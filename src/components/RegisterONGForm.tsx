@@ -28,6 +28,39 @@ export function RegisterONGForm() {
   const [imagenPerfil, setImagenPerfil] = useState<File | null>(null);
   const [archivoVerificacion, setArchivoVerificacion] = useState<File | null>(null);
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const validate = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!formData.nombre.trim()) newErrors.nombre = "El nombre es obligatorio";
+    if (!formData.email.trim()) newErrors.email = "El email es obligatorio";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+      newErrors.email = "Email no válido";
+
+    if (!formData.password) newErrors.password = "La contraseña es obligatoria";
+    else if (formData.password.length < 8)
+      newErrors.password = "La contraseña debe tener al menos 8 caracteres";
+
+    if (!formData.phone) newErrors.phone = "El teléfono es obligatorio";
+    else if (!/^\d{7,15}$/.test(formData.phone))
+      newErrors.phone = "El teléfono debe ser numérico y tener entre 7 y 15 dígitos";
+
+    if (!formData.address.trim()) newErrors.address = "La dirección es obligatoria";
+    if (!formData.city.trim()) newErrors.city = "La ciudad es obligatoria";
+    if (!formData.country.trim()) newErrors.country = "El país es obligatorio";
+
+    if (!formData.description.trim())
+      newErrors.description = "La descripción es obligatoria";
+
+    if (!imagenPerfil) newErrors.imagenPerfil = "La imagen de perfil es obligatoria";
+    if (!archivoVerificacion) newErrors.archivoVerificacion = "El archivo de verificación es obligatorio";
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -36,30 +69,40 @@ export function RegisterONGForm() {
       ...prev,
       [name]: value,
     }));
+
+    // Validación en tiempo real para ese campo
+    setErrors((prev) => {
+      const copy = { ...prev };
+      if (value.trim() === "") {
+        copy[name] = `El campo ${name} es obligatorio`;
+      } else {
+        delete copy[name];
+      }
+      return copy;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const data = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      data.append(key, value);
+    if (!validate()) return;
+
+    // Simulación de envío sin backend
+    alert("Simulación: ONG registrada con éxito");
+
+    setFormData({
+      nombre: "",
+      email: "",
+      password: "",
+      description: "",
+      phone: "",
+      address: "",
+      city: "",
+      country: "",
     });
-
-    if (imagenPerfil) data.append("imagenPerfil", imagenPerfil);
-    if (archivoVerificacion) data.append("archivoVerificacion", archivoVerificacion);
-
-    const res = await fetch("/api/registro-ong", {
-      method: "POST",
-      body: data,
-    });
-
-    if (res.ok) {
-      alert("ONG registrada con éxito");
-      // Aquí podrías resetear el formulario o redirigir
-    } else {
-      alert("Error al registrar ONG");
-    }
+    setImagenPerfil(null);
+    setArchivoVerificacion(null);
+    setErrors({});
   };
 
   const fields: { name: keyof FormDataType; label: string; type?: string }[] = [
@@ -73,7 +116,7 @@ export function RegisterONGForm() {
   ];
 
   return (
-  <div className="py-10">
+    <div className="py-10">
       <form
         onSubmit={handleSubmit}
         className="bg-white max-w-2xl mx-auto p-8 rounded-xl shadow-lg border border-pink-600 space-y-6"
@@ -96,9 +139,15 @@ export function RegisterONGForm() {
               id={name}
               value={formData[name]}
               onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+              className={`w-full border rounded-md px-4 py-2 focus:ring-2 focus:outline-none ${
+                errors[name]
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-pink-500"
+              }`}
             />
+            {errors[name] && (
+              <p className="text-red-600 text-sm mt-1">{errors[name]}</p>
+            )}
           </div>
         ))}
 
@@ -114,23 +163,42 @@ export function RegisterONGForm() {
             id="description"
             value={formData.description}
             onChange={handleChange}
-            required
             rows={4}
-            className="w-full border border-gray-300 rounded-md px-4 py-2 resize-none focus:ring-2 focus:ring-pink-500 focus:outline-none"
+            className={`w-full border rounded-md px-4 py-2 resize-none focus:ring-2 focus:outline-none ${
+              errors.description
+                ? "border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:ring-pink-500"
+            }`}
           />
+          {errors.description && (
+            <p className="text-red-600 text-sm mt-1">{errors.description}</p>
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-800 mb-2">
             Imagen de perfil
           </label>
-          <div className="border border-dashed border-pink-300 rounded-md px-4 py-6 text-center bg-pink-50 hover:bg-pink-100 transition">
+          <div
+            className={`border border-dashed rounded-md px-4 py-6 text-center bg-pink-50 hover:bg-pink-100 transition ${
+              errors.imagenPerfil
+                ? "border-red-500"
+                : "border-pink-300"
+            }`}
+          >
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => setImagenPerfil(e.target.files?.[0] || null)}
+              onChange={(e) => {
+                setImagenPerfil(e.target.files?.[0] || null);
+                setErrors((prev) => {
+                  const copy = { ...prev };
+                  if (!e.target.files?.[0]) copy.imagenPerfil = "La imagen de perfil es obligatoria";
+                  else delete copy.imagenPerfil;
+                  return copy;
+                });
+              }}
               className="w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-pink-600 file:text-white hover:file:bg-pink-700"
-              required
             />
             {imagenPerfil && (
               <p className="mt-2 text-sm text-gray-600">
@@ -138,27 +206,45 @@ export function RegisterONGForm() {
               </p>
             )}
           </div>
+          {errors.imagenPerfil && (
+            <p className="text-red-600 text-sm mt-1">{errors.imagenPerfil}</p>
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-800 mb-2">
             Archivo de verificación (PDF)
           </label>
-          <div className="border border-dashed border-pink-300 rounded-md px-4 py-6 text-center bg-pink-50 hover:bg-pink-100 transition">
+          <div
+            className={`border border-dashed rounded-md px-4 py-6 text-center bg-pink-50 hover:bg-pink-100 transition ${
+              errors.archivoVerificacion
+                ? "border-red-500"
+                : "border-pink-300"
+            }`}
+          >
             <input
               type="file"
               accept=".pdf"
-              onChange={(e) => setArchivoVerificacion(e.target.files?.[0] || null)}
+              onChange={(e) => {
+                setArchivoVerificacion(e.target.files?.[0] || null);
+                setErrors((prev) => {
+                  const copy = { ...prev };
+                  if (!e.target.files?.[0]) copy.archivoVerificacion = "El archivo de verificación es obligatorio";
+                  else delete copy.archivoVerificacion;
+                  return copy;
+                });
+              }}
               className="w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-pink-600 file:text-white hover:file:bg-pink-700"
-              required
             />
             {archivoVerificacion && (
               <p className="mt-2 text-sm text-gray-600">
-                Archivo seleccionado:{" "}
-                <strong>{archivoVerificacion.name}</strong>
+                Archivo seleccionado: <strong>{archivoVerificacion.name}</strong>
               </p>
             )}
           </div>
+          {errors.archivoVerificacion && (
+            <p className="text-red-600 text-sm mt-1">{errors.archivoVerificacion}</p>
+          )}
         </div>
 
         <button

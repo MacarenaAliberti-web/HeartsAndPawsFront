@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { FaHome, FaExclamation, FaHandshake } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -58,12 +59,17 @@ export default function Home() {
             <button className="px-4 py-2 text-white transition bg-pink-400 rounded-full hover:bg-pink-500 w-fit">
               Casos
             </button>
+            <Link href="/register/ong">
             <button className="px-4 py-2 text-pink-500 transition border-2 border-pink-400 rounded-full hover:bg-pink-100 w-fit">
               Registrá tu ONG
             </button>
+           </Link>
+
+         <Link href="/register/user">
             <button className="px-4 py-2 text-gray-700 transition bg-pink-200 rounded-full hover:bg-pink-300 w-fit">
-              Registrate
+              Registrate como usuario
             </button>
+            </Link>
           </div>
         </motion.div>
 
