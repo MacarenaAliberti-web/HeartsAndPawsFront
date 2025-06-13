@@ -27,7 +27,7 @@ const Navbar = () => {
 
   const menuLinks = [
     { label: "Casos", href: "#casos", icon: <FaExclamationTriangle /> },
-    { label: "Registro", href: "#registro", icon: <FaRegClipboard /> },
+    { label: "Registro", href: "/register", icon: <FaRegClipboard /> },
     { label: "Iniciar Sesión", href: "/login", icon: <FaSignInAlt /> },
   ];
 

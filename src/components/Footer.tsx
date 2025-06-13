@@ -1,5 +1,6 @@
 // components/Footer.tsx
 import { FaPaw, FaFacebook, FaInstagram, FaTwitter } from 'react-icons/fa';
+import Link from 'next/link';
 
 const Footer = () => {
   return (
@@ -21,7 +22,11 @@ const Footer = () => {
           <h4 className="mb-2 font-semibold">Enlaces</h4>
           <ul className="space-y-1 text-sm">
             <li><a href="#" className="hover:text-pink-600">Casos</a></li>
-            <li><a href="#" className="hover:text-pink-600">Registro</a></li>
+            <li>
+          <Link href="/register" className="hover:text-pink-600">
+            Registro
+           </Link>
+            </li>
             <li><a href="#" className="hover:text-pink-600">Iniciar sesión</a></li>
           </ul>
         </div>
