@@ -47,10 +47,10 @@ const Navbar = () => {
       { label: "Inicio", href: "/", icon: <FaHome /> },
     ];
     console.log('user: '+ JSON.stringify(user));
-console.log('roles: '+ roles);
+    console.log('roles: '+ roles);
     if (roles.includes("ong")) {
       menuLinks.push(
-        { label: "Mi Panel", href: "/dashboard/ong", icon: <FaUserShield /> },
+        { label: "Mi Perfil", href: "/dashboard/ong", icon: <FaUserShield /> },
         { label: "Mis Casos", href: "/mis-casos", icon: <FaExclamationTriangle /> },
         { label: "Mensajes", href: "/chat", icon: <FaCommentDots /> }
       );
@@ -58,7 +58,7 @@ console.log('roles: '+ roles);
 
     if (roles.includes("user")) {
       menuLinks.push(
-        { label: "Mi Panel", href: "/dashboard/usuario", icon: <FaUserShield /> },
+        { label: "Mi Perfil", href: "/dashboard/usuario", icon: <FaUserShield /> },
         { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> },
         { label: "Donar", href: "/donar", icon: <FaPaw /> }
       );
@@ -66,7 +66,7 @@ console.log('roles: '+ roles);
 
     if (roles.includes("admin")) {
       menuLinks.push(
-        { label: "Admin Panel", href: "/dashboard/admin", icon: <FaUserShield /> },
+        { label: "Admin Perfil", href: "/dashboard/admin", icon: <FaUserShield /> },
         { label: "Solicitudes", href: "/admin/solicitudes", icon: <FaRegClipboard /> }
       );
     }
