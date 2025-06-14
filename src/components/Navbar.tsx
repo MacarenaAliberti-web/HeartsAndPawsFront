@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import {
   FaPaw,
   FaBars,
@@ -9,11 +10,19 @@ import {
   FaExclamationTriangle,
   FaRegClipboard,
   FaSignInAlt,
+  FaHeart,
+  FaUserShield,
+  FaSignOutAlt,
+  FaHome,
+  FaCommentDots,
 } from "react-icons/fa";
+import { useUser } from "@auth0/nextjs-auth0/client";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { user } = useUser();
+  const namespace = "http://localhost:3000/";
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -25,11 +34,49 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const menuLinks = [
+  const roles = (user?.[`${namespace}roles`] as string[]) || [];
+
+  let menuLinks = [
     { label: "Casos", href: "#casos", icon: <FaExclamationTriangle /> },
     { label: "Registro", href: "/register", icon: <FaRegClipboard /> },
-    { label: "Iniciar Sesión", href: "/login", icon: <FaSignInAlt /> },
+    { label: "Iniciar Sesión", href: "/api/auth/login", icon: <FaSignInAlt /> },
   ];
+
+  if (user) {
+    menuLinks = [
+      { label: "Inicio", href: "/", icon: <FaHome /> },
+    ];
+    console.log('user: '+ JSON.stringify(user));
+console.log('roles: '+ roles);
+    if (roles.includes("ong")) {
+      menuLinks.push(
+        { label: "Mi Panel", href: "/dashboard/ong", icon: <FaUserShield /> },
+        { label: "Mis Casos", href: "/mis-casos", icon: <FaExclamationTriangle /> },
+        { label: "Mensajes", href: "/chat", icon: <FaCommentDots /> }
+      );
+    }
+
+    if (roles.includes("user")) {
+      menuLinks.push(
+        { label: "Mi Panel", href: "/dashboard/usuario", icon: <FaUserShield /> },
+        { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> },
+        { label: "Donar", href: "/donar", icon: <FaPaw /> }
+      );
+    }
+
+    if (roles.includes("admin")) {
+      menuLinks.push(
+        { label: "Admin Panel", href: "/dashboard/admin", icon: <FaUserShield /> },
+        { label: "Solicitudes", href: "/admin/solicitudes", icon: <FaRegClipboard /> }
+      );
+    }
+
+    menuLinks.push({
+      label: "Cerrar sesión",
+      href: "/api/auth/logout",
+      icon: <FaSignOutAlt />,
+    });
+  }
 
   return (
     <motion.div
@@ -42,14 +89,14 @@ const Navbar = () => {
     >
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <a
-            href="#home"
+          <Link
+            href="/"
             className="flex items-center gap-2 text-xl font-bold text-pink-600"
           >
             <FaPaw className="text-2xl" />
             <span>Hearts&Paws</span>
-          </a>
+          </Link>
+          
 
           {/* Desktop Menu */}
           <div className="hidden space-x-6 md:flex">

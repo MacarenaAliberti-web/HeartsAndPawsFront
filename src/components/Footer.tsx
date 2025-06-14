@@ -2,7 +2,7 @@
 import { FaPaw, FaFacebook, FaInstagram, FaTwitter } from 'react-icons/fa';
 import Link from 'next/link';
 
-const Footer = () => {
+ export const Footer = () => {
   return (
     <footer className="py-8 mt-12 text-gray-800 bg-pink-100">
       <div className="grid grid-cols-1 gap-8 px-4 mx-auto max-w-7xl md:grid-cols-3">
