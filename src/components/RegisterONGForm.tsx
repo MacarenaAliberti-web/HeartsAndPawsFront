@@ -27,7 +27,6 @@ export function RegisterONGForm() {
 
   const [imagenPerfil, setImagenPerfil] = useState<File | null>(null);
   const [archivoVerificacion, setArchivoVerificacion] = useState<File | null>(null);
-
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const validate = () => {
@@ -49,15 +48,12 @@ export function RegisterONGForm() {
     if (!formData.address.trim()) newErrors.address = "La dirección es obligatoria";
     if (!formData.city.trim()) newErrors.city = "La ciudad es obligatoria";
     if (!formData.country.trim()) newErrors.country = "El país es obligatorio";
-
-    if (!formData.description.trim())
-      newErrors.description = "La descripción es obligatoria";
+    if (!formData.description.trim()) newErrors.description = "La descripción es obligatoria";
 
     if (!imagenPerfil) newErrors.imagenPerfil = "La imagen de perfil es obligatoria";
     if (!archivoVerificacion) newErrors.archivoVerificacion = "El archivo de verificación es obligatorio";
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
@@ -70,7 +66,6 @@ export function RegisterONGForm() {
       [name]: value,
     }));
 
-    // Validación en tiempo real para ese campo
     setErrors((prev) => {
       const copy = { ...prev };
       if (value.trim() === "") {
@@ -87,22 +82,52 @@ export function RegisterONGForm() {
 
     if (!validate()) return;
 
-    // Simulación de envío sin backend
-    alert("Simulación: ONG registrada con éxito");
+   const dataToSend = new FormData();
+dataToSend.append("nombre", formData.nombre);
+dataToSend.append("email", formData.email);
+dataToSend.append("contrasena", formData.password);
+dataToSend.append("descripcion", formData.description); 
+dataToSend.append("telefono", formData.phone); 
+dataToSend.append("direccion", formData.address); 
+dataToSend.append("ciudad", formData.city); 
+dataToSend.append("pais", formData.country); 
+if (imagenPerfil) dataToSend.append("imagenPerfil", imagenPerfil);
+if (archivoVerificacion) dataToSend.append("archivoVerificacionUrl", archivoVerificacion);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/organizaciones/registro-ong`, {
+  method: "POST",
+  body: dataToSend,
+});
 
-    setFormData({
-      nombre: "",
-      email: "",
-      password: "",
-      description: "",
-      phone: "",
-      address: "",
-      city: "",
-      country: "",
-    });
-    setImagenPerfil(null);
-    setArchivoVerificacion(null);
-    setErrors({});
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Error en el registro:", errorData);
+        alert("Error al registrar ONG");
+        return;
+      }
+
+      const result = await res.json();
+      console.log("ONG registrada:", result);
+      alert("ONG registrada con éxito");
+
+      // Reiniciar formulario
+      setFormData({
+        nombre: "",
+        email: "",
+        password: "",
+        description: "",
+        phone: "",
+        address: "",
+        city: "",
+        country: "",
+      });
+      setImagenPerfil(null);
+      setArchivoVerificacion(null);
+      setErrors({});
+    } catch (err) {
+      console.error("Error de red o servidor:", err);
+      alert("Ocurrió un error al conectar con el servidor");
+    }
   };
 
   const fields: { name: keyof FormDataType; label: string; type?: string }[] = [
@@ -127,10 +152,7 @@ export function RegisterONGForm() {
 
         {fields.map(({ name, label, type = "text" }) => (
           <div key={name}>
-            <label
-              htmlFor={name}
-              className="block text-sm font-medium text-gray-800 mb-1"
-            >
+            <label htmlFor={name} className="block text-sm font-medium text-gray-800 mb-1">
               {label}
             </label>
             <input
@@ -152,10 +174,7 @@ export function RegisterONGForm() {
         ))}
 
         <div>
-          <label
-            htmlFor="description"
-            className="block text-sm font-medium text-gray-800 mb-1"
-          >
+          <label htmlFor="description" className="block text-sm font-medium text-gray-800 mb-1">
             Descripción
           </label>
           <textarea
@@ -181,9 +200,7 @@ export function RegisterONGForm() {
           </label>
           <div
             className={`border border-dashed rounded-md px-4 py-6 text-center bg-pink-50 hover:bg-pink-100 transition ${
-              errors.imagenPerfil
-                ? "border-red-500"
-                : "border-pink-300"
+              errors.imagenPerfil ? "border-red-500" : "border-pink-300"
             }`}
           >
             <input
@@ -217,9 +234,7 @@ export function RegisterONGForm() {
           </label>
           <div
             className={`border border-dashed rounded-md px-4 py-6 text-center bg-pink-50 hover:bg-pink-100 transition ${
-              errors.archivoVerificacion
-                ? "border-red-500"
-                : "border-pink-300"
+              errors.archivoVerificacion ? "border-red-500" : "border-pink-300"
             }`}
           >
             <input

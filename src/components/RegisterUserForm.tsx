@@ -1,23 +1,33 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import toast, { Toaster } from 'react-hot-toast';
 
 interface FormDataType {
   nombre: string;
   email: string;
-  contraseña: string;
+  contrasena: string;
   telefono: string;
   direccion: string;
+  ciudad: string;
+  pais: string;
 }
 
 export default function RegisterUserForm() {
+  const router = useRouter();
+
   const [formData, setFormData] = useState<FormDataType>({
     nombre: '',
     email: '',
-    contraseña: '',
+    contrasena: '',
     telefono: '',
     direccion: '',
+    ciudad: '',
+    pais: '',
   });
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -27,42 +37,116 @@ export default function RegisterUserForm() {
     }));
   };
 
+  const validarCampos = () => {
+    if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      return 'El correo electrónico no es válido.';
+    }
+
+    if (formData.contrasena.length < 8) {
+      return 'La contraseña debe tener al menos 8 caracteres.';
+    }
+
+    if (!/^\d+$/.test(formData.telefono)) {
+      return 'El teléfono debe contener solo números.';
+    }
+
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const res = await fetch('/api/registro-usuario', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    });
+    const errorMsg = validarCampos();
+    if (errorMsg) {
+      toast.error(errorMsg);
+      return;
+    }
 
-    if (res.ok) {
-      alert('Usuario registrado con éxito');
-      // Puedes limpiar el form si quieres
-      setFormData({
-        nombre: '',
-        email: '',
-        contraseña: '',
-        telefono: '',
-        direccion: '',
+    setIsLoading(true);
+
+    try {
+     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/autLocal/registro`, {
+
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
-    } else {
-      alert('Error al registrar el usuario');
+
+      const data = await res.json();
+
+      if (res.ok && data.ok) {
+        toast.success(data.mensaje);
+
+        setFormData({
+          nombre: '',
+          email: '',
+          contrasena: '',
+          telefono: '',
+          direccion: '',
+          ciudad: '',
+          pais: '',
+        });
+
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 500);
+      } else {
+        toast.error(data.mensaje || 'Error desconocido al registrar el usuario.');
+      }
+    } catch {
+      toast.error('Error de conexión con el servidor.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  
   const campos: { name: keyof FormDataType; label: string; type?: string }[] = [
     { name: 'nombre', label: 'Nombre' },
     { name: 'email', label: 'Correo electrónico', type: 'email' },
-    { name: 'contraseña', label: 'Contraseña', type: 'password' },
+    { name: 'contrasena', label: 'Contraseña', type: 'password' },
     { name: 'telefono', label: 'Teléfono' },
     { name: 'direccion', label: 'Dirección' },
+    { name: 'ciudad', label: 'Ciudad' },
+    { name: 'pais', label: 'País' },
   ];
 
   return (
     <div className="py-10">
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            fontSize: '14px',
+            fontWeight: '500',
+            borderRadius: '8px',
+          },
+          success: {
+            style: {
+              background: '#ec4899',
+              color: '#fff',
+            },
+            iconTheme: {
+              primary: '#fff',
+              secondary: '#ec4899',
+            },
+          },
+          error: {
+            style: {
+              background: '#fee2e2',
+              color: '#b91c1c',
+            },
+            iconTheme: {
+              primary: '#b91c1c',
+              secondary: '#fee2e2',
+            },
+          },
+        }}
+      />
+
       <form
         onSubmit={handleSubmit}
         className="bg-white max-w-2xl mx-auto p-8 rounded-xl shadow-lg border border-pink-600 space-y-6"
@@ -86,16 +170,18 @@ export default function RegisterUserForm() {
               value={formData[name]}
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+              disabled={isLoading}
+              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:outline-none disabled:opacity-50"
             />
           </div>
         ))}
 
         <button
           type="submit"
-          className="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-4 rounded-md transition"
+          disabled={isLoading}
+          className="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-4 rounded-md transition disabled:opacity-50"
         >
-          Registrar Usuario
+          {isLoading ? 'Registrando...' : 'Registrar Usuario'}
         </button>
       </form>
     </div>
