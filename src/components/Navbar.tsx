@@ -16,17 +16,29 @@ import {
   FaHome,
   FaCommentDots,
 } from "react-icons/fa";
-import { useUser } from "@auth0/nextjs-auth0/client";
+
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { user } = useUser();
+const [user, setUser] = useState<IUser | null>(null);
+
   const namespace = "http://localhost:3000/";
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
+interface IUser {
+  name: string;
+  roles: string[];
+}
+
+
   useEffect(() => {
+      const fakeUser = {
+    name: "ONG Ejemplo",
+    roles: ["ong"],
+  };
+  setUser(fakeUser);
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
@@ -34,7 +46,7 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const roles = (user?.[`${namespace}roles`] as string[]) || [];
+  const roles = user?.roles || [];
 
   let menuLinks = [
     { label: "Casos", href: "#casos", icon: <FaExclamationTriangle /> },
