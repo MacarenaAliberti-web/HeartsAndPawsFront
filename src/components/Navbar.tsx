@@ -1,6 +1,8 @@
 "use client";
 
+import type { JSX } from "react";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // <-- Importamos useRouter
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
@@ -10,56 +12,79 @@ import {
   FaExclamationTriangle,
   FaRegClipboard,
   FaSignInAlt,
-  FaHeart,
   FaUserShield,
   FaSignOutAlt,
   FaHome,
   FaCommentDots,
 } from "react-icons/fa";
-import { useOngAuth } from "../context/OngAuthContext"; // ⬅️ Asegurate de que el path sea correcto
+
+import { useOngAuth } from "@/context/OngAuthContext";
+import { useUsuarioAuth } from "@/context/UsuarioAuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { ong, logout } = useOngAuth(); // ⬅️ Tomamos el usuario y logout desde el context
+  const { ong, logout: logoutOng } = useOngAuth();
+  const { usuario, logout: logoutUsuario } = useUsuarioAuth();
+
+  const router = useRouter(); 
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 🔍 Armado del menú
-  let menuLinks = [
-    { label: "Casos", href: "#casos", icon: <FaExclamationTriangle /> },
-    { label: "Registro", href: "/register", icon: <FaRegClipboard /> },
-    { label: "Iniciar Sesión", href: "/login-ong", icon: <FaSignInAlt /> },
-  ];
+ 
+  const handleLogoutOng = () => {
+    logoutOng();
+    router.push("/");
+  };
+
+  const handleLogoutUsuario = () => {
+    logoutUsuario();
+    router.push("/");
+  };
+
+  let menuLinks: {
+    label: string;
+    href: string;
+    icon: JSX.Element;
+    onClick?: () => void;
+  }[] = [];
 
   if (ong) {
     menuLinks = [
       { label: "Inicio", href: "/", icon: <FaHome /> },
+      { label: "Mi Perfil", href: "/dashboard/ong", icon: <FaUserShield /> },
+      { label: "Mis Casos", href: "/mis-casos", icon: <FaExclamationTriangle /> },
+      { label: "Mensajes", href: "/chat", icon: <FaCommentDots /> },
+      {
+        label: "Cerrar sesión",
+        href: "#",
+        icon: <FaSignOutAlt />,
+        onClick: handleLogoutOng, 
+      },
     ];
-
-    if (ong.role === "ong") {
-      menuLinks.push(
-        { label: "Mi Perfil", href: "/dashboard/ong", icon: <FaUserShield /> },
-        { label: "Mis Casos", href: "/mis-casos", icon: <FaExclamationTriangle /> },
-        { label: "Mensajes", href: "/chat", icon: <FaCommentDots /> }
-      );
-    }
-
-    // 🎯 Logout manejado por función
-    menuLinks.push({
-      label: "Cerrar sesión",
-      href: "#",
-      icon: <FaSignOutAlt />,
-      onClick: logout,
-    });
+  } else if (usuario) {
+    menuLinks = [
+      { label: "Inicio", href: "/", icon: <FaHome /> },
+      { label: "Casos", href: "#casos", icon: <FaExclamationTriangle /> },
+      {
+        label: "Cerrar sesión",
+        href: "#",
+        icon: <FaSignOutAlt />,
+        onClick: handleLogoutUsuario, 
+      },
+    ];
+  } else {
+    menuLinks = [
+      { label: "Casos", href: "#casos", icon: <FaExclamationTriangle /> },
+      { label: "Registro", href: "/register", icon: <FaRegClipboard /> },
+      { label: "Iniciar Sesión", href: "/login", icon: <FaSignInAlt /> },
+    ];
   }
 
   return (
@@ -87,7 +112,14 @@ const Navbar = () => {
               <a
                 key={link.label}
                 href={link.href}
-                onClick={link.onClick ? (e) => { e.preventDefault(); link.onClick?.(); } : undefined}
+                onClick={
+                  link.onClick
+                    ? (e) => {
+                        e.preventDefault();
+                        link.onClick?.();
+                      }
+                    : undefined
+                }
                 className="flex items-center gap-1 text-gray-700 transition hover:text-pink-600"
               >
                 <span className="text-pink-500">{link.icon}</span>
@@ -98,15 +130,8 @@ const Navbar = () => {
 
           {/* Mobile Toggle */}
           <div className="md:hidden">
-            <button
-              onClick={toggleMenu}
-              className="text-gray-700 focus:outline-none"
-            >
-              {isOpen ? (
-                <FaTimes className="text-2xl" />
-              ) : (
-                <FaBars className="text-2xl" />
-              )}
+            <button onClick={toggleMenu} className="text-gray-700 focus:outline-none">
+              {isOpen ? <FaTimes className="text-2xl" /> : <FaBars className="text-2xl" />}
             </button>
           </div>
         </div>

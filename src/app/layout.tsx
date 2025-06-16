@@ -1,10 +1,12 @@
-import { OngAuthProvider } from '@/context/OngAuthContext'; // ✅ Tu contexto de autenticación ONG
-import { Toaster } from "react-hot-toast"; // <-- agrego import
-
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
+
+import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata } from "next";
+
 import Navbar from "@/components/Navbar";
+import { OngAuthProvider } from "@/context/OngAuthContext";
+import { UsuarioAuthProvider } from "@/context/UsuarioAuthContext"; // 👈 Nuevo contexto
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,11 +31,13 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <OngAuthProvider> {/* ✅ Tu contexto de autenticación personalizado */}
-          <Navbar />
-          <main className="pt-16">{children}</main>
-          <Toaster /> {/* <-- aquí agrego el Toaster */}
-        </OngAuthProvider>
+        <UsuarioAuthProvider> {/* ⬅️ Usuario común */}
+          <OngAuthProvider>    {/* ⬅️ ONG */}
+            <Navbar />
+            <main className="pt-16">{children}</main>
+            <Toaster /> {/* ⬅️ Notificaciones */}
+          </OngAuthProvider>
+        </UsuarioAuthProvider>
       </body>
     </html>
   );

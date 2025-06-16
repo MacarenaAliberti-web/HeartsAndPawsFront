@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { useUsuarioAuth } from "@/context/UsuarioAuthContext";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function LoginUsuario() {
   const router = useRouter();
+  const { loginUsuario } = useUsuarioAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,21 +41,13 @@ export default function LoginUsuario() {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3001/auth/usuarios/ingreso", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, contrasena: password }), 
-      });
+      const success = await loginUsuario(email, password);
 
-      if (res.ok) {
+      if (success) {
         toast.success("Login exitoso, redirigiendo...");
-        router.push("/dashboard/usuario"); 
-      } else if (res.status === 401) {
-        toast.error("Credenciales inválidas");
+        router.push("/dashboard/usuario");
       } else {
-        toast.error("Error en el servidor");
+        toast.error("Credenciales inválidas");
       }
     } catch (error) {
       toast.error("Error de conexión, intenta nuevamente");
@@ -90,7 +85,7 @@ export default function LoginUsuario() {
           type={showPassword ? "text" : "password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-pink-500"
+          className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-pink-500 pr-10"
           placeholder="Tu contraseña"
           disabled={loading}
           required
@@ -98,10 +93,10 @@ export default function LoginUsuario() {
         <button
           type="button"
           onClick={() => setShowPassword((prev) => !prev)}
-          className="absolute right-2 top-9 text-gray-500"
+          className="absolute right-3 top-9 text-gray-500"
           tabIndex={-1}
         >
-          {showPassword ? "🙈" : "👁️"}
+          {showPassword ? <FaEyeSlash /> : <FaEye />}
         </button>
       </label>
 

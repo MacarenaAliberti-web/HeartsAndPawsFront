@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 interface FormDataType {
   nombre: string;
@@ -27,58 +28,74 @@ export default function RegisterUserForm() {
     pais: '',
   });
 
+  const [errors, setErrors] = useState<Partial<FormDataType>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    validarCampo(name as keyof FormDataType, value);
   };
 
-  const validarCampos = () => {
-    if (!formData.nombre.match(/^[A-Za-zÀ-ÿ\s]+$/)) {
-      return 'El nombre solo puede contener letras y espacios.';
+  const validarCampo = (name: keyof FormDataType, value: string) => {
+    let error = '';
+
+    switch (name) {
+      case 'nombre':
+        if (!/^[A-Za-zÀ-ÿ\s]+$/.test(value)) {
+          error = 'Solo letras y espacios.';
+        }
+        break;
+      case 'email':
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = 'Correo inválido.';
+        }
+        break;
+      case 'contrasena':
+        if (
+          !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/.test(value)
+        ) {
+          error =
+            'Mín. 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y símbolo.';
+        }
+        break;
+      case 'telefono':
+        if (!/^\d+$/.test(value)) {
+          error = 'Solo números.';
+        }
+        break;
+      case 'direccion':
+        if (!/^[a-zA-Z0-9.,_\-\s]+$/.test(value)) {
+          error = 'Caracteres no permitidos.';
+        }
+        break;
+      case 'ciudad':
+        if (!/^[A-Za-z0-9 ]+$/.test(value)) {
+          error = 'Solo letras y números.';
+        }
+        break;
+      case 'pais':
+        if (!/^[a-zA-Z0-9]+$/.test(value)) {
+          error = 'Sin espacios.';
+        }
+        break;
     }
 
-    if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      return 'El correo electrónico no es válido.';
-    }
-
-    if (
-      !formData.contrasena.match(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/
-      )
-    ) {
-      return 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.';
-    }
-
-    if (!/^\d+$/.test(formData.telefono)) {
-      return 'El teléfono debe contener solo números.';
-    }
-
-    if (!formData.direccion.match(/^[a-zA-Z0-9.,_\-\s]+$/)) {
-      return 'La dirección contiene caracteres no permitidos.';
-    }
-
-    if (!formData.ciudad.match(/^[A-Za-z0-9 ]+$/)) {
-      return 'La ciudad solo puede contener letras, números y espacios.';
-    }
-
-    if (!formData.pais.match(/^[a-zA-Z0-9]+$/)) {
-      return 'El país solo puede contener letras y números (sin espacios).';
-    }
-
-    return null;
+    setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const errorMsg = validarCampos();
-    if (errorMsg) {
-      toast.error(errorMsg);
+    // Validar todos los campos
+    const camposInvalidos = Object.entries(formData).some(([key, val]) => {
+      validarCampo(key as keyof FormDataType, val);
+      return errors[key as keyof FormDataType];
+    });
+
+    if (camposInvalidos) {
+      toast.error('Corregí los errores del formulario.');
       return;
     }
 
@@ -87,9 +104,7 @@ export default function RegisterUserForm() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/registro`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
@@ -97,7 +112,6 @@ export default function RegisterUserForm() {
 
       if (res.ok && data.ok) {
         toast.success(data.mensaje);
-
         setFormData({
           nombre: '',
           email: '',
@@ -107,12 +121,9 @@ export default function RegisterUserForm() {
           ciudad: '',
           pais: '',
         });
-
-        setTimeout(() => {
-          router.push('/login/loginUsuario');
-        }, 500);
+        router.push('/login/loginUsuario');
       } else {
-        toast.error(data.mensaje || 'Error desconocido al registrar el usuario.');
+        toast.error(data.mensaje || 'Error desconocido.');
       }
     } catch {
       toast.error('Error de conexión con el servidor.');
@@ -133,37 +144,7 @@ export default function RegisterUserForm() {
 
   return (
     <div className="py-10">
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            fontSize: '14px',
-            fontWeight: '500',
-            borderRadius: '8px',
-          },
-          success: {
-            style: {
-              background: '#ec4899',
-              color: '#fff',
-            },
-            iconTheme: {
-              primary: '#fff',
-              secondary: '#ec4899',
-            },
-          },
-          error: {
-            style: {
-              background: '#fee2e2',
-              color: '#b91c1c',
-            },
-            iconTheme: {
-              primary: '#b91c1c',
-              secondary: '#fee2e2',
-            },
-          },
-        }}
-      />
+      <Toaster position="top-center" />
 
       <form
         onSubmit={handleSubmit}
@@ -174,23 +155,35 @@ export default function RegisterUserForm() {
         </h2>
 
         {campos.map(({ name, label, type = 'text' }) => (
-          <div key={name}>
-            <label
-              htmlFor={name}
-              className="block text-sm font-medium text-gray-800 mb-1"
-            >
+          <div key={name} className="relative">
+            <label htmlFor={name} className="block text-sm font-medium text-gray-800 mb-1">
               {label}
             </label>
-            <input
-              type={type}
-              name={name}
-              id={name}
-              value={formData[name]}
-              onChange={handleChange}
-              required
-              disabled={isLoading}
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:outline-none disabled:opacity-50"
-            />
+            <div className="relative">
+              <input
+                type={name === 'contrasena' ? (showPassword ? 'text' : 'password') : type}
+                name={name}
+                id={name}
+                value={formData[name]}
+                onChange={handleChange}
+                disabled={isLoading}
+                className={`w-full border ${
+                  errors[name] ? 'border-red-500' : 'border-gray-300'
+                } rounded-md px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:outline-none`}
+              />
+              {name === 'contrasena' && (
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-2 text-gray-600"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              )}
+            </div>
+            {errors[name] && (
+              <p className="text-red-500 text-xs mt-1">{errors[name]}</p>
+            )}
           </div>
         ))}
 
