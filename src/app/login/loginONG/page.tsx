@@ -1,5 +1,5 @@
-// src/app/login/page.tsx
-import LoginForm from "../../components/Login";
+
+import LoginONG from "@/components/LoginONG"; ;
 
 export default async function LoginPage() {
   // Si querés hacer una llamada del lado del server, podés hacer algo como esto:
@@ -8,7 +8,7 @@ export default async function LoginPage() {
 
   return (
     <div className="p-4">
-      <LoginForm />
+      <LoginONG />
     </div>
   );
 }

@@ -1,7 +1,7 @@
-"use client";
+"use client"; 
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useAppContext } from "@/context/AppContext";
+import { useOngAuth } from "@/context/OngAuthContext";
 
 interface IFormData {
   name: string;
@@ -12,8 +12,8 @@ interface IFormData {
 }
 
 const ProfileOng = () => {
-   const { userData, setUserData } = useAppContext();
-  const user = userData?.user;
+  const { ong: userData } = useOngAuth();
+  const user = userData;
 
   const {
     register,
@@ -24,39 +24,28 @@ const ProfileOng = () => {
     defaultValues: {
       name: user?.name || "",
       email: user?.email || "",
-      address: user?.address || "",
-      phone: user?.phone || "",
+      address: (user as any)?.address || "",  // Si address no está en tipo, usa as any
+      phone: (user as any)?.phone || "",
     },
   });
 
-  // Cada vez que cambie user, reiniciamos el formulario para tener datos actualizados
   React.useEffect(() => {
     reset({
-    //   imagenPerfil: user?.imagenPerfil || "",
+      // imagenPerfil: user?.imagenPerfil || "",
       name: user?.name || "",
       email: user?.email || "",
-      address: user?.address || "",
-      phone: user?.phone || "",
+      address: (user as any)?.address || "",
+      phone: (user as any)?.phone || "",
     });
   }, [user, reset]);
 
   const onSubmit = (data: IFormData) => {
     if (!userData) return;
 
-    // Aquí actualizarías en el backend la info, por ahora simulamos
+    // Aquí actualizarías en el backend la info, por ahora solo lo logueamos
     console.log("Datos actualizados:", data);
 
-    // Actualizamos el contexto con los nuevos datos (simulación)
-    setUserData({
-      ...userData,
-      user: {
-        ...userData.user,
-        name: data.name,
-        email: data.email,
-        address: data.address,
-        phone: data.phone,
-      },
-    });
+    // Si quisieras actualizar el contexto, tendrías que agregar setOng o similar en OngAuthContext
   };
 
   if (!user) {
@@ -144,5 +133,5 @@ const ProfileOng = () => {
   );
 };
 
+export default ProfileOng;
 
-export default ProfileOng

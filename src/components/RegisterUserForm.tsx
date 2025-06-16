@@ -38,16 +38,36 @@ export default function RegisterUserForm() {
   };
 
   const validarCampos = () => {
+    if (!formData.nombre.match(/^[A-Za-zÀ-ÿ\s]+$/)) {
+      return 'El nombre solo puede contener letras y espacios.';
+    }
+
     if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       return 'El correo electrónico no es válido.';
     }
 
-    if (formData.contrasena.length < 8) {
-      return 'La contraseña debe tener al menos 8 caracteres.';
+    if (
+      !formData.contrasena.match(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/
+      )
+    ) {
+      return 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.';
     }
 
     if (!/^\d+$/.test(formData.telefono)) {
       return 'El teléfono debe contener solo números.';
+    }
+
+    if (!formData.direccion.match(/^[a-zA-Z0-9.,_\-\s]+$/)) {
+      return 'La dirección contiene caracteres no permitidos.';
+    }
+
+    if (!formData.ciudad.match(/^[A-Za-z0-9 ]+$/)) {
+      return 'La ciudad solo puede contener letras, números y espacios.';
+    }
+
+    if (!formData.pais.match(/^[a-zA-Z0-9]+$/)) {
+      return 'El país solo puede contener letras y números (sin espacios).';
     }
 
     return null;
@@ -65,8 +85,7 @@ export default function RegisterUserForm() {
     setIsLoading(true);
 
     try {
-     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/autLocal/registro`, {
-
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/registro`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,7 +109,7 @@ export default function RegisterUserForm() {
         });
 
         setTimeout(() => {
-          router.push('/dashboard');
+          router.push('/login/loginUsuario');
         }, 500);
       } else {
         toast.error(data.mensaje || 'Error desconocido al registrar el usuario.');
@@ -102,7 +121,6 @@ export default function RegisterUserForm() {
     }
   };
 
-  
   const campos: { name: keyof FormDataType; label: string; type?: string }[] = [
     { name: 'nombre', label: 'Nombre' },
     { name: 'email', label: 'Correo electrónico', type: 'email' },

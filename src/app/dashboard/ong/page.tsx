@@ -1,11 +1,10 @@
-import OngDashboardComponent from '../../../components/OngDashboard';
+import OngDashboard from '@/components/componentsONG/OngDashboard';
 
-export default function OngDashboard() {
+export default function OngDashboardPage() {
   return (
     <div>
       <h1>Dashboard ONG</h1>
-      <OngDashboardComponent />
-      {/* Lo va a trabajar Debora */}
+      <OngDashboard />
       <h2>Debora</h2>
     </div>
   );

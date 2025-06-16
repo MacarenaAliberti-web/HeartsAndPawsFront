@@ -16,29 +16,16 @@ import {
   FaHome,
   FaCommentDots,
 } from "react-icons/fa";
-
+import { useOngAuth } from "../context/OngAuthContext"; // ⬅️ Asegurate de que el path sea correcto
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-const [user, setUser] = useState<IUser | null>(null);
-
-  const namespace = "http://localhost:3000/";
+  const { ong, logout } = useOngAuth(); // ⬅️ Tomamos el usuario y logout desde el context
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
-interface IUser {
-  name: string;
-  roles: string[];
-}
-
-
   useEffect(() => {
-      const fakeUser = {
-    name: "ONG Ejemplo",
-    roles: ["ong"],
-  };
-  setUser(fakeUser);
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
@@ -46,21 +33,19 @@ interface IUser {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const roles = user?.roles || [];
-
+  // 🔍 Armado del menú
   let menuLinks = [
     { label: "Casos", href: "#casos", icon: <FaExclamationTriangle /> },
     { label: "Registro", href: "/register", icon: <FaRegClipboard /> },
-    { label: "Iniciar Sesión", href: "/api/auth/login", icon: <FaSignInAlt /> },
+    { label: "Iniciar Sesión", href: "/login-ong", icon: <FaSignInAlt /> },
   ];
 
-  if (user) {
+  if (ong) {
     menuLinks = [
       { label: "Inicio", href: "/", icon: <FaHome /> },
     ];
-    console.log('user: '+ JSON.stringify(user));
-    console.log('roles: '+ roles);
-    if (roles.includes("ong")) {
+
+    if (ong.role === "ong") {
       menuLinks.push(
         { label: "Mi Perfil", href: "/dashboard/ong", icon: <FaUserShield /> },
         { label: "Mis Casos", href: "/mis-casos", icon: <FaExclamationTriangle /> },
@@ -68,25 +53,12 @@ interface IUser {
       );
     }
 
-    if (roles.includes("user")) {
-      menuLinks.push(
-        { label: "Mi Perfil", href: "/dashboard/usuario", icon: <FaUserShield /> },
-        { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> },
-        { label: "Donar", href: "/donar", icon: <FaPaw /> }
-      );
-    }
-
-    if (roles.includes("admin")) {
-      menuLinks.push(
-        { label: "Admin Perfil", href: "/dashboard/admin", icon: <FaUserShield /> },
-        { label: "Solicitudes", href: "/admin/solicitudes", icon: <FaRegClipboard /> }
-      );
-    }
-
+    // 🎯 Logout manejado por función
     menuLinks.push({
       label: "Cerrar sesión",
-      href: "/api/auth/logout",
+      href: "#",
       icon: <FaSignOutAlt />,
+      onClick: logout,
     });
   }
 
@@ -108,7 +80,6 @@ interface IUser {
             <FaPaw className="text-2xl" />
             <span>Hearts&Paws</span>
           </Link>
-          
 
           {/* Desktop Menu */}
           <div className="hidden space-x-6 md:flex">
@@ -116,6 +87,7 @@ interface IUser {
               <a
                 key={link.label}
                 href={link.href}
+                onClick={link.onClick ? (e) => { e.preventDefault(); link.onClick?.(); } : undefined}
                 className="flex items-center gap-1 text-gray-700 transition hover:text-pink-600"
               >
                 <span className="text-pink-500">{link.icon}</span>
@@ -154,7 +126,15 @@ interface IUser {
               <a
                 key={link.label}
                 href={link.href}
-                onClick={() => setIsOpen(false)}
+                onClick={(e) => {
+                  if (link.onClick) {
+                    e.preventDefault();
+                    link.onClick();
+                    setIsOpen(false);
+                  } else {
+                    setIsOpen(false);
+                  }
+                }}
                 className="flex items-center gap-2 text-gray-700 hover:text-pink-600"
               >
                 <span className="text-pink-500">{link.icon}</span>

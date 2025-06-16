@@ -1,15 +1,14 @@
-"use client"
-import { useAppContext } from '@/context/AppContext';
-import React, { useState } from 'react'
+"use client";
+import { useOngAuth } from '@/context/OngAuthContext';
+import React, { useState } from 'react';
 import ProfileOng from './ProfileOng';
 import NewCaseOng from './NewCaseOng';
 import AdoptionsOng from './AdoptionsOng';
 import PublishedOng from './PublishedOng';
 import DonationsOng from './DonationsOng';
 
-
 const MyAccount = () => {
-  const { userData, setUserData, logout } = useAppContext();
+  const { ong: userData, logout } = useOngAuth();
 
   const [selectedView, setSelectedView] = useState<
     | "profil"
@@ -19,7 +18,7 @@ const MyAccount = () => {
     | "adoptions"
   >("profil");
 
-const user = userData?.user;
+  const user = userData;
 
   return (
     <div className="flex min-h-screen -mt-16">
@@ -43,8 +42,6 @@ const user = userData?.user;
             {item.label}
           </button>
         ))}
-
-     
       </aside>
 
       <main className="flex-1 p-10 bg-gray-300">
@@ -58,4 +55,5 @@ const user = userData?.user;
   );
 };
 
-export default MyAccount
+export default MyAccount;
+
