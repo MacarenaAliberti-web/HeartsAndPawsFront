@@ -2,7 +2,7 @@
 
 import type { JSX } from "react";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // <-- Importamos useRouter
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
@@ -24,20 +24,25 @@ import { useUsuarioAuth } from "@/context/UsuarioAuthContext";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false); // 👈 Nuevo estado
+
   const { ong, logout: logoutOng } = useOngAuth();
   const { usuario, logout: logoutUsuario } = useUsuarioAuth();
-
-  const router = useRouter(); 
-
-  const toggleMenu = () => setIsOpen(!isOpen);
+  const router = useRouter();
 
   useEffect(() => {
+    setHasMounted(true); // 👈 Activamos después de montar en cliente
+
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
- 
+  // 🛑 Importante: prevenir render en SSR
+  if (!hasMounted) return null;
+
+  const toggleMenu = () => setIsOpen(!isOpen);
+
   const handleLogoutOng = () => {
     logoutOng();
     router.push("/");
@@ -65,7 +70,7 @@ const Navbar = () => {
         label: "Cerrar sesión",
         href: "#",
         icon: <FaSignOutAlt />,
-        onClick: handleLogoutOng, 
+        onClick: handleLogoutOng,
       },
     ];
   } else if (usuario) {
@@ -76,7 +81,7 @@ const Navbar = () => {
         label: "Cerrar sesión",
         href: "#",
         icon: <FaSignOutAlt />,
-        onClick: handleLogoutUsuario, 
+        onClick: handleLogoutUsuario,
       },
     ];
   } else {
@@ -100,9 +105,9 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           <Link
             href="/"
-            className="flex items-center gap-2 text-xl font-bold text-pink-600"
+            className="flex items-center gap-2 text-3xl font-semibold text-pink-600"
           >
-            <FaPaw className="text-2xl" />
+            <FaPaw className="text-4xl" />
             <span>Hearts&Paws</span>
           </Link>
 
@@ -120,9 +125,9 @@ const Navbar = () => {
                       }
                     : undefined
                 }
-                className="flex items-center gap-1 text-gray-700 transition hover:text-pink-600"
+                className="flex items-center gap-1 text-gray-800 text-xl font-semibold transition hover:text-pink-600"
               >
-                <span className="text-pink-500">{link.icon}</span>
+                <span className="text-pink-500 text-2xl">{link.icon}</span>
                 {link.label}
               </a>
             ))}
@@ -131,7 +136,7 @@ const Navbar = () => {
           {/* Mobile Toggle */}
           <div className="md:hidden">
             <button onClick={toggleMenu} className="text-gray-700 focus:outline-none">
-              {isOpen ? <FaTimes className="text-2xl" /> : <FaBars className="text-2xl" />}
+              {isOpen ? <FaTimes className="text-4xl" /> : <FaBars className="text-4xl" />}
             </button>
           </div>
         </div>
@@ -174,3 +179,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
@@ -35,6 +35,22 @@ export function RegisterONGForm() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showPassword, setShowPassword] = useState(false);
 
+  // Estado para la URL previa de imagen
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // Crear y limpiar URL para vista previa imagen perfil
+  useEffect(() => {
+    if (!imagenPerfil) {
+      setPreviewUrl(null);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(imagenPerfil);
+    setPreviewUrl(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [imagenPerfil]);
+
   const validateField = (name: string, value: string) => {
     let error = "";
 
@@ -45,9 +61,14 @@ export function RegisterONGForm() {
 
     if (name === "password") {
       if (!value) error = "La contraseña es obligatoria";
-      else if (value.length < 8) error = "Debe tener al menos 8 caracteres";
+      else
+        if (
+          !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/.test(value)
+        ) {
+          error =
+            'Mín. 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y símbolo.';
+        }
     }
-
     if (name === "phone") {
       if (!value) error = "El teléfono es obligatorio";
       else if (!/^\d{7,15}$/.test(value)) error = "Debe ser numérico (7-15 dígitos)";
@@ -232,33 +253,47 @@ export function RegisterONGForm() {
         </div>
 
         {/* Imagen perfil */}
-        <div>
-          <label className="block text-sm font-medium text-gray-800 mb-2">
-            Imagen de perfil
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              setImagenPerfil(e.target.files?.[0] || null);
-              setErrors((prev) => {
-                const copy = { ...prev };
-                if (!e.target.files?.[0]) copy.imagenPerfil = "La imagen de perfil es obligatoria";
-                else delete copy.imagenPerfil;
-                return copy;
-              });
-            }}
-            className="w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-pink-600 file:text-white hover:file:bg-pink-700"
-          />
-          {imagenPerfil && (
-            <p className="mt-2 text-sm text-gray-600">
-              Archivo seleccionado: <strong>{imagenPerfil.name}</strong>
-            </p>
-          )}
-          {errors.imagenPerfil && (
-            <p className="text-red-600 text-sm mt-1">{errors.imagenPerfil}</p>
-          )}
-        </div>
+       <div>
+  <label className="block text-sm font-medium text-gray-800 mb-2">
+    Imagen de perfil
+  </label>
+
+  <div>
+    <label className="inline-block cursor-pointer file:sr-only bg-pink-600 hover:bg-pink-700 text-white py-2 px-4 rounded">
+      Seleccionar imagen
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => {
+          const file = e.target.files?.[0] || null;
+          setImagenPerfil(file);
+          setErrors((prev) => {
+            const copy = { ...prev };
+            if (!file) copy.imagenPerfil = "La imagen de perfil es obligatoria";
+            else delete copy.imagenPerfil;
+            return copy;
+          });
+        }}
+        className="hidden"
+      />
+    </label>
+  </div>
+
+  {previewUrl && (
+    <div className="mt-2">
+      <img
+        src={previewUrl}
+        alt="Vista previa de imagen de perfil"
+        className="max-w-xs max-h-40 rounded-md object-contain border border-gray-300"
+      />
+    </div>
+  )}
+
+  {errors.imagenPerfil && (
+    <p className="text-red-600 text-sm mt-1">{errors.imagenPerfil}</p>
+  )}
+</div>
+
 
         {/* Archivo de verificación */}
         <div>
@@ -281,7 +316,7 @@ export function RegisterONGForm() {
           />
           {archivoVerificacion && (
             <p className="mt-2 text-sm text-gray-600">
-              Archivo seleccionado: <strong>{archivoVerificacion.name}</strong>
+             
             </p>
           )}
           {errors.archivoVerificacion && (

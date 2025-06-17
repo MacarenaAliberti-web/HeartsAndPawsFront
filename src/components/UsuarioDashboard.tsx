@@ -97,7 +97,7 @@ export default function DashboardSencillo() {
               }}
               className="max-w-xl bg-white p-6 rounded shadow space-y-5"
             >
-              {(['nombre', 'email', 'telefono', 'direccion', 'ciudad', 'pais'] as (keyof UserData)[]).map((campo) => (
+              {(['nombre', 'telefono', 'direccion', 'ciudad', 'pais'] as (keyof UserData)[]).map((campo) => (
                 <div key={campo}>
                   <label htmlFor={campo} className="block font-semibold mb-1 text-pink-700 capitalize">
                     {campo}
