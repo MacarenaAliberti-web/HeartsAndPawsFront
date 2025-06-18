@@ -1,4 +1,4 @@
-import UsuarioDashboardComponent from '../../../components/UsuarioDashboard';
+import UsuarioDashboardComponent from '../../../components/dashboard/UsuarioDashboard';
 
 export default function UsuarioDashboard() {
   return (

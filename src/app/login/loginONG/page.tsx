@@ -1,5 +1,5 @@
 
-import LoginONG from "@/components/LoginONG"; ;
+import LoginONG from "@/components/forms/LoginONG"; ;
 
 export default async function LoginPage() {
   // Si querés hacer una llamada del lado del server, podés hacer algo como esto:

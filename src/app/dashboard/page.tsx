@@ -2,8 +2,8 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { getUserRole } from '../../utils/getUserRole';
 import OngDashboard from "../../components/OngDashboard";
-import UsuarioDashboard from "../../components/UsuarioDashboard";
-import AdminDashboard from "../../components/AdminDashboard";
+import UsuarioDashboard from "../../components/dashboard/UsuarioDashboard";
+import AdminDashboard from "../../components/dashboard/AdminDashboard";
 
 export default function DashboardRouter() {
   const { user, isLoading } = useUser();
