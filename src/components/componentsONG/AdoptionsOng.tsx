@@ -15,26 +15,27 @@ interface ISolicitud {
 
 const AdoptionsOng = () => {
   const { ong } = useOngAuth();
-  const [solicitudes, setSolicitudes] = useState<ISolicitud[]>([]);
+  const [solicitudes, ] = useState<ISolicitud[]>([]);
 
   useEffect(() => {
+    /*
     if (ong?.id) {
       fetch(`/api/solicitudes?ongId=${ong.id}`)
         .then(res => res.json())
         .then(data => setSolicitudes(data))
         .catch(err => console.error("Error al cargar solicitudes:", err));
-    }
+    }*/
   }, [ong]);
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Solicitudes de Adopción Recibidas</h1>
+      <h1 className="mb-6 text-2xl font-bold">Solicitudes de Adopción Recibidas</h1>
       {solicitudes.length === 0 ? (
         <p>No hay solicitudes aún.</p>
       ) : (
         <ul className="space-y-4">
           {solicitudes.map(sol => (
-            <li key={sol.id} className="bg-white p-4 rounded shadow border">
+            <li key={sol.id} className="p-4 bg-white border rounded shadow">
               <p><strong>Usuario:</strong> {sol.userName}</p>
               <p><strong>Caso:</strong> {sol.caseTitle}</p>
               <p><strong>Mensaje:</strong> {sol.message}</p>

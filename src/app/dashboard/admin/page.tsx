@@ -1,12 +1,21 @@
-import AdminDashboard from "../../../components/dashboard/AdminDashboard";
+// app/dashboard/admin/page.tsx
+//import { getSession } from '@auth0/nextjs-auth0';
+//import { redirect } from 'next/navigation';
+import AdminDashboard from '../../../components/componentsadmin/AdminDashboard';
 
-export default function AdminDashboardPage() {
-  return (
-    <div>
-      <h1>Dashboard Admin</h1>
-      <AdminDashboard/>
-     {/* Lo va a resolver Natalia */}
-      <h2>Natalia</h2>
-    </div>
-  );
+export default async function AdminPage() {
+  //const session = await getSession();
+  //const namespace = process.env.AUTH0_BASE_URL;
+
+ // if (!session) {
+ //   return redirect('/api/auth/login');
+ // }
+//
+ // const roles = (session.user?.[`${namespace}roles`] as string[]) || [];
+//
+ // if (!roles.includes('admin')) {
+ //   return redirect('/not-authorized');
+ // }
+
+  return <AdminDashboard />;
 }

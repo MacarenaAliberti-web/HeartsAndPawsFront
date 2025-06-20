@@ -2,7 +2,7 @@
 import React from "react";
 import { useOngAuth } from "@/context/OngAuthContext";
 
-const ProfileOng = () => {
+ export const ProfileOng = () => {
   const { ong: user } = useOngAuth();
 
   if (!user) {
@@ -11,14 +11,14 @@ const ProfileOng = () => {
 
   return (
     <section>
-      <h1 className="text-3xl font-bold mb-2 text-pink-700">
+      <h1 className="mb-2 text-3xl font-bold text-pink-700">
         ¡Hola, {user.name}! 👋
       </h1>
-      <p className="text-gray-700 mb-6">
+      <p className="mb-6 text-gray-700">
         Bienvenida/o a tu perfil. Aquí podés ver tus datos registrados.
       </p>
 
-      <div className="bg-white p-6 rounded shadow max-w-lg space-y-4">
+      <div className="max-w-lg p-6 space-y-4 bg-white rounded shadow">
         <div>
           <strong className="block text-pink-600">Nombre:</strong>
           <span>{user.name}</span>
@@ -27,16 +27,16 @@ const ProfileOng = () => {
           <strong className="block text-pink-600">Email:</strong>
           <span>{user.email}</span>
         </div>
-        {user.address && (
+        {user.direccion && (
           <div>
             <strong className="block text-pink-600">Dirección:</strong>
-            <span>{user.address}</span>
+            <span>{user.direccion}</span>
           </div>
         )}
-        {user.phone && (
+        {user.telefono && (
           <div>
             <strong className="block text-pink-600">Teléfono:</strong>
-            <span>{user.phone}</span>
+            <span>{user.telefono}</span>
           </div>
         )}
       </div>

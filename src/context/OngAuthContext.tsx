@@ -4,6 +4,7 @@ import { createContext, useContext, useState, ReactNode } from "react";
 import { OngUser, ContextType } from "@/types/ong";
 import { ongLoginService } from '@/services/ongLogin';
 
+
 const OngAuthContext = createContext<ContextType | undefined>(undefined);
 
 export const OngAuthProvider = ({ children }: { children: ReactNode }) => {

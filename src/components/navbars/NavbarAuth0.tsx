@@ -22,7 +22,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { user } = useUser();
-  const namespace = "http://localhost:3000/";
+  //const namespace = process.env.AUTH0_BASE_URL;
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -34,7 +34,43 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const roles = (user?.[`${namespace}roles`] as string[]) || [];
+  function extractRolesFromJsonString(jsonString: string): string[] {
+    try {
+      if (jsonString.length > 0) {
+
+        console.log('Antes del Parse: ' + jsonString);
+        const user = JSON.parse(jsonString);
+        console.log('Despues del Parse: ' + user);
+        
+        for (const key in user) {
+          const value = user[key];
+          if (
+            Array.isArray(value) &&
+            value.every((v) => typeof v === "string")
+          ) {
+            const validRoles = ["admin", "user", "ong"];
+            if (value.some((v) => validRoles.includes(v))) {
+              return value;
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing JSON:", error);
+    }
+
+    return [];
+  }
+
+  let roles = [""];
+  const strJson = JSON.stringify(user) || "{}";  
+
+  if(strJson.length>2){
+    roles = extractRolesFromJsonString(strJson);
+    console.log(" Function extract Roles:", JSON.stringify(roles)); // ["admin"]
+  }
+  
+  //const roles = (user?.[`${namespace}roles`] as string[]) || [];
 
   let menuLinks = [
     { label: "Casos", href: "#casos", icon: <FaExclamationTriangle /> },
@@ -43,22 +79,29 @@ const Navbar = () => {
   ];
 
   if (user) {
-    menuLinks = [
-      { label: "Inicio", href: "/", icon: <FaHome /> },
-    ];
-    console.log('user: '+ JSON.stringify(user));
-    console.log('roles: '+ roles);
+    menuLinks = [{ label: "Inicio", href: "/", icon: <FaHome /> }];
+    console.log("user: " + JSON.stringify(user));
+    console.log("roles: " + roles);
+
     if (roles.includes("ong")) {
       menuLinks.push(
         { label: "Mi Perfil", href: "/dashboard/ong", icon: <FaUserShield /> },
-        { label: "Mis Casos", href: "/mis-casos", icon: <FaExclamationTriangle /> },
+        {
+          label: "Mis Casos",
+          href: "/mis-casos",
+          icon: <FaExclamationTriangle />,
+        },
         { label: "Mensajes", href: "/chat", icon: <FaCommentDots /> }
       );
     }
 
     if (roles.includes("user")) {
       menuLinks.push(
-        { label: "Mi Perfil", href: "/dashboard/usuario", icon: <FaUserShield /> },
+        {
+          label: "Mi Perfil",
+          href: "/dashboard/usuario",
+          icon: <FaUserShield />,
+        },
         { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> },
         { label: "Donar", href: "/donar", icon: <FaPaw /> }
       );
@@ -66,8 +109,12 @@ const Navbar = () => {
 
     if (roles.includes("admin")) {
       menuLinks.push(
-        { label: "Admin Perfil", href: "/dashboard/admin", icon: <FaUserShield /> },
-        { label: "Solicitudes", href: "/admin/solicitudes", icon: <FaRegClipboard /> }
+        {
+          label: "Admin Perfil",
+          href: "/dashboard/admin",
+          icon: <FaUserShield />,
+        }
+        //{/* label: "Solicitudes", href: "/solicitudesONG", icon: <FaRegClipboard /> */}
       );
     }
 
@@ -96,7 +143,6 @@ const Navbar = () => {
             <FaPaw className="text-2xl" />
             <span>Hearts&Paws</span>
           </Link>
-          
 
           {/* Desktop Menu */}
           <div className="hidden space-x-6 md:flex">

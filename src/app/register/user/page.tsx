@@ -1,4 +1,4 @@
-import RegisterUserForm from "@/components/forms/RegisterUserForm";
+import RegisterUserForm from "@/components/RegisterUserForm";
 
 
 export default function RegisterPageUser() {

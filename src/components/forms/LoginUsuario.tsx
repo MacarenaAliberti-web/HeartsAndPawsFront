@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useUsuarioAuth } from "@/context/UsuarioAuthContext";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { authMe } from "@/services/login";
+
 
 export default function LoginUsuario() {
   const router = useRouter();
@@ -44,14 +46,30 @@ export default function LoginUsuario() {
       const success = await loginUsuario(email, password);
 
       if (success) {
+        
+      const authme = await authMe();
+      const rol = authme ? await authme.json() : {};
+      console.log('YO SOY EL ROL: ' + rol.rol);
+
+      
         toast.success("Login exitoso, redirigiendo...");
-        router.push("/dashboard/usuario");
-      } else {
-        toast.error("Credenciales inválidas");
+
+        switch (rol.rol){
+          case "ADMIN":
+             router.push("/dashboard/admin");
+             break;
+          case "USER":
+             router.push("/dashboard/usuario");    
+          case "ONG":
+             router.push("/dashboard/ong");    
+          default:
+              toast.error("Credenciales inválidas");
+        }
+
       }
     } catch (error) {
       toast.error("Error de conexión, intenta nuevamente");
-      console.error(error);
+      console.log(error);
     } finally {
       setLoading(false);
     }
@@ -60,32 +78,32 @@ export default function LoginUsuario() {
   return (
     <form
       onSubmit={handleLogin}
-      className="max-w-md mx-auto p-6 bg-white rounded-xl shadow-md border border-pink-300"
+      className="max-w-md p-6 mx-auto bg-white border border-pink-300 shadow-md rounded-xl"
     >
-      <h2 className="text-3xl font-bold mb-6 text-pink-600 text-center">
+      <h2 className="mb-6 text-3xl font-bold text-center text-pink-600">
         Iniciar sesión
       </h2>
 
       <label className="block mb-4">
-        <span className="block font-semibold mb-1 text-gray-700">Email:</span>
+        <span className="block mb-1 font-semibold text-gray-700">Email:</span>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-pink-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
           placeholder="ejemplo@correo.com"
           disabled={loading}
           required
         />
       </label>
 
-      <label className="block mb-6 relative">
-        <span className="block font-semibold mb-1 text-gray-700">Contraseña:</span>
+      <label className="relative block mb-6">
+        <span className="block mb-1 font-semibold text-gray-700">Contraseña:</span>
         <input
           type={showPassword ? "text" : "password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-pink-500 pr-10"
+          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
           placeholder="Tu contraseña"
           disabled={loading}
           required
@@ -93,7 +111,7 @@ export default function LoginUsuario() {
         <button
           type="button"
           onClick={() => setShowPassword((prev) => !prev)}
-          className="absolute right-3 top-9 text-gray-500"
+          className="absolute text-gray-500 right-3 top-9"
           tabIndex={-1}
         >
           {showPassword ? <FaEyeSlash /> : <FaEye />}

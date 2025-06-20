@@ -15,6 +15,9 @@ export type OngUser = {
   name: string;
   role: "ong";
   token?: string;
+  telefono: string;
+  descripcion: string;
+  direccion: string;
 };
 
 export type ContextType = {

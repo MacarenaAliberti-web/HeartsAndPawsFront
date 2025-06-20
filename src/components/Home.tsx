@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <main className="flex flex-col items-center justify-start text-gray-800 bg-white w-full overflow-x-hidden">
+    <main className="flex flex-col items-center justify-start text-gray-800 bg-white min-w-screen">
       
       <div className="w-full relative h-[60vh] overflow-hidden flex items-center justify-center">
   <Image

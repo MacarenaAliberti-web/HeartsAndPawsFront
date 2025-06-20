@@ -7,23 +7,18 @@ import AdoptionsOng from './AdoptionsOng';
 import PublishedOng from './PublishedOng';
 import DonationsOng from './DonationsOng';
 
+type ViewType = "profil" | "donations" | "newCase" | "myCases" | "adoptions";
+
 const MyAccount = () => {
-  const { ong: userData, logout } = useOngAuth();
+  useOngAuth();
 
-  const [selectedView, setSelectedView] = useState<
-    | "profil"
-    | "donations"
-    | "newCase"
-    | "myCases"
-    | "adoptions"
-  >("profil");
+  const [selectedView, setSelectedView] = useState<ViewType>("profil");
 
-  const user = userData;
 
   return (
     <div className="flex min-h-screen -mt-16">
-      <aside className="w-64 bg-pink-600 text-white p-6 space-y-4">
-        <h2 className="text-2xl font-bold mb-6">Mi cuenta</h2>
+      <aside className="w-64 p-6 space-y-4 text-white bg-pink-600">
+        <h2 className="mb-6 text-2xl font-bold">Mi cuenta</h2>
 
         {[
           { label: "Mi Perfil", view: "profil" },
@@ -37,7 +32,7 @@ const MyAccount = () => {
             className={`block w-full text-left py-2 px-3 rounded hover:bg-pink-700 ${
               selectedView === item.view ? "bg-pink-700" : ""
             }`}
-            onClick={() => setSelectedView(item.view as any)}
+            onClick={() => setSelectedView(item.view as ViewType)}
           >
             {item.label}
           </button>

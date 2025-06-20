@@ -1,22 +1,39 @@
-// src/services/login.ts
+
 
 export const loginUserService = async (email: string, contrasena: string) => {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/usuarios/ingreso`, {
+  console.log('Service: Usuario: ' + email);
+  console.log('Service: Passwd: ' + contrasena);
+  
+ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/ingreso`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       credentials: 'include',
       body: JSON.stringify({ email, contrasena }),
     });
+  const data = await response.json();
 
-    const data = await res.json();
-
-    if (res.ok && data.ok) {
-      return { ok: true, usuario: data.usuario };
-    } else {
-      return { ok: false, mensaje: data.mensaje || 'Error en login' };
-    }
-  } catch {
-    return { ok: false, mensaje: 'Error de red o servidor' };
+  if (!response.ok) {
+    throw new Error(data.message || 'Login fallido');
   }
+
+  return data;
 };
+
+
+export async function authMe(){
+      try {
+      const res =  await fetch(`${process.env.NEXT_PUBLIC_API_URL}/usuarios/me`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',        
+      });
+        return res;
+      } catch (error) {
+      console.error(`Error al ontener usuario`, error);
+      
+    }  
+}

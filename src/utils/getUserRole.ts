@@ -4,7 +4,7 @@ type UserWithRoles = {
 };
 
 export const getUserRole = (user: UserWithRoles) => {
-  const namespace = "https://backend-hearts-paws/";
+  const namespace = "NEXT_PUBLIC_API_URL";
   const roles = user?.[`${namespace}roles`] as string[] || [];
   return roles[0]; 
 };

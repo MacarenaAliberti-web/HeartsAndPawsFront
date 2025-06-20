@@ -18,7 +18,7 @@ export async function registerOng(
   if (imagenPerfil) dataToSend.append("imagenPerfil", imagenPerfil);
   if (archivoVerificacion) dataToSend.append("archivoVerificacionUrl", archivoVerificacion);
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/organizaciones/registro-ong`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/registro-ong`, {
     method: "POST",
     body: dataToSend,
   });

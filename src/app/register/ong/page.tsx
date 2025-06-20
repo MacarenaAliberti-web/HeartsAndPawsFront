@@ -1,4 +1,4 @@
-import { RegisterONGForm } from '@/components/forms/RegisterONGForm';
+import { RegisterONGForm } from '@/components/RegisterONGForm';
 
 export default function RegisterPageONG() {
   return (
