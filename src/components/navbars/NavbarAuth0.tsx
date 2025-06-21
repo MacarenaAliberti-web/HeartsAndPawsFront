@@ -15,6 +15,7 @@ import {
   FaSignOutAlt,
   FaHome,
   FaCommentDots,
+  FaHandsHelping,
 } from "react-icons/fa";
 import { useUser } from "@auth0/nextjs-auth0/client";
 
@@ -73,7 +74,8 @@ const Navbar = () => {
   //const roles = (user?.[`${namespace}roles`] as string[]) || [];
 
   let menuLinks = [
-    { label: "Casos", href: "#casos", icon: <FaExclamationTriangle /> },
+    { label: "Te necesitan", href: "#casos", icon: <FaHeart className="text-pink-500" /> },
+    { label: "Adoptar", href: "/adopcion", icon: <FaPaw/> },
     { label: "Registro", href: "/register", icon: <FaRegClipboard /> },
     { label: "Iniciar Sesión", href: "/api/auth/login", icon: <FaSignInAlt /> },
   ];
@@ -85,13 +87,10 @@ const Navbar = () => {
 
     if (roles.includes("ong")) {
       menuLinks.push(
+        { label: "Inicio", href: "/", icon: <FaHome /> },
         { label: "Mi Perfil", href: "/dashboard/ong", icon: <FaUserShield /> },
-        {
-          label: "Mis Casos",
-          href: "/mis-casos",
-          icon: <FaExclamationTriangle />,
-        },
-        { label: "Mensajes", href: "/chat", icon: <FaCommentDots /> }
+        { label: "Mis Casos", href: "/mis-casos", icon: <FaExclamationTriangle /> },
+        { label: "Mensajes", href: "/chat", icon: <FaCommentDots /> },
       );
     }
 
@@ -102,8 +101,11 @@ const Navbar = () => {
           href: "/dashboard/usuario",
           icon: <FaUserShield />,
         },
-        { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> },
-        { label: "Donar", href: "/donar", icon: <FaPaw /> }
+      { label: "Inicio", href: "/", icon: <FaHome /> },
+      { label: "Te necesitan", href: "/donacion", icon: <FaHandsHelping className="text-pink-500" /> },
+      { label: "Adoptar", href: "/adopcion", icon: <FaPaw/> },
+      { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> },
+        
       );
     }
 

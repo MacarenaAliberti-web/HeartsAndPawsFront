@@ -51,21 +51,21 @@ export default function LoginUsuario() {
       const rol = authme ? await authme.json() : {};
       console.log('YO SOY EL ROL: ' + rol.rol);
 
-      
-        toast.success("Login exitoso, redirigiendo...");
+toast.success("Login exitoso, redirigiendo...");
 
-        switch (rol.rol){
-          case "ADMIN":
-             router.push("/dashboard/admin");
-             break;
-          case "USER":
-             router.push("/dashboard/usuario");    
-          case "ONG":
-             router.push("/dashboard/ong");    
-          default:
-              toast.error("Credenciales inválidas");
-        }
-
+switch (rol.rol) {
+  case "ADMIN":
+    router.push("/dashboard/admin");
+    break;
+  case "USUARIO":
+    router.push("/dashboard/usuario");
+    break;
+  case "ONG":
+    router.push("/dashboard/ong");
+    break;
+  default:
+    toast.error("Credenciales inválidas");
+}
       }
     } catch (error) {
       toast.error("Error de conexión, intenta nuevamente");

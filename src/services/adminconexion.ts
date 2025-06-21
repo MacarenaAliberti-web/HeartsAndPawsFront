@@ -13,7 +13,7 @@ export async function getMyadmin() {
     }
 };
 
-export async function Patchsolicitud(id: number, decision: 'aprobada' | 'rechazada'){
+export async function Patchsolicitud(id: number, decision: 'APROBADA' | 'RECHAZADA'){
 
       try {
       return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/organizaciones/${id}/estado`, {
@@ -26,7 +26,7 @@ export async function Patchsolicitud(id: number, decision: 'aprobada' | 'rechaza
       });
 
       } catch (error) {
-      console.error(`Error al ${decision === 'aprobada' ? 'aceptar' : 'rechazar'} solicitud`, error);
+      console.error(`Error al ${decision === 'APROBADA' ? 'aceptar' : 'rechazar'} solicitud`, error);
       
     }
 }

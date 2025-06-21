@@ -16,6 +16,9 @@ import {
   FaSignOutAlt,
   FaHome,
   FaCommentDots,
+  FaHeart,
+  FaHandsHelping,
+  FaUser,
 } from "react-icons/fa";
 
 import { useOngAuth } from "@/context/OngAuthContext";
@@ -75,8 +78,15 @@ const Navbar = () => {
     ];
   } else if (usuario) {
     menuLinks = [
-      { label: "Inicio", href: "/", icon: <FaHome /> },
-      { label: "Casos", href: "#casos", icon: <FaExclamationTriangle /> },
+     {
+    label: "Perfil",
+    href: "/dashboard/usuario",
+    icon: <FaUser className="text-pink-500" />,
+  },
+
+      { label: "Te necesitan", href: "/donacion", icon: <FaHandsHelping className="text-pink-500" /> },
+      { label: "Adoptar", href: "/adopcion", icon: <FaPaw/> },
+      { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> },
       {
         label: "Cerrar sesión",
         href: "#",
@@ -86,7 +96,8 @@ const Navbar = () => {
     ];
   } else {
     menuLinks = [
-      { label: "Casos", href: "#casos", icon: <FaExclamationTriangle /> },
+      { label: "Te necesitan", href: "/donacion", icon: <FaHandsHelping className="text-pink-500" /> },
+      { label: "Adoptar", href: "/adopcion", icon: <FaPaw/> },
       { label: "Registro", href: "/register", icon: <FaRegClipboard /> },
       { label: "Iniciar Sesión", href: "/login", icon: <FaSignInAlt /> },
     ];

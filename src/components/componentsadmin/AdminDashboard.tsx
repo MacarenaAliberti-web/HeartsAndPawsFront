@@ -38,15 +38,15 @@ export default function AdminDashboard() {
     fetchSolicitudes();
   }, []);
 
-  const handleDecision = async (id: number, decision: 'aprobada' | 'rechazada') => {
+  const handleDecision = async (id: number, decision: 'APROBADA' | 'RECHAZADA') => {
     try {
       const res = await Patchsolicitud(id, decision);
       if (!res || !res.ok) throw new Error('Error actualizando estado');
 
       setRequests((prev) => prev.filter((req) => req.id !== id));
-      toast(`Solicitud ${id} fue ${decision === 'aprobada' ? 'aceptada' : 'rechazada'}.`);
+      toast(`Solicitud ${id} fue ${decision === 'APROBADA' ? 'aceptada' : 'rechazada'}.`);
     } catch (error) {
-      console.error(`Error al ${decision === 'aprobada' ? 'aceptar' : 'rechazar'} solicitud`, error);
+      console.error(`Error al ${decision === 'APROBADA' ? 'aceptar' : 'rechazar'} solicitud`, error);
       toast('Hubo un error. Intenta nuevamente.');
     }
   };
@@ -93,14 +93,14 @@ export default function AdminDashboard() {
 
               <div className="flex space-x-4">
                 <button
-                  onClick={() => handleDecision(req.id, 'aprobada')}
+                  onClick={() => handleDecision(req.id, 'APROBADA')}
                   className="flex items-center px-4 py-2 text-white bg-pink-600 rounded shadow hover:bg-pink-700"
                 >
                   <FaCheckCircle className="mr-2" />
                   Aceptar
                 </button>
                 <button
-                  onClick={() => handleDecision(req.id, 'rechazada')}
+                  onClick={() => handleDecision(req.id, 'APROBADA')}
                   className="flex items-center px-4 py-2 text-black bg-gray-300 rounded shadow hover:bg-gray-400"
                 >
                   <FaTimesCircle className="mr-2" />

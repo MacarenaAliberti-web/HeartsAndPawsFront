@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 import FormBase from '@/components/forms/FormBase';
 import { useUsuarioAuth } from '@/context/UsuarioAuthContext';
-import { FormDataType } from '@/types/user';
+import { RegisterData } from '@/types/user';
+
 
 export default function RegisterUserForm() {
   const { registerUser } = useUsuarioAuth();
   const router = useRouter();
 
-  const [formData, setFormData] = useState<FormDataType>({
+  const [formData, setFormData] = useState<RegisterData>({
     nombre: '',
     email: '',
     contrasena: '',
@@ -21,11 +22,11 @@ export default function RegisterUserForm() {
     pais: '',
   });
 
-  const [errors, setErrors] = useState<Partial<Record<keyof FormDataType, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof RegisterData, string>>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const campos: { name: keyof FormDataType; label: string; type?: string }[] = [
+  const campos: { name: keyof RegisterData; label: string; type?: string }[] = [
     { name: 'nombre', label: 'Nombre' },
     { name: 'email', label: 'Correo electrónico', type: 'email' },
     { name: 'contrasena', label: 'Contraseña', type: 'password' },
@@ -35,7 +36,7 @@ export default function RegisterUserForm() {
     { name: 'pais', label: 'País' },
   ];
 
-  const validarCampo = (name: keyof FormDataType, value: string) => {
+  const validarCampo = (name: keyof RegisterData, value: string) => {
     let error = '';
 
     switch (name) {
@@ -59,7 +60,7 @@ export default function RegisterUserForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement| HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    validarCampo(name as keyof FormDataType, value);
+    validarCampo(name as keyof RegisterData, value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,8 +68,8 @@ export default function RegisterUserForm() {
 
     let hayErrores = false;
     for (const [key, value] of Object.entries(formData)) {
-      validarCampo(key as keyof FormDataType, value);
-      if (errors[key as keyof FormDataType]) hayErrores = true;
+      validarCampo(key as keyof RegisterData, value);
+      if (errors[key as keyof RegisterData]) hayErrores = true;
     }
 
     if (hayErrores) {

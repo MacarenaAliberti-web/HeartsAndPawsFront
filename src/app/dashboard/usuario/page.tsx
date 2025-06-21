@@ -6,7 +6,6 @@ export default function UsuarioDashboard() {
     
       <UsuarioDashboardComponent/>
      
-      <h2>Macarena</h2>
     </div>
   );
 }

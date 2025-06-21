@@ -1,14 +1,33 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Usuario, RegisterData, AuthContextType } from '@/types/user';
 import { registerUserService } from '@/services/register';
 import { loginUserService } from '@/services/login';
+import { getMyUser } from '@/services/direccionamiento';
+import { logoutService } from '@/services/logout';
 
 const UsuarioAuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const UsuarioAuthProvider = ({ children }: { children: ReactNode }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
+
+  useEffect(() => {
+    async function cargarUsuario() {
+      try {
+        const data = await getMyUser();
+        if (data?.usuario) {
+          setUsuario(data.usuario);
+        } else {
+          setUsuario(null);
+        }
+      } catch (error) {
+        console.error('Error al cargar usuario', error);
+        setUsuario(null);
+      }
+    }
+    cargarUsuario();
+  }, []);
 
   const registerUser = async (data: RegisterData) => {
     return await registerUserService(data);
@@ -23,9 +42,11 @@ export const UsuarioAuthProvider = ({ children }: { children: ReactNode }) => {
     return false;
   };
 
-//si el logout implica alguna llamada a backend para invalidar sesión, borrar tokens en servidor, limpiar cookies, lo pasamos a logoutService.
-  const logout = () => {
-    setUsuario(null);
+  const logout = async () => {
+    const success = await logoutService();
+    if (success) {
+      setUsuario(null);
+    }
   };
 
   return (
