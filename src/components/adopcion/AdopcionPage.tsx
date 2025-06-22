@@ -67,7 +67,7 @@ const fetchMascotas = async (filtros: { tipo?: string; nombre?: string }) => {
     if (!mascota) return
     toast.success(`¡Gracias por querer adoptar a ${mascota.nombre}! 🐶🐱`)
     setMostrandoHistoria(false)
-    router.push('/formAdopcion')
+    router.push('/adoptar/formulario-adopcion')
   }
 
   return (

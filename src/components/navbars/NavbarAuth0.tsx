@@ -103,7 +103,7 @@ const Navbar = () => {
         },
       { label: "Inicio", href: "/", icon: <FaHome /> },
       { label: "Te necesitan", href: "/donacion", icon: <FaHandsHelping className="text-pink-500" /> },
-      { label: "Adoptar", href: "/adopcion", icon: <FaPaw/> },
+      { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw/> },
       { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> },
         
       );

@@ -85,7 +85,7 @@ const Navbar = () => {
   },
 
       { label: "Te necesitan", href: "/donacion", icon: <FaHandsHelping className="text-pink-500" /> },
-      { label: "Adoptar", href: "/adopcion", icon: <FaPaw/> },
+      { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw/> },
       { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> },
       {
         label: "Cerrar sesión",
@@ -97,7 +97,7 @@ const Navbar = () => {
   } else {
     menuLinks = [
       { label: "Te necesitan", href: "/donacion", icon: <FaHandsHelping className="text-pink-500" /> },
-      { label: "Adoptar", href: "/adopcion", icon: <FaPaw/> },
+      { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw/> },
       { label: "Registro", href: "/register", icon: <FaRegClipboard /> },
       { label: "Iniciar Sesión", href: "/login", icon: <FaSignInAlt /> },
     ];

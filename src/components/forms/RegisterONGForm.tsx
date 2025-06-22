@@ -128,7 +128,7 @@ export function RegisterONGForm() {
       setImagenPerfil(null);
       setArchivoVerificacion(null);
       setErrors({});
-      router.push("/login/loginONG");
+      router.push("/register/ong-registro-exitoso");
     } catch (error) {
       console.error("Error al registrar ONG:", error);
       toast.error("Error al registrar ONG. Intenta nuevamente.");

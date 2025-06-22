@@ -9,15 +9,19 @@ export default function MascotaCard({ mascota, onConocerHistoria, onAdoptar }: M
 
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden transform hover:scale-105 transition duration-300 flex flex-col">
-      <div className="relative w-full h-48">
-        <Image
-          src={imagenUrl}
-          alt={mascota.nombre}
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, 33vw"
-        />
-      </div>
+    <div className="w-full h-48 p-2 flex items-center justify-center bg-white">
+  <Image
+    src={imagenUrl}
+    alt={mascota.nombre}
+    width={180}
+    height={130}
+    className="object-contain"
+    sizes="(max-width: 768px) 100vw, 33vw"
+  />
+</div>
+
+
+
       <div className="p-4 flex-1 flex flex-col justify-between">
         <h2 className="text-xl font-bold text-pink-600 mb-2">{mascota.nombre}</h2>
 
