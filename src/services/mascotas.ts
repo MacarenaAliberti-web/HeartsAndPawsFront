@@ -59,3 +59,51 @@ export async function adoptarMascota(id: string) {
 
   return res.json()
 }
+
+export async function getMascotasEnDonacion() {
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/casos/donacion`
+
+  const res = await fetch(url, {
+    method: 'GET',
+    credentials: 'include',
+  })
+
+  if (!res.ok) {
+    throw new Error('Error al obtener mascotas en donación')
+  }
+
+  return res.json()
+}
+
+export async function getMascotasDonacionFiltradas({ tipo = '' }: { tipo?: string } = {}) {
+  const params = new URLSearchParams()
+  if (tipo) params.append('tipo', tipo)
+
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/casos/donacion/buscar?${params.toString()}`
+
+  const res = await fetch(url, {
+    method: 'GET',
+    credentials: 'include',
+  })
+
+  if (!res.ok) {
+    throw new Error('Error al filtrar mascotas en donación')
+  }
+
+  return res.json()
+}
+
+export async function getCasoDonacionById(id: string) {
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/casos/donacion/${id}`
+
+  const res = await fetch(url, {
+    method: 'GET',
+    credentials: 'include',
+  })
+
+  if (!res.ok) {
+    throw new Error('Error al obtener los datos del caso de donación')
+  }
+
+  return res.json()
+}

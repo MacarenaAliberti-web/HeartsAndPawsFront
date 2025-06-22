@@ -1,23 +1,24 @@
 'use client'
 
-import { Mascota } from '@/types/mascotas'
+import { MascotaModalProps } from '@/types/mascotas'
 import Image from 'next/image'
 
-interface Props {
-  mascota: Mascota
-  visible: boolean
-  cargando?: boolean
-  onClose: () => void
-  onAdoptar?: (id: string) => void
-}
 
-export default function MascotaModal({ mascota, visible, cargando = false, onClose, onAdoptar }: Props) {
+export default function MascotaModal({
+  mascota,
+  visible,
+  cargando = false,
+  onClose,
+  onAccion,
+  modo,
+}: MascotaModalProps) {
   if (!visible) return null
 
   const imagenUrl = mascota.imagenes?.[0]?.url ?? 'https://via.placeholder.com/400x300?text=Mascota'
 
+  const textoBoton = modo === 'adopcion' ? '¡Quiero Adoptar!' : '¡Quiero Donar!'
+
   return (
-    
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-pink-100 bg-opacity-30">
       <div className="relative bg-pink-50 rounded-2xl shadow-lg max-w-md w-full p-6 border border-pink-200 overflow-hidden">
         {/* Fondo decorativo */}
@@ -59,13 +60,13 @@ export default function MascotaModal({ mascota, visible, cargando = false, onClo
           )}
         </div>
 
-        {/* Botón Adoptar */}
+        {/* Botón Acción */}
         <div className="text-center z-10 relative">
           <button
-            onClick={() => onAdoptar?.(mascota.id)}
+            onClick={() => onAccion?.(mascota.id)}
             className="bg-pink-500 hover:bg-pink-600 text-white font-semibold px-6 py-3 rounded-full shadow-md transition-all duration-300"
           >
-            ¡Quiero Adoptar!
+            {textoBoton}
           </button>
         </div>
       </div>

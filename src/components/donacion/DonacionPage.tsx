@@ -1,16 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-
-import MascotaCard from './MascotaCard'
-import MascotaModal from './MascotaModal'
+import { useRouter } from 'next/navigation'
+import { toast } from 'react-hot-toast'
 import { Mascota } from '@/types/mascotas'
 import { Caso } from '@/types/casos'
-import { toast } from 'react-hot-toast'
-import { useRouter } from 'next/navigation'
-import { getMascotasEnAdopcion, getMascotasFiltradas } from '@/services/mascotas'
+import {
+  getMascotasEnDonacion,
+  getMascotasDonacionFiltradas,
+} from '@/services/mascotas'
+import MascotaCard from '@/components/adopcion/MascotaCard'
+import MascotaModal from '@/components/adopcion/MascotaModal'
 
-export default function AdopcionPage() {
+export default function DonacionPage() {
   const router = useRouter()
 
   const [busqueda, setBusqueda] = useState('')
@@ -19,65 +21,63 @@ export default function AdopcionPage() {
   const [error, setError] = useState('')
   const [mascotaSeleccionada, setMascotaSeleccionada] = useState<Mascota | null>(null)
   const [mostrandoHistoria, setMostrandoHistoria] = useState(false)
-  const [cargandoHistoria] = useState(false)
 
   useEffect(() => {
-  const timer = setTimeout(() => {
-    const texto = busqueda.trim().toLowerCase()
+    const timer = setTimeout(() => {
+      const texto = busqueda.trim().toLowerCase()
 
-    // Solo filtra si es 'perro' o 'gato'
-    if (texto === 'perro' || texto === 'gato') {
-      fetchMascotas({ tipo: texto })
-    } else if (texto === '') {
-      fetchMascotas({})
-    } else {
-      // Si escribe otra cosa, no busca nada
+      if (texto === 'perro' || texto === 'gato') {
+        fetchMascotas({ tipo: texto })
+      } else if (texto === '') {
+        fetchMascotas({})
+      } else {
+        setResultados([])
+      }
+    }, 400)
+
+    return () => clearTimeout(timer)
+  }, [busqueda])
+
+  const fetchMascotas = async (filtros: { tipo?: string }) => {
+    setCargando(true)
+    setError('')
+    try {
+      const data =
+        Object.keys(filtros).length === 0
+          ? await getMascotasEnDonacion()
+          : await getMascotasDonacionFiltradas(filtros)
+
+      setResultados(data)
+    } catch {
+      setError('Hubo un error al cargar los casos de donación.')
       setResultados([])
+    } finally {
+      setCargando(false)
     }
-  }, 400)
-
-  return () => clearTimeout(timer)
-}, [busqueda])
-
-const fetchMascotas = async (filtros: { tipo?: string; nombre?: string }) => {
-  setCargando(true)
-  setError('')
-  try {
-    const data =
-      Object.keys(filtros).length === 0
-        ? await getMascotasEnAdopcion()
-        : await getMascotasFiltradas(filtros)
-
-    setResultados(data)
-  } catch {
-    setError('Hubo un error al cargar las mascotas.')
-    setResultados([])
-  } finally {
-    setCargando(false)
   }
-}
 
+  // Ahora recibe directamente la mascota y abre el modal
   const handleConocerHistoria = (mascota: Mascota) => {
     setMascotaSeleccionada(mascota)
     setMostrandoHistoria(true)
   }
 
-  const handleAdoptar = (id: string) => {
+  const handleDonar = (id: string) => {
     const mascota = resultados.find(c => c.mascota.id === id)?.mascota
     if (!mascota) return
-    toast.success(`¡Gracias por querer adoptar a ${mascota.nombre}! 🐶🐱`)
+    toast.success(`¡Gracias por tu interés en ayudar a ${mascota.nombre}! 🐾`)
     setMostrandoHistoria(false)
-    router.push('/adoptar/formulario-adopcion')
+    router.push('/')
   }
 
   return (
     <div className="flex flex-col items-center justify-start py-10 px-4 bg-pink-50 min-h-screen">
       <div className="w-full max-w-7xl">
         <h1 className="text-4xl font-extrabold text-center text-pink-600 mb-2">
-          Mi raza favorita es <span className="italic">adoptada</span>
+          Ayudá a una mascota en <span className="italic">situación crítica</span>
         </h1>
         <p className="text-gray-600 text-lg mb-6 text-center">
-          Encontrá a tu nuevo mejor amigo. 
+          Estos animales necesitan tu colaboración. Gracias por tu interés en ayudarlos.
         </p>
 
         <div className="w-full max-w-md mx-auto relative mb-8">
@@ -99,20 +99,21 @@ const fetchMascotas = async (filtros: { tipo?: string; nombre?: string }) => {
           </svg>
         </div>
 
-        {cargando && <p className="text-center text-gray-500">Cargando mascotas...</p>}
+        {cargando && <p className="text-center text-gray-500">Cargando casos...</p>}
         {error && <p className="text-center text-red-500">{error}</p>}
         {!cargando && resultados.length === 0 && (
-          <p className="text-center text-gray-500 mt-4">No se encontraron mascotas.</p>
+          <p className="text-center text-gray-500 mt-4">No se encontraron casos.</p>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-6">
           {resultados.map((caso) => (
             <MascotaCard
+            
               key={caso.id}
               mascota={caso.mascota}
-              onConocerHistoria={() => handleConocerHistoria(caso.mascota)}
-              onAdoptar={() => handleAdoptar(caso.mascota.id)}
-              modo="adopcion"
+              onConocerHistoria={() => handleConocerHistoria(caso.mascota)} // paso mascota completa
+              onAdoptar={() => handleDonar(caso.mascota.id)}
+              modo="donacion"
             />
           ))}
         </div>
@@ -120,14 +121,13 @@ const fetchMascotas = async (filtros: { tipo?: string; nombre?: string }) => {
 
       {mascotaSeleccionada && (
         <MascotaModal
-  mascota={mascotaSeleccionada}
-  visible={mostrandoHistoria}
-  cargando={cargandoHistoria}
-  onClose={() => setMostrandoHistoria(false)}
-  onAccion={() => handleAdoptar(mascotaSeleccionada.id)}
-  modo="adopcion"
-/>
-
+          mascota={mascotaSeleccionada}
+          visible={mostrandoHistoria}
+          cargando={false} // no hay carga asíncrona aquí
+          onClose={() => setMostrandoHistoria(false)}
+          onAccion={() => handleDonar(mascotaSeleccionada.id)}
+          modo="donacion"
+        />
       )}
     </div>
   )

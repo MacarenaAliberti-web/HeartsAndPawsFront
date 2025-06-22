@@ -13,6 +13,21 @@ export interface Mascota {
 
 export interface MascotaCardProps {
   mascota: Mascota
-  onConocerHistoria?: (id: string) => void
+  onConocerHistoria?: (mascota: Mascota) => void
   onAdoptar?: (id: string) => void
+}
+
+// Esta es la que usa MascotaCard
+export interface MascotaCardConModoProps extends MascotaCardProps {
+  modo: 'adopcion' | 'donacion'
+}
+
+// Esta es para MascotaModal
+export interface MascotaModalProps {
+  mascota: Mascota
+  visible: boolean
+  cargando?: boolean
+  onClose: () => void
+  onAccion?: (id: string) => void
+  modo: 'adopcion' | 'donacion'
 }
