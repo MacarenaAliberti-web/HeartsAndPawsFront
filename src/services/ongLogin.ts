@@ -18,7 +18,7 @@ export const ongLoginService = async (email: string, contrasena: string) => {
     const data = await res.json();
 
     if (data) {
-      return { ok: true, ong: data };
+       return { ok: true, ong: data.organizacion };
     } else {
       return { ok: false, mensaje: "Datos inválidos" };
     }
