@@ -1,43 +1,49 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useUsuarioAuth } from '@/context/UsuarioAuthContext';
-import { Usuario } from '@/types/user';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUsuarioAuth } from "@/context/UsuarioAuthContext";
+import { Usuario } from "@/types/user";
+import { useUser } from "@auth0/nextjs-auth0/client";
 
 export default function DashboardSencillo() {
+  const { user } = useUser();
   const router = useRouter();
   const { usuario } = useUsuarioAuth();
 
-  const [seccionActiva, setSeccionActiva] = useState<'perfil' | 'datos'>('perfil');
+  const [seccionActiva, setSeccionActiva] = useState<"perfil" | "datos">(
+    "perfil"
+  );
   const [isEditando, setIsEditando] = useState(false);
-  const [userData, setUserData] = useState<Pick<
-    Usuario,
-    'nombre' | 'email' | 'telefono' | 'direccion' | 'ciudad' | 'pais'
-  >>({
-    nombre: '',
-    email: '',
-    telefono: '',
-    direccion: '',
-    ciudad: '',
-    pais: '',
+  const [userData, setUserData] = useState<
+    Pick<
+      Usuario,
+      "nombre" | "email" | "telefono" | "direccion" | "ciudad" | "pais"
+    >
+  >({
+    nombre: "",
+    email: "",
+    telefono: "",
+    direccion: "",
+    ciudad: "",
+    pais: "",
   });
 
   useEffect(() => {
     if (!usuario) {
-      router.push('/login'); // Cambia esta ruta si tu login está en otro lugar
+      router.push("/login"); // Cambia esta ruta si tu login está en otro lugar
     }
   }, [usuario, router]);
 
   useEffect(() => {
     if (usuario) {
       setUserData({
-        nombre: usuario.nombre || '',
-        email: usuario.email || '',
-        telefono: usuario.telefono || '',
-        direccion: usuario.direccion || '',
-        ciudad: usuario.ciudad || '',
-        pais: usuario.pais || '',
+        nombre: usuario.nombre || "",
+        email: usuario.email || "",
+        telefono: usuario.telefono || "",
+        direccion: usuario.direccion || "",
+        ciudad: usuario.ciudad || "",
+        pais: usuario.pais || "",
       });
     }
   }, [usuario]);
@@ -50,7 +56,7 @@ export default function DashboardSencillo() {
   const handleGuardar = () => {
     setIsEditando(false);
     // Aquí podrías llamar al backend para actualizar datos si es necesario
-    console.log('Datos actualizados localmente:', userData);
+    console.log("Datos actualizados localmente:", userData);
   };
 
   if (!usuario) {
@@ -61,21 +67,27 @@ export default function DashboardSencillo() {
     <div className="flex min-h-screen bg-pink-50">
       {/* Panel lateral */}
       <nav className="flex flex-col px-4 py-6 text-white bg-pink-600 w-60">
-        <h2 className="mb-8 text-xl font-semibold text-center">Panel del Usuario</h2>
+        <h2 className="mb-8 text-xl font-semibold text-center">
+          Panel del Usuario
+        </h2>
 
         <button
-          onClick={() => setSeccionActiva('perfil')}
+          onClick={() => setSeccionActiva("perfil")}
           className={`mb-4 text-left px-3 py-2 rounded ${
-            seccionActiva === 'perfil' ? 'bg-pink-800 font-semibold' : 'hover:bg-pink-700'
+            seccionActiva === "perfil"
+              ? "bg-pink-800 font-semibold"
+              : "hover:bg-pink-700"
           }`}
         >
           Mi perfil
         </button>
 
         <button
-          onClick={() => setSeccionActiva('datos')}
+          onClick={() => setSeccionActiva("datos")}
           className={`text-left px-3 py-2 rounded ${
-            seccionActiva === 'datos' ? 'bg-pink-800 font-semibold' : 'hover:bg-pink-700'
+            seccionActiva === "datos"
+              ? "bg-pink-800 font-semibold"
+              : "hover:bg-pink-700"
           }`}
         >
           Mis datos
@@ -84,11 +96,30 @@ export default function DashboardSencillo() {
 
       {/* Contenido principal */}
       <main className="flex-1 p-10">
-        {seccionActiva === 'perfil' && (
+        {seccionActiva === "perfil" && (
           <section>
             <h1 className="mb-6 text-3xl font-bold text-pink-700">Mi perfil</h1>
             <p className="mb-8 text-pink-600">
-              Aquí puedes poner información del perfil del usuario, foto, saludo, etc.
+              <header className="flex items-center justify-between mb-8">
+                <div className="flex items-center space-x-4">
+                  {/* Imagen del usuario */}
+                  {user?.picture && (
+                    <img
+                      src={user.picture}
+                      alt={`Foto de perfil de ${user.name}`}
+                      className="w-12 h-12 rounded-full border-2 border-pink-400 shadow"
+                    />
+                  )}
+
+                  {/* Nombre del usuario */}
+                  <div>
+                    <p className="text-lg font-semibold text-pink-700">
+                      {user?.name}
+                    </p>
+                    <p className="text-sm text-gray-600">Hola!</p>
+                  </div>
+                </div>
+              </header>
             </p>
 
             <div className="flex gap-4">
@@ -109,7 +140,7 @@ export default function DashboardSencillo() {
           </section>
         )}
 
-        {seccionActiva === 'datos' && (
+        {seccionActiva === "datos" && (
           <section>
             <h1 className="mb-6 text-3xl font-bold text-pink-700">Mis datos</h1>
 
@@ -120,7 +151,16 @@ export default function DashboardSencillo() {
               }}
               className="max-w-xl p-6 space-y-5 bg-white rounded shadow"
             >
-              {(['nombre', 'email', 'telefono', 'direccion', 'ciudad', 'pais'] as const).map((campo) => (
+              {(
+                [
+                  "nombre",
+                  "email",
+                  "telefono",
+                  "direccion",
+                  "ciudad",
+                  "pais",
+                ] as const
+              ).map((campo) => (
                 <div key={campo}>
                   <label
                     htmlFor={campo}
@@ -131,16 +171,16 @@ export default function DashboardSencillo() {
                   <input
                     id={campo}
                     name={campo}
-                    type={campo === 'email' ? 'email' : 'text'}
+                    type={campo === "email" ? "email" : "text"}
                     disabled={!isEditando}
                     value={userData[campo]}
                     onChange={handleChange}
                     className={`w-full border rounded px-3 py-2 ${
                       isEditando
-                        ? 'border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-400'
-                        : 'border-gray-300 bg-gray-100 cursor-not-allowed'
+                        ? "border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                        : "border-gray-300 bg-gray-100 cursor-not-allowed"
                     }`}
-                    required={campo === 'nombre' || campo === 'email'}
+                    required={campo === "nombre" || campo === "email"}
                   />
                 </div>
               ))}
