@@ -11,7 +11,8 @@ const nextConfig: NextConfig = {
       'placekitten.com',
        'images.pexels.com',
        'res.cloudinary.com',
-       'via.placeholder.com'
+       'via.placeholder.com',
+       'comunidad.retorn.com'
     ],
   },
 }
