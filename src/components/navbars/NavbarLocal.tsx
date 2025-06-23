@@ -67,7 +67,7 @@ const Navbar = () => {
     menuLinks = [
       { label: "Inicio", href: "/", icon: <FaHome /> },
       { label: "Mi Perfil", href: "/dashboard/ong", icon: <FaUserShield /> },
-      { label: "Mis Casos", href: "/mis-casos", icon: <FaExclamationTriangle /> },
+      { label: "Publicar", href: "/dashboard/ong/nueva-mascota", icon: <FaExclamationTriangle /> },
       { label: "Mensajes", href: "/chat", icon: <FaCommentDots /> },
       {
         label: "Cerrar sesión",

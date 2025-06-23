@@ -22,9 +22,16 @@ export type OngUser = {
   imagenPerfil: string;
 };
 
-
-export type ContextType = {
+export interface ContextType {
   ong: OngUser | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
-};
+  loading: boolean;  // <-- agregá esta línea
+}
+
+
+// export type ContextType = {
+//   ong: OngUser | null;
+//   login: (email: string, password: string) => Promise<boolean>;
+//   logout: () => void;
+// };
