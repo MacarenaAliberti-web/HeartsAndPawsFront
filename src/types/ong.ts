@@ -11,14 +11,17 @@ export interface OngFormDataType {
 
 // OngAuthContext.tsx
 export type OngUser = {
-  email: string;
-  name: string;
-  role: "ong";
-  token?: string;
-  telefono: string;
+  id: string;
+  nombre: string;
   descripcion: string;
+  telefono: string;
   direccion: string;
+  ciudad: string;
+  pais: string;
+  plan: string;
+  imagenPerfil: string;
 };
+
 
 export type ContextType = {
   ong: OngUser | null;

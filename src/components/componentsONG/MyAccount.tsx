@@ -1,19 +1,17 @@
+
 "use client";
 import { useOngAuth } from '@/context/OngAuthContext';
 import React, { useState } from 'react';
 import ProfileOng from './ProfileOng';
 import NewCaseOng from './NewCaseOng';
 import AdoptionsOng from './AdoptionsOng';
-import PublishedOng from './PublishedOng';
 import DonationsOng from './DonationsOng';
 
-type ViewType = "profil" | "donations" | "newCase" | "myCases" | "adoptions";
+type ViewType = "profil" | "donations" | "newCase" | "adoptions";
 
 const MyAccount = () => {
   useOngAuth();
-
   const [selectedView, setSelectedView] = useState<ViewType>("profil");
-
 
   return (
     <div className="flex min-h-screen -mt-16">
@@ -24,7 +22,6 @@ const MyAccount = () => {
           { label: "Mi Perfil", view: "profil" },
           { label: "Historial de Donaciones", view: "donations" },
           { label: "Publicar Nuevo Caso", view: "newCase" },
-          { label: "Mis Casos Publicados", view: "myCases" },
           { label: "Solicitudes de Adopción", view: "adoptions" },
         ].map((item) => (
           <button
@@ -39,11 +36,10 @@ const MyAccount = () => {
         ))}
       </aside>
 
-      <main className="flex-1 p-10 bg-gray-300">
+      <main className="flex-1 p-10 bg-pink-50">
         {selectedView === "profil" && <ProfileOng />}
         {selectedView === "donations" && <DonationsOng />}
         {selectedView === "newCase" && <NewCaseOng />}
-        {selectedView === "myCases" && <PublishedOng />}
         {selectedView === "adoptions" && <AdoptionsOng />}
       </main>
     </div>
@@ -51,4 +47,3 @@ const MyAccount = () => {
 };
 
 export default MyAccount;
-
