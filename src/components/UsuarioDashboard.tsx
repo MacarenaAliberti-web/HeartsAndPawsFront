@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+
 import { useUsuarioAuth } from "@/context/UsuarioAuthContext";
 //import { Usuario} from "@/types/user";
 import { User } from "@supabase/supabase-js";
 
 export default function DashboardSencillo() {
-  const router = useRouter();
-  const { usuario, logged } = useUsuarioAuth();
+
+  const { usuario } = useUsuarioAuth();
   const [user] = useState<User | null>(null);
   const [seccionActiva, setSeccionActiva] = useState<"perfil" | "datos">("perfil");
   const [isEditando, setIsEditando] = useState(false);
@@ -30,11 +30,7 @@ export default function DashboardSencillo() {
     pais: "",
   });
 
-  useEffect(() => {
-    if (!logged) {
-      router.push("/login");
-    }
-  }, [logged, router]);
+
 
   useEffect(() => {
     if (usuario) {
