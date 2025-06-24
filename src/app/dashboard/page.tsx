@@ -1,49 +1,72 @@
-// app/dashboard/page.tsx
+
 "use client";
-
-import { useEffect } from "react";
+/*
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "../../lib/supabaseClient";
 import { getMyUser } from "@/services/direccionamiento";
-import { useUser } from "@auth0/nextjs-auth0/client";
-import OngDashboard from "@/components/OngDashboard";
-import UsuarioDashboard from "@/components/UsuarioDashboard";
-import AdminDashboard from "@/components/componentsadmin/AdminDashboard";
-import { getUserRole } from '../../utils/getUserRole';
-
+import { User, Session } from "@supabase/supabase-js";
+*/
 export default function DashboardPage() {
+  /*
   const router = useRouter();
-  const { user, isLoading } = useUser();
+  const [loading, setLoading] = useState(true);
+  const [sessionUser, setSessionUser] = useState<User | null>(null);
+  // const supabase = createClient();
 
   useEffect(() => {
-    async function getUsuarioYRedirigir() {
+    async function checkSessionAndRedirect(session: Session) {
+      console.log("SESSION: " + session);
+      //if (!session) return;
+
+      setSessionUser(session.user);
+
       try {
-        const res = await getMyUser();
-        const usuario = res;
+        const usuario = await getMyUser();
 
         if (usuario.rol === "admin") {
+          console.log("Rol ADMIN");
           router.push("/dashboard/admin");
         } else if (usuario.rol === "ong") {
+          console.log("Rol ONG");
           router.push("/dashboard/ong");
         } else {
+          console.log("Rol USER");
           router.push("/dashboard/usuario");
         }
       } catch (error) {
         console.error("Error al obtener usuario:", error);
-        router.push("/login");
+        // router.push("/login");
       }
     }
 
-    getUsuarioYRedirigir();
-  }, [router]);
+    // Primero escuchamos cambios de sesión
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Auth state changed:", _event, session);
 
-  if (isLoading) return <div>Cargando...</div>;
-  if (!user) return <div>No estás logueado</div>;
+      if (session) {
+        checkSessionAndRedirect(session);
+      } else {
+        //router.push("/login");
+      }
+    });
 
-  const role = getUserRole(user);
-  console.log('este es el rol: ' + role)
-  if (role === "ong") return <OngDashboard />;
-  if (role === "usuario") return <UsuarioDashboard />;
-  if (role === "admin") return <AdminDashboard />;
-  console.log('soy: ' + role);
-  return <div>No tenés un rol válido</div>;
+    // Luego intentamos obtener sesión inicial
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        checkSessionAndRedirect(session);
+      }
+      setLoading(false); // Finaliza loading igual
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [router, supabase]);
+
+  if (loading) return <div>Cargando...</div>;
+
+  return <div>Redirigiendo...</div>;*/
 }

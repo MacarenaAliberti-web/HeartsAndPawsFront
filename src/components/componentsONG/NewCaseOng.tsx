@@ -69,14 +69,14 @@ const NewCaseOng = () => {
       <h1 className="text-3xl font-bold mb-4 text-center text-pink-600">Crear nuevo caso</h1>
 
       {/* Botón para redirigir al form de mascota */}
-      {/* <div className="flex justify-center mb-6">
+      <div className="flex justify-center mb-6">
         <button
           className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-6 py-2 rounded-lg transition"
           onClick={() => setMostrarNewPet(true)}
         >
           Crear nueva mascota
         </button>
-      </div> */}
+      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <CaseForm register={register} errors={errors} watch={watch} />

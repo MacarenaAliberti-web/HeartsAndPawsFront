@@ -1,111 +1,180 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useUser } from '@auth0/nextjs-auth0/client';
-import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
-import { MdVerified } from 'react-icons/md';
-import toast from 'react-hot-toast';
-import { getMyadmin, Patchsolicitud } from '@/services/adminconexion';
+import { useEffect, useState } from "react";
+import { User } from "@supabase/supabase-js";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { MdVerified } from "react-icons/md";
+import toast from "react-hot-toast";
+import { getMyadmin, getVerificacion, Patchsolicitud } from "@/services/adminconexion";
+import { OngUser } from "@/types/ong";
+import { useOngAuth } from "@/context/OngAuthContext";
 
-interface SolicitudONG {
-  id: number;
-  nombre: string;
-  contacto: string;
-  descripcion: string;
-}
 
 export default function AdminDashboard() {
-  const { user } = useUser();
-  const [requests, setRequests] = useState<SolicitudONG[]>([]);
+ const [user] = useState<User | null>(null);
+  const { ong } = useOngAuth();
+  const [requests, setRequests] = useState<OngUser[]>([]);
   const [loading, setLoading] = useState(true);
 
-  
+ 
+
   useEffect(() => {
     const fetchSolicitudes = async () => {
       try {
-         const res = await getMyadmin();
-        if (!res || !res.ok) throw new Error('Error al obtener las ONGs');
+        const res = await getMyadmin();
+        if (!res || !res.ok) throw new Error("Error al obtener las ONGs");
 
-        const data = await res.json();
+        const data: OngUser[] = await res.json();
         setRequests(data);
       } catch (error) {
-        console.error('Error cargando solicitudes:', error);
+        console.error("Error cargando solicitudes:", error);
       } finally {
         setLoading(false);
-      }
+          }
     };
 
     fetchSolicitudes();
   }, []);
 
-  const handleDecision = async (id: number, decision: 'APROBADA' | 'RECHAZADA') => {
+
+  const handleVerificacion = async (id: string) => {
+      try {
+        const res = await getVerificacion(id);
+        if (!res || !res.ok) throw new Error("Error al obtener las ONGs");
+
+     
+      } catch (error) {
+        console.error("Error cargando solicitudes:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+   // handleVerificacion('9d7a6b3a-9130-413c-a51d-748f4a79b013'); //Ejemplo. Ver donde se obtiene el ID
+
+  const handleDecision = async (
+    id: number,
+    decision: "APROBADA" | "RECHAZADA"
+  ) => {
     try {
       const res = await Patchsolicitud(id, decision);
-      if (!res || !res.ok) throw new Error('Error actualizando estado');
+      if (!res || !res.ok) throw new Error("Error actualizando estado");
 
-      setRequests((prev) => prev.filter((req) => req.id !== id));
-      toast(`Solicitud ${id} fue ${decision === 'APROBADA' ? 'aceptada' : 'rechazada'}.`);
+      setRequests((prev) => prev.filter((req) => Number(req.id) !== id));
+      toast(
+        `Solicitud ${id} fue ${
+          decision === "APROBADA" ? "aceptada" : "rechazada"
+        }.`
+      );
     } catch (error) {
-      console.error(`Error al ${decision === 'APROBADA' ? 'aceptar' : 'rechazar'} solicitud`, error);
-      toast('Hubo un error. Intenta nuevamente.');
+      console.error(
+        `Error al ${
+          decision === "APROBADA" ? "aceptar" : "rechazar"
+        } solicitud`,
+        error
+      );
+      toast("Hubo un error. Intenta nuevamente.");
     }
   };
+
+  const displayName =
+    typeof user?.app_metadata === "string"
+      ? user.app_metadata
+      : ong?.nombre || "Administrador";
 
   return (
     <main className="min-h-screen p-8 bg-gradient-to-br from-pink-100 to-pink-200">
       <div className="max-w-4xl mx-auto">
-        {/* Header con usuario */}
         <header className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
             <div>
-              <p className="text-lg font-semibold text-pink-700">{user?.name}</p>
-              <p className="text-sm text-gray-600">Administrador</p>
+              <p className="text-lg font-semibold text-pink-700">
+                {displayName}
+              </p>
             </div>
           </div>
         </header>
 
-        {/* Título */}
         <h1 className="flex items-center mb-6 text-3xl font-bold text-pink-700">
           <MdVerified className="mr-2 text-pink-600" />
           Solicitudes de Verificación de ONGs
         </h1>
 
-        {/* Estado de carga */}
         {loading ? (
-          <div className="font-semibold text-center text-pink-700">Cargando solicitudes...</div>
+          <div className="font-semibold text-center text-pink-700">
+            Cargando solicitudes...
+          </div>
         ) : requests.length === 0 ? (
           <div className="p-6 text-center text-gray-600 bg-white rounded-lg shadow">
             No hay solicitudes pendientes.
           </div>
         ) : (
-          requests.map((req) => (
+          requests.map((req: OngUser) => (
             <div
               key={req.id}
               className="p-5 mb-6 transition-shadow duration-200 bg-white border-2 border-pink-400 rounded-lg shadow-lg hover:shadow-pink-300"
             >
-              <h2 className="mb-1 text-xl font-semibold text-pink-800">{req.nombre}</h2>
-              <p className="mb-1 text-sm text-gray-600">
-                <strong>Contacto:</strong> {req.contacto}
-              </p>
-              <p className="mb-4 text-sm text-gray-600">
-                <strong>Descripción:</strong> {req.descripcion}
-              </p>
+              <div className="flex gap-6">
+                {/* Imagen de perfil */}
+                <div className="flex-shrink-0">
+                  <img
+                    src={req.imagenPerfil}
+                    alt={`Foto de perfil de ${req.nombre}`}
+                    className="w-40 h-40 object-cover border-4 border-pink-500 shadow-md rounded"
+                  />
+                </div>
 
-              <div className="flex space-x-4">
-                <button
-                  onClick={() => handleDecision(req.id, 'APROBADA')}
-                  className="flex items-center px-4 py-2 text-white bg-pink-600 rounded shadow hover:bg-pink-700"
-                >
-                  <FaCheckCircle className="mr-2" />
-                  Aceptar
-                </button>
-                <button
-                  onClick={() => handleDecision(req.id, 'APROBADA')}
-                  className="flex items-center px-4 py-2 text-black bg-gray-300 rounded shadow hover:bg-gray-400"
-                >
-                  <FaTimesCircle className="mr-2" />
-                  Rechazar
-                </button>
+                {/* Información textual */}
+                <div className="flex flex-col justify-between">
+                  <div>
+                    <h2 className="mb-1 text-xl font-semibold text-pink-800">
+                      {req.nombre}
+                    </h2>
+                    <p className="mb-1 text-sm text-gray-600">
+                      <strong>Contacto:</strong> {req.email ?? "Sin contacto"}
+                    </p>
+                    <p className="mb-4 text-sm text-gray-600">
+                      <strong>Creado:</strong>{" "}
+                      {req.creado_en
+                        ? new Date(req.creado_en).toLocaleDateString("es-ES", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })
+                        : "Sin descripción"}
+                    </p>
+                  </div>
+
+                  {/* Botones */}
+                  <div className="flex space-x-4 mt-2">
+                    <button
+                      onClick={() => handleDecision(Number(req.id), "APROBADA")}
+                      className="flex items-center px-4 py-2 text-white bg-pink-600 rounded shadow hover:bg-pink-700"
+                    >
+                      <FaCheckCircle className="mr-2" />
+                      Aceptar
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleDecision(Number(req.id), "RECHAZADA")
+                      }
+                      className="flex items-center px-4 py-2 text-black bg-gray-300 rounded shadow hover:bg-gray-400"
+                    >
+                      <FaTimesCircle className="mr-2" />
+                      Rechazar
+                    </button>
+                      <button
+                      onClick={() =>
+                           handleVerificacion(String(req.id))
+                          
+                      }
+                      className="flex items-center px-4 py-2 text-black bg-gray-300 rounded shadow hover:bg-gray-400"
+                    >
+                      <FaTimesCircle className="mr-2" />
+                      Ver Documentacion
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           ))
@@ -114,3 +183,4 @@ export default function AdminDashboard() {
     </main>
   );
 }
+
