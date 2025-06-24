@@ -11,13 +11,18 @@ const UsuarioAuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const UsuarioAuthProvider = ({ children }: { children: ReactNode }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
+   const [userLogged, setUserLogged] = useState<boolean>(false);
+  const logged: boolean = userLogged;
 
+  
   useEffect(() => {
     async function cargarUsuario() {
+
       try {
         const data = await getMyUser();
         if (data?.usuario) {
           setUsuario(data.usuario);
+           setUserLogged(true);
         } else {
           setUsuario(null);
         }
@@ -50,7 +55,7 @@ export const UsuarioAuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <UsuarioAuthContext.Provider value={{ usuario, registerUser, loginUsuario, logout }}>
+    <UsuarioAuthContext.Provider value={{ usuario, registerUser, loginUsuario, logout,logged }}>
       {children}
     </UsuarioAuthContext.Provider>
   );

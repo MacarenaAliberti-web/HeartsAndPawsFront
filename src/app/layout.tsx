@@ -1,16 +1,12 @@
-
-
-//import { UserProvider } from '@auth0/nextjs-auth0/client';
-//import { UserProvider } from '@auth0/nextjs-auth0/client';
-import { UserProvider } from '@auth0/nextjs-auth0/client';
-
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import NavbarWrapper from '@/components/NavbarWrapper';
-import { UsuarioAuthProvider } from '@/context/UsuarioAuthContext';
-import { OngAuthProvider } from '@/context/OngAuthContext';
-import { Toaster } from 'react-hot-toast';
+
+import NavbarWrapper from "@/components/NavbarWrapper";
+import { UsuarioAuthProvider } from "@/context/UsuarioAuthContext";
+import { OngAuthProvider } from "@/context/OngAuthContext";
+import { AuthProvider } from "@/components/SupabaseProvider";
+import { Toaster } from "react-hot-toast";
 
 
 
@@ -39,17 +35,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-       <UserProvider>
-          
-           <UsuarioAuthProvider> 
-          <OngAuthProvider>  
-             <NavbarWrapper /> 
-          <main className="pt-16">{children}</main>
-           <Toaster />
-          </OngAuthProvider>
-            </UsuarioAuthProvider>
-        </UserProvider>
-        
+        <AuthProvider>
+          <UsuarioAuthProvider>
+            <OngAuthProvider>
+              <NavbarWrapper />              
+              <main className="pt-16">{children}</main>
+              <Toaster />
+            </OngAuthProvider>
+          </UsuarioAuthProvider>
+         </AuthProvider>
       </body>
     </html>
   );

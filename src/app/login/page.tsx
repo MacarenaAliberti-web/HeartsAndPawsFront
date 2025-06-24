@@ -14,7 +14,7 @@ export default function LoginSelector() {
 
        <div className="flex flex-col gap-6">
         <button
-          onClick={() => router.push('/login/google')}
+          onClick={() => router.push('/login/login')}
          className="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-4 px-6 rounded-md text-lg transition w-full"
         >
           Iniciar sesión con Google

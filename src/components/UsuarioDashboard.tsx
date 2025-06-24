@@ -3,24 +3,25 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUsuarioAuth } from "@/context/UsuarioAuthContext";
-import { Usuario } from "@/types/user";
-import { useUser } from "@auth0/nextjs-auth0/client";
+//import { Usuario} from "@/types/user";
+import { User } from "@supabase/supabase-js";
 
 export default function DashboardSencillo() {
-  const { user } = useUser();
   const router = useRouter();
-  const { usuario } = useUsuarioAuth();
-
-  const [seccionActiva, setSeccionActiva] = useState<"perfil" | "datos">(
-    "perfil"
-  );
+  const { usuario, logged } = useUsuarioAuth();
+  const [user] = useState<User | null>(null);
+  const [seccionActiva, setSeccionActiva] = useState<"perfil" | "datos">("perfil");
   const [isEditando, setIsEditando] = useState(false);
-  const [userData, setUserData] = useState<
-    Pick<
-      Usuario,
-      "nombre" | "email" | "telefono" | "direccion" | "ciudad" | "pais"
-    >
-  >({
+
+  const [userData, setUserData] = useState<{
+    nombre: string;
+    email: string;
+    telefono: string;
+    direccion: string;
+    ciudad: string;
+    pais: string;
+    imagenPerfil?: string;
+  }>({
     nombre: "",
     email: "",
     telefono: "",
@@ -30,13 +31,14 @@ export default function DashboardSencillo() {
   });
 
   useEffect(() => {
-    if (!usuario) {
-      router.push("/login"); // Cambia esta ruta si tu login está en otro lugar
+    if (!logged) {
+      router.push("/login");
     }
-  }, [usuario, router]);
+  }, [logged, router]);
 
   useEffect(() => {
     if (usuario) {
+      // Usuario local
       setUserData({
         nombre: usuario.nombre || "",
         email: usuario.email || "",
@@ -44,9 +46,20 @@ export default function DashboardSencillo() {
         direccion: usuario.direccion || "",
         ciudad: usuario.ciudad || "",
         pais: usuario.pais || "",
+        imagenPerfil: usuario.imagenPerfil || "",
+      });
+    } else if (user) {
+      // Usuario Supabase
+      setUserData({
+        nombre: typeof user?.user_metadata?.nombre === "string" ? user.user_metadata.nombre : "",
+        email: user?.email || "",
+        telefono: "", 
+        direccion: "",
+        ciudad: "",
+        pais: "",
       });
     }
-  }, [usuario]);
+  }, [usuario, user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -55,28 +68,24 @@ export default function DashboardSencillo() {
 
   const handleGuardar = () => {
     setIsEditando(false);
-    // Aquí podrías llamar al backend para actualizar datos si es necesario
+    // Aquí podrías guardar en Supabase o backend
     console.log("Datos actualizados localmente:", userData);
   };
 
-  if (!usuario) {
-    return null; // O un loading si querés mostrar algo mientras redirige
+  if (!usuario && !user) {
+    return null;
   }
 
   return (
     <div className="flex min-h-screen bg-pink-50">
       {/* Panel lateral */}
       <nav className="flex flex-col px-4 py-6 text-white bg-pink-600 w-60">
-        <h2 className="mb-8 text-xl font-semibold text-center">
-          Panel del Usuario
-        </h2>
+        <h2 className="mb-8 text-xl font-semibold text-center">Panel del Usuario</h2>
 
         <button
           onClick={() => setSeccionActiva("perfil")}
           className={`mb-4 text-left px-3 py-2 rounded ${
-            seccionActiva === "perfil"
-              ? "bg-pink-800 font-semibold"
-              : "hover:bg-pink-700"
+            seccionActiva === "perfil" ? "bg-pink-800 font-semibold" : "hover:bg-pink-700"
           }`}
         >
           Mi perfil
@@ -85,9 +94,7 @@ export default function DashboardSencillo() {
         <button
           onClick={() => setSeccionActiva("datos")}
           className={`text-left px-3 py-2 rounded ${
-            seccionActiva === "datos"
-              ? "bg-pink-800 font-semibold"
-              : "hover:bg-pink-700"
+            seccionActiva === "datos" ? "bg-pink-800 font-semibold" : "hover:bg-pink-700"
           }`}
         >
           Mis datos
@@ -99,41 +106,28 @@ export default function DashboardSencillo() {
         {seccionActiva === "perfil" && (
           <section>
             <h1 className="mb-6 text-3xl font-bold text-pink-700">Mi perfil</h1>
-            <p className="mb-8 text-pink-600">
-              <header className="flex items-center justify-between mb-8">
-                <div className="flex items-center space-x-4">
-                  {/* Imagen del usuario */}
-                  {user?.picture && (
-                    <img
-                      src={user.picture}
-                      alt={`Foto de perfil de ${user.name}`}
-                      className="w-12 h-12 rounded-full border-2 border-pink-400 shadow"
-                    />
-                  )}
-
-                  {/* Nombre del usuario */}
-                  <div>
-                    <p className="text-lg font-semibold text-pink-700">
-                      {user?.name}
-                    </p>
-                    <p className="text-sm text-gray-600">Hola!</p>
-                  </div>
+            <header className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-4">
+                {/* Imagen del usuario si existe */}
+                {userData.imagenPerfil && (
+                  <img
+                    src={userData.imagenPerfil}
+                    alt={`Foto de perfil de ${userData.nombre}`}
+                    className="w-12 h-12 rounded-full border-2 border-pink-400 shadow"
+                  />
+                )}
+                <div>
+                  <p className="text-lg font-semibold text-pink-700">{userData.nombre}</p>
+                  <p className="text-sm text-gray-600">Hola!</p>
                 </div>
-              </header>
-            </p>
+              </div>
+            </header>
 
             <div className="flex gap-4">
-              <button
-                type="button"
-                className="px-6 py-2 font-semibold text-white transition bg-pink-500 rounded hover:bg-pink-600"
-              >
+              <button className="px-6 py-2 font-semibold text-white transition bg-pink-500 rounded hover:bg-pink-600">
                 Adoptar
               </button>
-
-              <button
-                type="button"
-                className="px-6 py-2 font-semibold text-white transition bg-pink-400 rounded hover:bg-pink-500"
-              >
+              <button className="px-6 py-2 font-semibold text-white transition bg-pink-400 rounded hover:bg-pink-500">
                 Donar
               </button>
             </div>
@@ -152,14 +146,7 @@ export default function DashboardSencillo() {
               className="max-w-xl p-6 space-y-5 bg-white rounded shadow"
             >
               {(
-                [
-                  "nombre",
-                  "email",
-                  "telefono",
-                  "direccion",
-                  "ciudad",
-                  "pais",
-                ] as const
+                ["nombre", "email", "telefono", "direccion", "ciudad", "pais"] as const
               ).map((campo) => (
                 <div key={campo}>
                   <label

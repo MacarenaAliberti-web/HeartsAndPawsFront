@@ -64,44 +64,47 @@ const Navbar = () => {
   }[] = [];
 
   if (ong) {
+  menuLinks = [
+    { label: "Inicio", href: "/", icon: <FaHome /> },
+    { label: "Mi Perfil", href: "/dashboard/ong", icon: <FaUserShield /> },
+    { label: "Mis Casos", href: "/mis-casos", icon: <FaExclamationTriangle /> },
+    { label: "Mensajes", href: "/chat", icon: <FaCommentDots /> },
+    {
+      label: "Cerrar sesión",
+      href: "#",
+      icon: <FaSignOutAlt />,
+      onClick: handleLogoutOng,
+    },
+  ];
+} else if (usuario) {
+  if (usuario.rol === "admin") {
+    // 👉 Menú para administrador
     menuLinks = [
-      { label: "Inicio", href: "/", icon: <FaHome /> },
-      { label: "Mi Perfil", href: "/dashboard/ong", icon: <FaUserShield /> },
-      { label: "Publicar", href: "/dashboard/ong/nueva-mascota", icon: <FaExclamationTriangle /> },
-      { label: "Mensajes", href: "/chat", icon: <FaCommentDots /> },
-      {
-        label: "Cerrar sesión",
-        href: "#",
-        icon: <FaSignOutAlt />,
-        onClick: handleLogoutOng,
-      },
-    ];
-  } else if (usuario) {
-    menuLinks = [
-     {
-    label: "Perfil",
-    href: "/dashboard/usuario",
-    icon: <FaUser className="text-pink-500" />,
-  },
-
-      { label: "Te necesitan", href: "/donacion", icon: <FaHandsHelping className="text-pink-500" /> },
-      { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw/> },
-      { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> },
-      {
-        label: "Cerrar sesión",
-        href: "#",
-        icon: <FaSignOutAlt />,
-        onClick: handleLogoutUsuario,
-      },
+      { label: "Perfil Admin", href: "/admin", icon: <FaUserShield /> },
+      { label: "Gestionar Usuarios", href: "/admin/usuarios", icon: <FaUser /> },
+      { label: "Casos Reportados", href: "/admin/casos", icon: <FaExclamationTriangle /> },
+      { label: "Cerrar sesión", href: "#", icon: <FaSignOutAlt />, onClick: handleLogoutUsuario },
     ];
   } else {
+    // 👉 Menú para usuario normal
     menuLinks = [
+      { label: "Perfil", href: "/dashboard/usuario", icon: <FaUser className="text-pink-500" /> },
       { label: "Te necesitan", href: "/donacion", icon: <FaHandsHelping className="text-pink-500" /> },
-      { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw/> },
-      { label: "Registro", href: "/register", icon: <FaRegClipboard /> },
-      { label: "Iniciar Sesión", href: "/login", icon: <FaSignInAlt /> },
+      { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw /> },
+      { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> },
+      { label: "Cerrar sesión", href: "#", icon: <FaSignOutAlt />, onClick: handleLogoutUsuario },
     ];
   }
+} else {
+  // 👉 Menú para visitante
+  menuLinks = [
+    { label: "Te necesitan", href: "/donacion", icon: <FaHandsHelping className="text-pink-500" /> },
+    { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw /> },
+    { label: "Registro", href: "/register", icon: <FaRegClipboard /> },
+    { label: "Iniciar Sesión", href: "/login", icon: <FaSignInAlt /> },
+  ];
+}
+
 
   return (
     <motion.div

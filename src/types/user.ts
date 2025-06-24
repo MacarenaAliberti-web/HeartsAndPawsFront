@@ -29,4 +29,5 @@ export interface AuthContextType {
   registerUser: (data: RegisterData) => Promise<{ ok: boolean; mensaje: string }>;
   loginUsuario: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
+   logged: boolean;
 }

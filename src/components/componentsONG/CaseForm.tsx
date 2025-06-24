@@ -1,17 +1,24 @@
 "use client";
 import React from "react";
-import SelectPet from "./SelectPet";
+import SelectPet from "../componentsong/SelectPet";
+import { FieldErrors, UseFormRegister, UseFormWatch } from "react-hook-form";
 
+
+interface FormData {
+  title: string;
+  description: string;
+  type: string;
+}
 
 interface Props {
-  register: any;
-  errors: any;
-  watch: any;
+  register: UseFormRegister<FormData>;
+  errors: FieldErrors<FormData>;
+  watch: UseFormWatch<FormData>;
 }
 
 const CaseForm = ({ register, errors, watch }: Props) => {
   const type = watch("type");
-
+console.log(type);
   return (
     <>
       <div>
