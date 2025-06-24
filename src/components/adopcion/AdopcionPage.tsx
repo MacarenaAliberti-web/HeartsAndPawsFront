@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 import MascotaCard from './MascotaCard'
 import MascotaModal from './MascotaModal'
@@ -13,49 +13,48 @@ import { getMascotasEnAdopcion, getMascotasFiltradas } from '@/services/mascotas
 export default function AdopcionPage() {
   const router = useRouter()
 
-  const [busqueda, setBusqueda] = useState('')
+  // Ahora tipo puede ser '', 'perro' o 'gato'
+  const [tipo, setTipo] = useState<'perro' | 'gato' | ''>('')
   const [resultados, setResultados] = useState<Caso[]>([])
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState('')
   const [mascotaSeleccionada, setMascotaSeleccionada] = useState<Mascota | null>(null)
   const [mostrandoHistoria, setMostrandoHistoria] = useState(false)
   const [cargandoHistoria] = useState(false)
+  const [orden, setOrden] = useState<'mas_reciente' | 'mas_antiguo'>('mas_reciente')
 
-  useEffect(() => {
-  const timer = setTimeout(() => {
-    const texto = busqueda.trim().toLowerCase()
-
-    // Solo filtra si es 'perro' o 'gato'
-    if (texto === 'perro' || texto === 'gato') {
-      fetchMascotas({ tipo: texto })
-    } else if (texto === '') {
-      fetchMascotas({})
-    } else {
-      // Si escribe otra cosa, no busca nada
+  const fetchMascotas = useCallback(async (filtros: { tipo?: string }) => {
+    setCargando(true)
+    setError('')
+    try {
+      const data =
+        Object.keys(filtros).length === 0
+          ? await getMascotasEnAdopcion()
+          : await getMascotasFiltradas(filtros)
+console.log('🐾 Resultados filtrados:', data) // <-- agregá esto
+      setResultados(data)
+    } catch {
+      setError('Hubo un error al cargar las mascotas.')
       setResultados([])
+    } finally {
+      setCargando(false)
     }
-  }, 400)
+  }, [])
 
-  return () => clearTimeout(timer)
-}, [busqueda])
+  // Traer mascotas cuando cambien tipo o al inicio (tipo inicial '')
+  useEffect(() => {
+    fetchMascotas(tipo ? { tipo } : {})
+  }, [tipo, fetchMascotas])
 
-const fetchMascotas = async (filtros: { tipo?: string; nombre?: string }) => {
-  setCargando(true)
-  setError('')
-  try {
-    const data =
-      Object.keys(filtros).length === 0
-        ? await getMascotasEnAdopcion()
-        : await getMascotasFiltradas(filtros)
-
-    setResultados(data)
-  } catch {
-    setError('Hubo un error al cargar las mascotas.')
-    setResultados([])
-  } finally {
-    setCargando(false)
-  }
-}
+  const resultadosOrdenados = resultados.slice().sort((a, b) => {
+    const fechaA = new Date(a.creado_en).getTime()
+    const fechaB = new Date(b.creado_en).getTime()
+    if (orden === 'mas_reciente') {
+      return fechaB - fechaA
+    } else {
+      return fechaA - fechaB
+    }
+  })
 
   const handleConocerHistoria = (mascota: Mascota) => {
     setMascotaSeleccionada(mascota)
@@ -77,27 +76,59 @@ const fetchMascotas = async (filtros: { tipo?: string; nombre?: string }) => {
           Mi raza favorita es <span className="italic">adoptada</span>
         </h1>
         <p className="text-gray-600 text-lg mb-6 text-center">
-          Encontrá a tu nuevo mejor amigo. 
+          Encontrá a tu nuevo mejor amigo.
         </p>
 
-        <div className="w-full max-w-md mx-auto relative mb-8">
-          <input
-            type="text"
-            placeholder="Buscar por tipo (perro / gato)"
-            className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-          />
-          <svg
-            className="w-5 h-5 absolute left-3 top-3.5 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 103.75 3.75a7.5 7.5 0 0012.9 12.9z" />
-          </svg>
-        </div>
+        <div className="flex flex-col sm:flex-row sm:justify-center gap-4 max-w-md mx-auto mb-8">
+  <div className="relative w-full max-w-xs">
+    <select
+      className="appearance-none w-full px-4 py-3 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+      value={tipo}
+      onChange={(e) => setTipo(e.target.value as 'perro' | 'gato' | '')}
+      aria-label="Filtrar por tipo de mascota"
+    >
+      <option value="">Todos</option>
+      <option value="perro">Perro</option>
+      <option value="gato">Gato</option>
+    </select>
+    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+      <svg
+        className="w-5 h-5 text-pink-600"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+  </div>
+
+  <div className="relative w-full max-w-xs">
+    <select
+      className="appearance-none w-full px-4 py-3 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+      value={orden}
+      onChange={(e) => setOrden(e.target.value as 'mas_reciente' | 'mas_antiguo')}
+      aria-label="Ordenar mascotas"
+    >
+      <option value="mas_reciente">Más reciente</option>
+      <option value="mas_antiguo">Más antiguo</option>
+    </select>
+    
+    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+      <svg
+        className="w-5 h-5 text-pink-600"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+  </div>
+</div>
+
 
         {cargando && <p className="text-center text-gray-500">Cargando mascotas...</p>}
         {error && <p className="text-center text-red-500">{error}</p>}
@@ -106,7 +137,7 @@ const fetchMascotas = async (filtros: { tipo?: string; nombre?: string }) => {
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-6">
-          {resultados.map((caso) => (
+          {resultadosOrdenados.map((caso) => (
             <MascotaCard
               key={caso.id}
               mascota={caso.mascota}
@@ -120,14 +151,13 @@ const fetchMascotas = async (filtros: { tipo?: string; nombre?: string }) => {
 
       {mascotaSeleccionada && (
         <MascotaModal
-  mascota={mascotaSeleccionada}
-  visible={mostrandoHistoria}
-  cargando={cargandoHistoria}
-  onClose={() => setMostrandoHistoria(false)}
-  onAccion={() => handleAdoptar(mascotaSeleccionada.id)}
-  modo="adopcion"
-/>
-
+          mascota={mascotaSeleccionada}
+          visible={mostrandoHistoria}
+          cargando={cargandoHistoria}
+          onClose={() => setMostrandoHistoria(false)}
+          onAccion={() => handleAdoptar(mascotaSeleccionada.id)}
+          modo="adopcion"
+        />
       )}
     </div>
   )

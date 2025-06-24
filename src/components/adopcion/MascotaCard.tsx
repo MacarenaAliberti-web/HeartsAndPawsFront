@@ -3,12 +3,34 @@
 import { MascotaCardConModoProps } from '@/types/mascotas'
 import Image from 'next/image'
 import React from 'react'
+import { useUsuarioAuth } from '@/context/UsuarioAuthContext' // Ajustá si la ruta cambia
+import { useRouter } from 'next/navigation'
+import { toast } from 'react-hot-toast'
 
-export default function MascotaCard({ mascota, onConocerHistoria, onAdoptar, modo }: MascotaCardConModoProps) {
-  const imagenUrl = mascota.imagenes?.[0]?.url ?? 'https://via.placeholder.com/400x300?text=Mascota'
+export default function MascotaCard({
+  mascota,
+  onConocerHistoria,
+  onAdoptar,
+  modo
+}: MascotaCardConModoProps) {
+  const { usuario } = useUsuarioAuth()
+  const router = useRouter()
+
+  const imagenUrl =
+    mascota.imagenes?.[0]?.url ??
+    'https://via.placeholder.com/400x300?text=Mascota'
 
   const textoBotonAccion = modo === 'adopcion' ? 'Adoptar' : 'Donar'
-  const onAccion = onAdoptar 
+
+  const handleAccion = () => {
+    if (!usuario) {
+      toast.error('Necesitás iniciar sesión para continuar.')
+      router.push('/login')
+      return
+    }
+
+    onAdoptar?.(mascota.id)
+  }
 
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden transform hover:scale-105 transition duration-300 flex flex-col">
@@ -34,7 +56,7 @@ export default function MascotaCard({ mascota, onConocerHistoria, onAdoptar, mod
             Conocer historia
           </button>
           <button
-            onClick={() => onAccion?.(mascota.id)}
+            onClick={handleAccion}
             className="w-full border border-pink-600 text-pink-600 hover:bg-pink-50 py-2 px-4 rounded-full transition"
           >
             {textoBotonAccion}

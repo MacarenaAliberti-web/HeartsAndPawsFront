@@ -2,7 +2,9 @@
 
 import { MascotaModalProps } from '@/types/mascotas'
 import Image from 'next/image'
-
+import { useRouter } from 'next/navigation'
+import { toast } from 'react-hot-toast'
+import { useUsuarioAuth } from '@/context/UsuarioAuthContext' // Ajustá si tu ruta es distinta
 
 export default function MascotaModal({
   mascota,
@@ -12,11 +14,27 @@ export default function MascotaModal({
   onAccion,
   modo,
 }: MascotaModalProps) {
+  const { usuario } = useUsuarioAuth()
+  const router = useRouter()
+
   if (!visible) return null
 
-  const imagenUrl = mascota.imagenes?.[0]?.url ?? 'https://via.placeholder.com/400x300?text=Mascota'
+  const imagenUrl =
+    mascota.imagenes?.[0]?.url ??
+    'https://via.placeholder.com/400x300?text=Mascota'
 
-  const textoBoton = modo === 'adopcion' ? '¡Quiero Adoptar!' : '¡Quiero Donar!'
+  const textoBoton =
+    modo === 'adopcion' ? '¡Quiero Adoptar!' : '¡Quiero Donar!'
+
+  const handleAccion = () => {
+    if (!usuario) {
+      toast.error('Necesitás iniciar sesión para continuar.')
+      router.push('/login')
+      return
+    }
+
+    onAccion?.(mascota.id)
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-pink-100 bg-opacity-30">
@@ -63,7 +81,7 @@ export default function MascotaModal({
         {/* Botón Acción */}
         <div className="text-center z-10 relative">
           <button
-            onClick={() => onAccion?.(mascota.id)}
+            onClick={handleAccion}
             className="bg-pink-500 hover:bg-pink-600 text-white font-semibold px-6 py-3 rounded-full shadow-md transition-all duration-300"
           >
             {textoBoton}

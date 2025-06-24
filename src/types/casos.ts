@@ -7,5 +7,7 @@ export interface Caso {
   descripcion: string
   tipo: 'ADOPCION' | 'DONACION'
   ongId: string
+  mascotaId: string
+  creado_en: string
   mascota: Mascota
 }
