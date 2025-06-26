@@ -4,6 +4,7 @@ import type { JSX } from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { FaChevronDown } from "react-icons/fa";
 import Link from "next/link";
 import {
   FaPaw,
@@ -27,21 +28,20 @@ import { useUsuarioAuth } from "@/context/UsuarioAuthContext";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [hasMounted, setHasMounted] = useState(false); // 👈 Nuevo estado
+  const [hasMounted, setHasMounted] = useState(false);
+  const [showHistorialDropdown, setShowHistorialDropdown] = useState(false);
 
   const { ong, logout: logoutOng } = useOngAuth();
   const { usuario, logout: logoutUsuario } = useUsuarioAuth();
   const router = useRouter();
 
   useEffect(() => {
-    setHasMounted(true); // 👈 Activamos después de montar en cliente
-
+    setHasMounted(true);
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 🛑 Importante: prevenir render en SSR
   if (!hasMounted) return null;
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -56,55 +56,102 @@ const Navbar = () => {
     router.push("/");
   };
 
-  let menuLinks: {
+  type MenuLink = {
     label: string;
     href: string;
     icon: JSX.Element;
     onClick?: () => void;
-  }[] = [];
+    subItems?: { label: string; href: string }[];
+  };
+
+  let menuLinks: MenuLink[] = [];
 
   if (ong) {
-  menuLinks = [
-    { label: "Inicio", href: "/", icon: <FaHome /> },
-    { label: "Mi Perfil", href: "/dashboard/ong", icon: <FaUserShield /> },
-    { label: "Mis Casos", href: "/mis-casos", icon: <FaExclamationTriangle /> },
-    { label: "Mensajes", href: "/chat", icon: <FaCommentDots /> },
-    {
-      label: "Cerrar sesión",
-      href: "#",
-      icon: <FaSignOutAlt />,
-      onClick: handleLogoutOng,
-    },
-  ];
-} else if (usuario) {
-  if (usuario.rol === "admin") {
-    // 👉 Menú para administrador
     menuLinks = [
-      { label: "Perfil Admin", href: "/admin", icon: <FaUserShield /> },
-      { label: "Gestionar Usuarios", href: "/admin/usuarios", icon: <FaUser /> },
-      { label: "Casos Reportados", href: "/admin/casos", icon: <FaExclamationTriangle /> },
-      { label: "Cerrar sesión", href: "#", icon: <FaSignOutAlt />, onClick: handleLogoutUsuario },
+      { label: "Inicio", href: "/", icon: <FaHome /> },
+      { label: "Mi Perfil", href: "/dashboard/ong", icon: <FaUserShield /> },
+      {
+        label: "Mis Casos",
+        href: "/mis-casos",
+        icon: <FaExclamationTriangle />,
+      },
+      { label: "Mensajes", href: "/chat", icon: <FaCommentDots /> },
+      {
+        label: "Cerrar sesión",
+        href: "#",
+        icon: <FaSignOutAlt />,
+        onClick: handleLogoutOng,
+      },
     ];
+  } else if (usuario) {
+    if (usuario.rol === "ADMIN") {
+      menuLinks = [
+        {
+          label: "Perfil Admin",
+          href: "/dashboard/admin",
+          icon: <FaUserShield />,
+        },
+        {
+          label: "Gestionar Usuarios",
+          href: "/admin/usuarios",
+          icon: <FaUser />,
+        },
+        {
+          label: "Casos Reportados",
+          href: "/admin/casos",
+          icon: <FaExclamationTriangle />,
+        },
+        {
+          label: "Historial ONG",
+          href: "#",
+          icon: <FaRegClipboard />,
+          onClick: () => setShowHistorialDropdown((prev) => !prev),
+          subItems: [
+            { label: "Aprobadas", href: "/admin/historial/aprobadas" },
+            { label: "Rechazadas", href: "/admin/historial/rechazadas" },
+          ],
+        },
+        {
+          label: "Cerrar sesión",
+          href: "#",
+          icon: <FaSignOutAlt />,
+          onClick: handleLogoutUsuario,
+        },
+      ];
+    } else {
+      menuLinks = [
+        {
+          label: "Perfil",
+          href: "/dashboard/usuario",
+          icon: <FaUser className="text-pink-500" />,
+        },
+        {
+          label: "Te necesitan",
+          href: "/donacion",
+          icon: <FaHandsHelping className="text-pink-500" />,
+        },
+        { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw /> },
+        { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> },
+        {
+          label: "Cerrar sesión",
+          href: "#",
+          icon: <FaSignOutAlt />,
+          onClick: handleLogoutUsuario,
+        },
+      ];
+    }
   } else {
-    // 👉 Menú para usuario normal
     menuLinks = [
-      { label: "Perfil", href: "/dashboard/usuario", icon: <FaUser className="text-pink-500" /> },
-      { label: "Te necesitan", href: "/donacion", icon: <FaHandsHelping className="text-pink-500" /> },
+      {
+        label: "Te necesitan",
+        href: "/donacion",
+        icon: <FaHandsHelping className="text-pink-500" />,
+      },
       { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw /> },
-      { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> },
-      { label: "Cerrar sesión", href: "#", icon: <FaSignOutAlt />, onClick: handleLogoutUsuario },
+      { label: "Registro", href: "/register", icon: <FaRegClipboard /> },
+      { label: "Iniciar Sesión", href: "/login", icon: <FaSignInAlt /> },
     ];
   }
-} else {
-  // 👉 Menú para visitante
-  menuLinks = [
-    { label: "Te necesitan", href: "/donacion", icon: <FaHandsHelping className="text-pink-500" /> },
-    { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw /> },
-    { label: "Registro", href: "/register", icon: <FaRegClipboard /> },
-    { label: "Iniciar Sesión", href: "/login", icon: <FaSignInAlt /> },
-  ];
-}
-
 
   return (
     <motion.div
@@ -117,40 +164,72 @@ const Navbar = () => {
     >
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
+          {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 text-3xl font-semibold text-pink-600"
+            className="flex items-center gap-1 text-2xl font-semibold text-pink-600 whitespace-nowrap"
           >
-            <FaPaw className="text-4xl" />
+            <FaPaw className="text-3xl" />
             <span>Hearts&Paws</span>
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden space-x-6 md:flex">
+          <div className="hidden md:flex items-center gap-4">
             {menuLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={
-                  link.onClick
-                    ? (e) => {
-                        e.preventDefault();
-                        link.onClick?.();
-                      }
-                    : undefined
-                }
-                className="flex items-center gap-1 text-xl font-semibold text-gray-800 transition hover:text-pink-600"
-              >
-                <span className="text-2xl text-pink-500">{link.icon}</span>
-                {link.label}
-              </a>
+              <div key={link.label} className="relative group">
+                {link.onClick ? (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      link.onClick?.();
+                    }}
+                    className="flex items-center gap-1 text-lg font-medium text-gray-800 transition hover:text-pink-600 whitespace-nowrap"
+                  >
+                    <span className="text-2xl text-pink-500">{link.icon}</span>
+                    {link.label}
+                    {link.subItems && (
+                      <FaChevronDown className="ml-1 text-sm" />
+                    )}
+                  </button>
+                ) : (
+                  <Link
+                    href={link.href}
+                    className="flex items-center gap-1 text-lg font-medium text-gray-800 transition hover:text-pink-600 whitespace-nowrap"
+                  >
+                    <span className="text-2xl text-pink-500">{link.icon}</span>
+                    {link.label}
+                  </Link>
+                )}
+
+                {/* Dropdown solo si hay subItems y está abierto */}
+                {link.subItems && showHistorialDropdown && (
+                  <div className="absolute left-0 z-10 mt-2 w-48 bg-white rounded shadow-lg">
+                    {link.subItems.map((sub) => (
+                      <Link
+                        key={sub.label}
+                        href={sub.href}
+                        className="block px-4 py-2 text-gray-700 hover:bg-pink-100"
+                      >
+                        {sub.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
 
           {/* Mobile Toggle */}
           <div className="md:hidden">
-            <button onClick={toggleMenu} className="text-gray-700 focus:outline-none">
-              {isOpen ? <FaTimes className="text-4xl" /> : <FaBars className="text-4xl" />}
+            <button
+              onClick={toggleMenu}
+              className="text-gray-700 focus:outline-none"
+            >
+              {isOpen ? (
+                <FaTimes className="text-4xl" />
+              ) : (
+                <FaBars className="text-4xl" />
+              )}
             </button>
           </div>
         </div>
@@ -167,23 +246,40 @@ const Navbar = () => {
             transition={{ duration: 0.3 }}
           >
             {menuLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={(e) => {
-                  if (link.onClick) {
-                    e.preventDefault();
-                    link.onClick();
-                    setIsOpen(false);
-                  } else {
-                    setIsOpen(false);
-                  }
-                }}
-                className="flex items-center gap-2 text-gray-700 hover:text-pink-600"
-              >
-                <span className="text-pink-500">{link.icon}</span>
-                {link.label}
-              </a>
+              <div key={link.label}>
+                <a
+                  href={link.href}
+                  onClick={(e) => {
+                    if (link.onClick) {
+                      e.preventDefault();
+                      link.onClick();
+                      setIsOpen(false);
+                    } else {
+                      setIsOpen(false);
+                    }
+                  }}
+                  className="flex items-center gap-2 text-gray-700 hover:text-pink-600"
+                >
+                  <span className="text-pink-500">{link.icon}</span>
+                  {link.label}
+                </a>
+
+                {/* Subitems (solo para historial ONG en mobile) */}
+                {link.subItems && (
+                  <div className="ml-6 mt-1 space-y-1">
+                    {link.subItems.map((sub) => (
+                      <a
+                        key={sub.label}
+                        href={sub.href}
+                        onClick={() => setIsOpen(false)}
+                        className="block text-gray-600 hover:text-pink-600"
+                      >
+                        - {sub.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </motion.div>
         )}
@@ -193,4 +289,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

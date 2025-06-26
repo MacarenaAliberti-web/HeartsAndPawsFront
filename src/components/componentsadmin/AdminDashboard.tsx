@@ -53,14 +53,14 @@ export default function AdminDashboard() {
    // handleVerificacion('9d7a6b3a-9130-413c-a51d-748f4a79b013'); //Ejemplo. Ver donde se obtiene el ID
 
   const handleDecision = async (
-    id: number,
+    id: string,
     decision: "APROBADA" | "RECHAZADA"
   ) => {
     try {
       const res = await Patchsolicitud(id, decision);
       if (!res || !res.ok) throw new Error("Error actualizando estado");
 
-      setRequests((prev) => prev.filter((req) => Number(req.id) !== id));
+      setRequests((prev) => prev.filter((req) => String(req.id) !== id));
       toast(
         `Solicitud ${id} fue ${
           decision === "APROBADA" ? "aceptada" : "rechazada"
@@ -148,7 +148,7 @@ export default function AdminDashboard() {
                   {/* Botones */}
                   <div className="flex space-x-4 mt-2">
                     <button
-                      onClick={() => handleDecision(Number(req.id), "APROBADA")}
+                      onClick={() => handleDecision(String(req.id), "APROBADA")}
                       className="flex items-center px-4 py-2 text-white bg-pink-600 rounded shadow hover:bg-pink-700"
                     >
                       <FaCheckCircle className="mr-2" />
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
                     </button>
                     <button
                       onClick={() =>
-                        handleDecision(Number(req.id), "RECHAZADA")
+                        handleDecision(String(req.id), "RECHAZADA")
                       }
                       className="flex items-center px-4 py-2 text-black bg-gray-300 rounded shadow hover:bg-gray-400"
                     >

@@ -83,7 +83,7 @@ export default function RegisterUserForm() {
 
     if (result.ok) {
       toast.success(result.mensaje);
-      router.push('/login/loginUsuario');
+      router.push('/login/login-user');
     } else {
       toast.error(result.mensaje);
     }

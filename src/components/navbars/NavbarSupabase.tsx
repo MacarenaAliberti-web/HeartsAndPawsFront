@@ -46,7 +46,7 @@ const Navbar = () => {
       if (user) {
 
         //setUser(user);
-        setRoles(["admin"]);
+        setRoles(["user"]);
         // Asume que tienes una tabla `profiles` con roles asociados
         /*
         const { data: profile, error } = await supabase
@@ -88,7 +88,7 @@ const Navbar = () => {
       href: "#casos",
       icon: <FaHeart className="text-pink-500" />,
     },
-    { label: "Adoptar", href: "/adopcion", icon: <FaPaw /> },
+    { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw /> },
     { label: "Registro", href: "/register", icon: <FaRegClipboard /> },
     { label: "Iniciar Sesión", href: "/login", icon: <FaSignInAlt /> },
   ];
@@ -120,7 +120,7 @@ const Navbar = () => {
           href: "/donacion",
           icon: <FaHandsHelping className="text-pink-500" />,
         },
-        { label: "Adoptar", href: "/adopcion", icon: <FaPaw /> },
+        { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw /> },
         { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> }
       );
     }

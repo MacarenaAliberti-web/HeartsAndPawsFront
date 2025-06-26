@@ -13,7 +13,7 @@ export async function getMyadmin() {
     }
 };
 
-export async function Patchsolicitud(id: number, decision: 'APROBADA' | 'RECHAZADA') {
+export async function Patchsolicitud(id: string, decision: 'APROBADA' | 'RECHAZADA') {
 
     try {
         return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/organizaciones/${id}/estado`, {

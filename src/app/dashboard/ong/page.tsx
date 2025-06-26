@@ -1,4 +1,4 @@
-import OngDashboardComponent from "@/components/componentsONG/OngDashboard";
+import OngDashboardComponent from "@/components/componentsong/MyAccount";
 
 
 export default function OngDashboard() {
