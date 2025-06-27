@@ -1,25 +1,15 @@
 export interface FormularioAdopcionData {
-  nombre: string;
-  edad: string;
-  dni: string;
-  direccion: string;
-  telefono: string;
-  email: string;
-  ocupacion: string;
-  estadoCivil: string;
-
+  usuarioId: string;
+  casoAdopcionId: string;
   tipoVivienda: string;
-  conQuienVives: string;
-  hijosEdades: string;
-  otrosConviven: string;
-  tieneMascotas: string | null;
-  otrasMascotas: string;
-
-  gastosVeterinarios: string;
-  alimentacion: string;
-  dedicacion: string;
-  devolucionResponsable: string;
-  quePasaSiNoPuedo: string;
-
+  integrantesFlia: number;
+  hijos: number;
+  hayOtrasMascotas: string;
+  descripcionOtrasMascotas?: string;
+  cubrirGastos: string;
+  darAlimentoCuidados: string;
+  darAmorTiempoEj: string;
+  devolucionDeMascota: string;
+  siNoPodesCuidarla: string;
   declaracionFinal: string;
 }

@@ -62,11 +62,16 @@ console.log('🐾 Resultados filtrados:', data) // <-- agregá esto
   }
 
   const handleAdoptar = (id: string) => {
-    const mascota = resultados.find(c => c.mascota.id === id)?.mascota
-    if (!mascota) return
-    toast.success(`¡Gracias por querer adoptar a ${mascota.nombre}! 🐶🐱`)
-    setMostrandoHistoria(false)
-    router.push('/adoptar/formulario-adopcion')
+   const caso = resultados.find(c => c.mascota.id === id)
+if (!caso) return
+
+console.log('➡️ Adoptar mascota ID:', caso.mascota.id, 'Nombre:', caso.mascota.nombre)
+
+toast.success(`¡Gracias por querer adoptar a ${caso.mascota.nombre}! 🐶🐱`)
+setMostrandoHistoria(false)
+router.push(`/adoptar/formulario-adopcion?id=${caso.mascota.id}`)
+
+
   }
 
   return (

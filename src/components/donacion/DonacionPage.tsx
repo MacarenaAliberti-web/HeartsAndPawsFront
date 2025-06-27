@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import { Mascota } from '@/types/mascotas'
 import { Caso } from '@/types/casos'
@@ -9,23 +8,23 @@ import {
   getMascotasEnDonacion,
   getMascotasDonacionFiltradas,
 } from '@/services/mascotas'
+import { iniciarDonacion } from '@/services/donacion'
 import MascotaCard from '@/components/adopcion/MascotaCard'
 import MascotaModal from '@/components/adopcion/MascotaModal'
+import { useUsuarioAuth } from '@/context/UsuarioAuthContext'
+
 
 export default function DonacionPage() {
-  const router = useRouter()
+  const { usuario } = useUsuarioAuth()
 
-  // Estados para filtro y orden
   const [tipo, setTipo] = useState<'perro' | 'gato' | ''>('')
   const [orden, setOrden] = useState<'mas_reciente' | 'mas_antiguo'>('mas_reciente')
-
   const [resultados, setResultados] = useState<Caso[]>([])
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState('')
   const [mascotaSeleccionada, setMascotaSeleccionada] = useState<Mascota | null>(null)
   const [mostrandoHistoria, setMostrandoHistoria] = useState(false)
 
-  // Función para cargar mascotas con filtros
   const fetchMascotas = useCallback(async (filtros: { tipo?: string }) => {
     setCargando(true)
     setError('')
@@ -34,7 +33,6 @@ export default function DonacionPage() {
         Object.keys(filtros).length === 0
           ? await getMascotasEnDonacion()
           : await getMascotasDonacionFiltradas(filtros)
-console.log('🐾 Resultados filtrados:', data) // <-- agregá esto
       setResultados(data)
     } catch {
       setError('Hubo un error al cargar los casos de donación.')
@@ -44,20 +42,14 @@ console.log('🐾 Resultados filtrados:', data) // <-- agregá esto
     }
   }, [])
 
-  // Llamar fetch cuando cambian filtros
   useEffect(() => {
     fetchMascotas(tipo ? { tipo } : {})
   }, [tipo, fetchMascotas])
 
-  // Ordenar resultados antes de mostrar
   const resultadosOrdenados = resultados.slice().sort((a, b) => {
     const fechaA = new Date(a.creado_en).getTime()
     const fechaB = new Date(b.creado_en).getTime()
-    if (orden === 'mas_reciente') {
-      return fechaB - fechaA
-    } else {
-      return fechaA - fechaB
-    }
+    return orden === 'mas_reciente' ? fechaB - fechaA : fechaA - fechaB
   })
 
   const handleConocerHistoria = (mascota: Mascota) => {
@@ -65,12 +57,37 @@ console.log('🐾 Resultados filtrados:', data) // <-- agregá esto
     setMostrandoHistoria(true)
   }
 
-  const handleDonar = (id: string) => {
-    const mascota = resultados.find(c => c.mascota.id === id)?.mascota
-    if (!mascota) return
-    toast.success(`¡Gracias por tu interés en ayudar a ${mascota.nombre}! 🐾`)
-    setMostrandoHistoria(false)
-    router.push('/')
+  const handleDonar = async (mascotaId: string) => {
+    const caso = resultados.find((c) => c.mascota.id === mascotaId)
+    if (!caso || !usuario?.id) {
+      toast.error('No se pudo iniciar la donación.')
+      return
+    }
+
+    try {
+  console.log('Iniciando donación con:', {
+    usuarioId: usuario.id,
+    casoId: caso.id,
+    monto: 5000,
+  })
+
+  const data = await iniciarDonacion({
+    usuarioId: usuario.id,
+    casoId: caso.id,
+    monto: 5000,
+  })
+
+  console.log('Respuesta del backend:', data)
+
+  if (data?.url) {
+    window.location.href = data.url
+  } else {
+    toast.error('No se pudo generar el link de pago.')
+  }
+} catch (error) {
+  console.error('Error al iniciar la donación:', error)
+  toast.error('Ocurrió un error al iniciar la donación.')
+}
   }
 
   return (

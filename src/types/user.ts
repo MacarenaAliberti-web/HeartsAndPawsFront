@@ -20,14 +20,17 @@ export interface Usuario {
   direccion: string;
   ciudad: string;
   pais: string;
+  foto: string | null;
 }
-
 
 // Tipo del contexto de autenticación
 export interface AuthContextType {
   usuario: Usuario | null;
-  registerUser: (data: RegisterData) => Promise<{ ok: boolean; mensaje: string }>;
+  registerUser: (
+    data: RegisterData
+  ) => Promise<{ ok: boolean; mensaje: string }>;
   loginUsuario: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
-   logged: boolean;
+  logged: boolean;
+  loading: boolean; // ← indica si está en proceso de cargar el usuario
 }

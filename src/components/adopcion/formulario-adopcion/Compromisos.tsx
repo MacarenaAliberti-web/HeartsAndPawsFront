@@ -1,6 +1,6 @@
 'use client';
 
-import { FormularioAdopcionData } from "@/types/formularioadopcion";
+import { FormularioAdopcionData } from '@/types/formularioadopcion';
 
 interface Props {
   formData: FormularioAdopcionData;
@@ -10,20 +10,19 @@ interface Props {
 export default function Compromisos({ formData, onChange }: Props) {
   const compromisos = [
     {
-      name: 'gastosVeterinarios',
-      label:
-        '¿Estás dispuesto a cubrir los gastos veterinarios (vacunas, esterilización, emergencias)?',
+      name: 'cubrirGastos',
+      label: '¿Estás dispuesto a cubrir los gastos veterinarios (vacunas, esterilización, emergencias)?',
     },
     {
-      name: 'alimentacion',
+      name: 'darAlimentoCuidados',
       label: '¿Proporcionar alimento adecuado y atención diaria?',
     },
     {
-      name: 'dedicacion',
+      name: 'darAmorTiempoEj',
       label: '¿Dar amor, tiempo y ejercicio a la mascota?',
     },
     {
-      name: 'devolucionResponsable',
+      name: 'devolucionDeMascota',
       label: '¿Devolver al animal si no puedes cuidarlo más, en lugar de abandonarlo?',
     },
   ] as const;
@@ -66,15 +65,19 @@ export default function Compromisos({ formData, onChange }: Props) {
         ))}
 
         <div>
-          <label htmlFor="quePasaSiNoPuedo" className="block font-medium text-base text-gray-900 mb-1">
+          <label
+            htmlFor="siNoPodesCuidarla"
+            className="block font-medium text-base text-gray-900 mb-1"
+          >
             ¿Qué pasará con la mascota si tú ya no puedes cuidarla?
           </label>
           <textarea
-            id="quePasaSiNoPuedo"
-            name="quePasaSiNoPuedo"
-            value={formData.quePasaSiNoPuedo}
+            id="siNoPodesCuidarla"
+            name="siNoPodesCuidarla"
+            value={formData.siNoPodesCuidarla}
             onChange={onChange}
             className="w-full p-3 border border-gray-300 rounded text-base text-gray-900"
+            required
           />
         </div>
       </fieldset>

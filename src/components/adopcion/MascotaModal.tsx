@@ -1,3 +1,4 @@
+//components/adopcion/MascotaModal.tsx
 'use client'
 
 import { MascotaModalProps } from '@/types/mascotas'

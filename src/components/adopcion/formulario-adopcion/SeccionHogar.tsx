@@ -1,6 +1,6 @@
 'use client';
 
-import { FormularioAdopcionData } from "@/types/formularioadopcion";
+import { FormularioAdopcionData } from '@/types/formularioadopcion';
 
 interface Props {
   formData: FormularioAdopcionData;
@@ -41,53 +41,50 @@ export default function SeccionHogar({ formData, onChange }: Props) {
             placeholder="Otro"
             value={esOpcionPredefinida ? '' : formData.tipoVivienda}
             onChange={onChange}
-            className="mt-1 w-full p-2 border border-gray-300 rounded"
+            disabled={esOpcionPredefinida}
+            className={`mt-1 w-full p-2 border rounded ${
+              esOpcionPredefinida ? 'border-gray-200 bg-gray-100 cursor-not-allowed' : 'border-gray-300'
+            }`}
           />
         </div>
 
-        {/* Con quién vives */}
+        {/* Integrantes de la familia */}
         <div>
-          <label className="block font-medium text-sm mb-1">¿Con quién vives?</label>
-          {['Solo/a', 'Pareja'].map((op) => (
-            <label key={op} className="block text-sm">
-              <input
-                type="radio"
-                name="conQuienVives"
-                value={op}
-                checked={formData.conQuienVives === op}
-                onChange={onChange}
-                required
-              />{' '}
-              {op}
-            </label>
-          ))}
+          <label className="block font-medium text-sm mb-1">¿Cuántos integrantes hay en tu familia?</label>
           <input
-            type="text"
-            name="hijosEdades"
-            placeholder="Hijos (edades...)"
-            value={formData.hijosEdades}
+            type="number"
+            name="integrantesFlia"
+            min={1}
+            value={formData.integrantesFlia}
             onChange={onChange}
-            className="mt-1 w-full p-2 border border-gray-300 rounded"
-          />
-          <input
-            type="text"
-            name="otrosConviven"
-            placeholder="Otros: ..."
-            value={formData.otrosConviven}
-            onChange={onChange}
-            className="mt-1 w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded"
+            required
           />
         </div>
 
-        {/* Tiene otras mascotas */}
+        {/* Hijos */}
+        <div>
+          <label className="block font-medium text-sm mb-1">¿Cuántos hijos tienen?</label>
+          <input
+            type="number"
+            name="hijos"
+            min={0}
+            value={formData.hijos}
+            onChange={onChange}
+            className="w-full p-2 border border-gray-300 rounded"
+            required
+          />
+        </div>
+
+        {/* Hay otras mascotas */}
         <div>
           <label className="block font-medium text-sm mb-1">¿Hay otras mascotas en casa?</label>
           <label className="inline-flex items-center mr-4">
             <input
               type="radio"
-              name="tieneMascotas"
+              name="hayOtrasMascotas"
               value="Sí"
-              checked={formData.tieneMascotas === 'Sí'}
+              checked={formData.hayOtrasMascotas === 'Sí'}
               onChange={onChange}
               required
             />{' '}
@@ -96,21 +93,24 @@ export default function SeccionHogar({ formData, onChange }: Props) {
           <label className="inline-flex items-center">
             <input
               type="radio"
-              name="tieneMascotas"
+              name="hayOtrasMascotas"
               value="No"
-              checked={formData.tieneMascotas === 'No'}
+              checked={formData.hayOtrasMascotas === 'No'}
               onChange={onChange}
               required
             />{' '}
             No
           </label>
-          <textarea
-            name="otrasMascotas"
-            placeholder="Especificar especie, raza, edad y si están esterilizados"
-            value={formData.otrasMascotas}
-            onChange={onChange}
-            className="mt-2 w-full p-2 border border-gray-300 rounded"
-          />
+          {formData.hayOtrasMascotas === 'Sí' && (
+            <textarea
+              name="descripcionOtrasMascotas"
+              placeholder="Especificar especie, raza, edad y si están esterilizados"
+              value={formData.descripcionOtrasMascotas || ''}
+              onChange={onChange}
+              className="mt-2 w-full p-2 border border-gray-300 rounded"
+              required
+            />
+          )}
         </div>
       </fieldset>
     </div>

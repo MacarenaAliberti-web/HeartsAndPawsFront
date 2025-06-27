@@ -1,10 +1,10 @@
 'use client';
 
-import { FormularioAdopcionData } from "@/types/formularioadopcion";
+import { FormularioAdopcionData } from '@/types/formularioadopcion';
 
 interface Props {
   formData: FormularioAdopcionData;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
 export default function DeclaracionFinal({ formData, onChange }: Props) {
@@ -15,12 +15,12 @@ export default function DeclaracionFinal({ formData, onChange }: Props) {
           Declaración Final
         </legend>
 
-        <p className="text-base text-gray-900">
+        <p className="text-sm text-gray-900">
           Declaro que toda la información proporcionada es verdadera. Entiendo que este formulario no garantiza la adopción,
           y que la entidad protectora puede hacer una visita pre o post adopción.
         </p>
 
-        <div className="flex items-center space-x-8 text-base text-gray-900">
+        <div className="flex items-center space-x-8 text-sm text-gray-900" role="radiogroup" aria-required="true" aria-labelledby="declaracionFinalLabel">
           {['Sí', 'No'].map((opcion) => (
             <label key={opcion} className="inline-flex items-center cursor-pointer">
               <input
