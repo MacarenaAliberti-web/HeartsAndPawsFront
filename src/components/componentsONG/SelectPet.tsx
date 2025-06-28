@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { useOngAuth } from "@/context/OngAuthContext";
 import { fetchPetsByOngId } from "@/services/petsService";
-
+import { UseFormRegister, FieldErrors } from "react-hook-form";
+import { FormInputs } from "@/types/formsOng";
 
 interface Pet {
   id: string;
@@ -10,8 +11,8 @@ interface Pet {
 }
 
 interface Props {
-  register: any;
-  errors: any;
+  register: UseFormRegister<FormInputs>;
+  errors: FieldErrors<FormInputs>;
 }
 
 const SelectPet = ({ register, errors }: Props) => {

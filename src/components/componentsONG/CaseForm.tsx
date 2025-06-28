@@ -1,24 +1,23 @@
 "use client";
 import React from "react";
-import SelectPet from "../componentsong/SelectPet";
-import { FieldErrors, UseFormRegister, UseFormWatch } from "react-hook-form";
+
+import { UseFormRegister, FieldErrors, UseFormWatch } from "react-hook-form";
+import { FormInputs } from "@/types/formsOng";
+import SelectPet from "@/components/componentsONG/SelectPet";
 
 
-interface FormData {
-  title: string;
-  description: string;
-  type: string;
-}
+
 
 interface Props {
-  register: UseFormRegister<FormData>;
-  errors: FieldErrors<FormData>;
-  watch: UseFormWatch<FormData>;
+  register: UseFormRegister<FormInputs>;
+  errors: FieldErrors<FormInputs>;
+  watch: UseFormWatch<FormInputs>;
 }
+
 
 const CaseForm = ({ register, errors, watch }: Props) => {
   const type = watch("type");
-console.log(type);
+
   return (
     <>
       <div>
@@ -28,7 +27,11 @@ console.log(type);
           {...register("title", { required: true })}
           className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500"
         />
-        {errors.title && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
+        {errors.title && (
+          <p className="text-red-500 text-sm mt-1">
+            Este campo es obligatorio.
+          </p>
+        )}
       </div>
 
       <div>
@@ -38,7 +41,11 @@ console.log(type);
           className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500"
           rows={4}
         />
-        {errors.description && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
+        {errors.description && (
+          <p className="text-red-500 text-sm mt-1">
+            Este campo es obligatorio.
+          </p>
+        )}
       </div>
 
       <div>
@@ -51,12 +58,35 @@ console.log(type);
           <option value="ADOPCION">Adopción</option>
           <option value="DONACION">Donación</option>
         </select>
-        {errors.type && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
+        {errors.type && (
+          <p className="text-red-500 text-sm mt-1">
+            Este campo es obligatorio.
+          </p>
+        )}
       </div>
 
       <SelectPet register={register} errors={errors} />
 
       {/* Eliminado el campo metaDonación porque se hardcodea desde el componente padre */}
+
+      {type === "DONACION" && (
+        <div>
+          <label className="block mb-2 font-semibold">
+            Meta de donación (en pesos)
+          </label>
+          <input
+            type="number"
+            {...register("donationGoal", { required: true, min: 1 })}
+            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500"
+            placeholder="Ej: 50000"
+          />
+          {errors.donationGoal && (
+            <p className="text-red-500 text-sm mt-1">
+              Este campo es obligatorio y debe ser mayor a 0.
+            </p>
+          )}
+        </div>
+      )}
     </>
   );
 };
