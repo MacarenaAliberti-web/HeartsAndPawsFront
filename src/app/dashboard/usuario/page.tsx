@@ -1,6 +1,7 @@
-import UsuarioDashboardComponent from '../../../components/UsuarioDashboard';
+import UsuarioDashboardComponent from '../../../components/componenstuser/UsuarioDashboard';
 
-export default function UsuarioDashboard() {
+export default  async function UsuarioDashboard() {
+   
   return (
     <div>
     

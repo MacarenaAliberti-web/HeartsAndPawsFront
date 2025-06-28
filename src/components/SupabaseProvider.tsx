@@ -1,33 +1,3 @@
-/*'use client'
-
-import { createContext, useContext, useState, ReactNode } from 'react'
-import { createClient } from '../lib/supabaseClient'
-import { SupabaseClient } from '@supabase/supabase-js'
-
-const SupabaseContext = createContext<SupabaseClient | null>(null)
-
-interface SupabaseProviderProps {
-  children: ReactNode
-}
-
-export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
-  const [client] = useState(() => createClient())
-
-  return (
-    <SupabaseContext.Provider value={client}>
-      {children}
-    </SupabaseContext.Provider>
-  )
-}
-
-export const useSupabase = () => {
-  const context = useContext(SupabaseContext)
-  if (!context) {
-    throw new Error('useSupabase debe estar dentro de un SupabaseProvider')
-  }
-  return context
-}
-*/
 
 "use client";
 

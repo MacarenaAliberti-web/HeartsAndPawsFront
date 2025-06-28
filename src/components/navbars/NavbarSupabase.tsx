@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useEffect, JSX } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
+import { useState, useEffect, JSX } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   FaPaw,
   FaBars,
@@ -16,22 +17,23 @@ import {
   FaHome,
   FaCommentDots,
   FaHandsHelping,
-} from "react-icons/fa";
-import { supabase } from "@/lib/supabaseClient";
-import { User } from "@supabase/supabase-js";
+} from 'react-icons/fa';
+import { supabase } from '@/lib/supabaseClient';
+import { User } from '@supabase/supabase-js';
 
 const Navbar = () => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [roles, setRoles] = useState<string[]>([]);
-  //const supabase = createClient();
+
   const toggleMenu = () => setIsOpen(!isOpen);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -40,30 +42,12 @@ const Navbar = () => {
         data: { user },
       } = await supabase.auth.getUser();
 
-      console.log("usuario desde navbar supabase: " + JSON.stringify(user));
       setUser(user);
 
       if (user) {
-
-        //setUser(user);
-        setRoles(["user"]);
-        // Asume que tienes una tabla `profiles` con roles asociados
-        /*
-        const { data: profile, error } = await supabase
-          .from("users")
-          .select("roles")
-          .eq("id", user.id)  
-          .single();
-
-        if (profile?.roles && Array.isArray(profile.roles)) {
-          setRoles(profile.roles);
-        } else {
-          setRoles([]);
-        }
-
-        if (error) console.error("Error loading profile:", error);*/
+        // Simulación: podrías reemplazar esto por lógica real basada en metadata
+        setRoles(['user']);
       }
-        
     };
 
     getUserAndRoles();
@@ -77,69 +61,68 @@ const Navbar = () => {
 
   type MenuLink = {
     label: string;
-    href: string;
+    href?: string;
     icon: JSX.Element;
-    onClick?: () => void | Promise<void>;
+    onClick?: (e?: React.MouseEvent) => void | Promise<void>;
+    isButton?: boolean;
   };
 
   let menuLinks: MenuLink[] = [
     {
-      label: "Te necesitan",
-      href: "#casos",
+      label: 'Te necesitan',
+      href: '#casos',
       icon: <FaHeart className="text-pink-500" />,
     },
-    { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw /> },
-    { label: "Registro", href: "/register", icon: <FaRegClipboard /> },
-    { label: "Iniciar Sesión", href: "/login", icon: <FaSignInAlt /> },
+    { label: 'Adoptar', href: '/adoptar/adopcion', icon: <FaPaw /> },
+    { label: 'Registro', href: '/register', icon: <FaRegClipboard /> },
+    { label: 'Iniciar Sesión', href: '/login', icon: <FaSignInAlt /> },
   ];
 
   if (user) {
-    menuLinks = [{ label: "Inicio", href: "/", icon: <FaHome /> }];
+    menuLinks = [{ label: 'Inicio', href: '/', icon: <FaHome /> }];
 
-    if (roles.includes("ong")) {
+    if (roles.includes('ong')) {
       menuLinks.push(
-        { label: "Mi Perfil", href: "/dashboard/ong", icon: <FaUserShield /> },
+        { label: 'Mi Perfil', href: '/dashboard/ong', icon: <FaUserShield /> },
         {
-          label: "Mis Casos",
-          href: "/mis-casos",
+          label: 'Mis Casos',
+          href: '/mis-casos',
           icon: <FaExclamationTriangle />,
         },
-        { label: "Mensajes", href: "/chat", icon: <FaCommentDots /> }
+        { label: 'Mensajes', href: '/chat', icon: <FaCommentDots /> }
       );
     }
 
-    if (roles.includes("user")) {
+    if (roles.includes('user')) {
       menuLinks.push(
+        { label: 'Mi Perfil', href: '/dashboard/usuario', icon: <FaUserShield /> },
         {
-          label: "Mi Perfil",
-          href: "/dashboard/usuario",
-          icon: <FaUserShield />,
-        },
-        {
-          label: "Te necesitan",
-          href: "/donacion",
+          label: 'Te necesitan',
+          href: '/donacion',
           icon: <FaHandsHelping className="text-pink-500" />,
         },
-        { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw /> },
-        { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> }
+        { label: 'Adoptar', href: '/adoptar/adopcion', icon: <FaPaw /> },
+        { label: 'Favoritos', href: '/favoritos', icon: <FaHeart /> }
       );
     }
 
-    if (roles.includes("admin")) {
+    if (roles.includes('admin')) {
       menuLinks.push({
-        label: "Admin Perfil",
-        href: "/dashboard/admin",
+        label: 'Admin Perfil',
+        href: '/dashboard/admin',
         icon: <FaUserShield />,
       });
     }
 
     menuLinks.push({
-      label: "Cerrar sesión",
-      href: "#",
+      label: 'Cerrar sesión',
       icon: <FaSignOutAlt />,
-      onClick: async () => {
+      isButton: true,
+      onClick: async (e) => {
+        e?.preventDefault();
         await supabase.auth.signOut();
-        window.location.reload();
+        setUser(null);
+        router.push('/login');
       },
     });
   }
@@ -148,9 +131,9 @@ const Navbar = () => {
     <motion.div
       initial={{ y: -50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
       className={`sticky top-0 w-full z-50 transition-all ${
-        scrolled ? "bg-white/70 backdrop-blur-md shadow-md" : "bg-white/90"
+        scrolled ? 'bg-white/70 backdrop-blur-md shadow-md' : 'bg-white/90'
       }`}
     >
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -164,17 +147,28 @@ const Navbar = () => {
           </Link>
 
           <div className="hidden space-x-6 md:flex">
-            {menuLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={link.onClick}
-                className="flex items-center gap-1 text-gray-700 transition hover:text-pink-600"
-              >
-                <span className="text-pink-500">{link.icon}</span>
-                {link.label}
-              </a>
-            ))}
+            {menuLinks.map((link) =>
+              link.isButton ? (
+                <button
+                  key={link.label}
+                  onClick={link.onClick}
+                  className="flex items-center gap-1 text-gray-700 transition hover:text-pink-600"
+                >
+                  <span className="text-pink-500">{link.icon}</span>
+                  {link.label}
+                </button>
+              ) : (
+                <Link
+                  key={link.label}
+                  href={link.href!}
+                  onClick={link.onClick}
+                  className="flex items-center gap-1 text-gray-700 transition hover:text-pink-600"
+                >
+                  <span className="text-pink-500">{link.icon}</span>
+                  {link.label}
+                </Link>
+              )
+            )}
           </div>
 
           <div className="md:hidden">
@@ -197,24 +191,35 @@ const Navbar = () => {
           <motion.div
             className="px-4 py-4 space-y-2 bg-white shadow-md md:hidden"
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
+            animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {menuLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={() => {
-                  setIsOpen(false);
-                  link.onClick?.();
-                }}
-                className="flex items-center gap-2 text-gray-700 hover:text-pink-600"
-              >
-                <span className="text-pink-500">{link.icon}</span>
-                {link.label}
-              </a>
-            ))}
+            {menuLinks.map((link) =>
+              link.isButton ? (
+                <button
+                  key={link.label}
+                  onClick={(e) => {
+                    setIsOpen(false);
+                    link.onClick?.(e);
+                  }}
+                  className="flex items-center gap-2 text-gray-700 hover:text-pink-600"
+                >
+                  <span className="text-pink-500">{link.icon}</span>
+                  {link.label}
+                </button>
+              ) : (
+                <Link
+                  key={link.label}
+                  href={link.href!}
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2 text-gray-700 hover:text-pink-600"
+                >
+                  <span className="text-pink-500">{link.icon}</span>
+                  {link.label}
+                </Link>
+              )
+            )}
           </motion.div>
         )}
       </AnimatePresence>

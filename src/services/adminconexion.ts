@@ -49,3 +49,18 @@ export async function getVerificacion(id: string) {
         console.error('Error cargando solicitudes:', error);
     }
 };
+ 
+
+export async function getTodosUser() {
+ try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/usuarios`, {
+            method: 'GET',
+            credentials: 'include',
+        });
+      
+        return res;
+    } catch (error) {
+        console.error('Error cargando Usuarios:', error);
+    }
+
+}

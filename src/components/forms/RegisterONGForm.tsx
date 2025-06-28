@@ -21,6 +21,7 @@ export function RegisterONGForm() {
     direccion: "",     
     ciudad: "",
     pais: "",
+    
   });
 
   const [imagenPerfil, setImagenPerfil] = useState<File | null>(null);
@@ -124,6 +125,7 @@ export function RegisterONGForm() {
         direccion: "",
         ciudad: "",
         pais: "",
+       
       });
       setImagenPerfil(null);
       setArchivoVerificacion(null);

@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaChevronDown } from "react-icons/fa";
+import { FaBuilding, FaChevronDown } from "react-icons/fa";
 import Link from "next/link";
 import {
   FaPaw,
@@ -48,11 +48,13 @@ const Navbar = () => {
 
   const handleLogoutOng = () => {
     logoutOng();
+    router.refresh(); 
     router.push("/");
   };
 
   const handleLogoutUsuario = () => {
     logoutUsuario();
+    router.refresh(); 
     router.push("/");
   };
 
@@ -92,23 +94,27 @@ const Navbar = () => {
           icon: <FaUserShield />,
         },
         {
-          label: "Gestionar Usuarios",
-          href: "/admin/usuarios",
+          label: " Usuarios",
+          href: "/dashboard/admin/vista-user",
           icon: <FaUser />,
         },
         {
-          label: "Casos Reportados",
-          href: "/admin/casos",
-          icon: <FaExclamationTriangle />,
+         label: "Organizaciones",
+         href: "#",
+         icon: <FaBuilding />,
         },
         {
-          label: "Historial ONG",
+          label: "Otros",
           href: "#",
           icon: <FaRegClipboard />,
           onClick: () => setShowHistorialDropdown((prev) => !prev),
           subItems: [
             { label: "Aprobadas", href: "/admin/historial/aprobadas" },
             { label: "Rechazadas", href: "/admin/historial/rechazadas" },
+            { label: "Mascotas", href: "/admin/historial/rechazadas" },
+            { label: "Solicitudes", href: "/admin/historial/rechazadas" },
+            { label: "Adopciones", href: "/admin/historial/rechazadas" },
+            { label: "Donaciones", href: "/admin/historial/rechazadas" },
           ],
         },
         {
@@ -134,7 +140,7 @@ const Navbar = () => {
         { label: "Favoritos", href: "/favoritos", icon: <FaHeart /> },
         {
           label: "Cerrar sesión",
-          href: "#",
+          href: "/login",
           icon: <FaSignOutAlt />,
           onClick: handleLogoutUsuario,
         },
