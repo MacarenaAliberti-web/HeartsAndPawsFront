@@ -11,8 +11,9 @@ import {
 import { iniciarDonacion } from '@/services/donacion'
 import MascotaCard from '@/components/adopcion/MascotaCard'
 import MascotaModal from '@/components/adopcion/MascotaModal'
-import { useUsuarioAuth } from '@/context/UsuarioAuthContext'
 
+import { useUsuarioAuth } from '@/context/UsuarioAuthContext'
+import DonarModal from './DonarModal'
 
 export default function DonacionPage() {
   const { usuario } = useUsuarioAuth()
@@ -24,6 +25,10 @@ export default function DonacionPage() {
   const [error, setError] = useState('')
   const [mascotaSeleccionada, setMascotaSeleccionada] = useState<Mascota | null>(null)
   const [mostrandoHistoria, setMostrandoHistoria] = useState(false)
+
+  // Estados para el modal de donación
+  const [donarModalVisible, setDonarModalVisible] = useState(false)
+  const [mascotaParaDonar, setMascotaParaDonar] = useState<Mascota | null>(null)
 
   const fetchMascotas = useCallback(async (filtros: { tipo?: string }) => {
     setCargando(true)
@@ -57,37 +62,34 @@ export default function DonacionPage() {
     setMostrandoHistoria(true)
   }
 
-  const handleDonar = async (mascotaId: string) => {
-    const caso = resultados.find((c) => c.mascota.id === mascotaId)
+  const handleDonar = (mascota: Mascota) => {
+    setMascotaParaDonar(mascota)
+    setDonarModalVisible(true)
+  }
+
+  const handleConfirmarDonacion = async (monto: number) => {
+    const caso = resultados.find((c) => c.mascota.id === mascotaParaDonar?.id)
     if (!caso || !usuario?.id) {
       toast.error('No se pudo iniciar la donación.')
       return
     }
 
     try {
-  console.log('Iniciando donación con:', {
-    usuarioId: usuario.id,
-    casoId: caso.id,
-    monto: 5000,
-  })
+      const data = await iniciarDonacion({
+        usuarioId: usuario.id,
+        casoId: caso.id,
+        monto,
+      })
 
-  const data = await iniciarDonacion({
-    usuarioId: usuario.id,
-    casoId: caso.id,
-    monto: 5000,
-  })
-
-  console.log('Respuesta del backend:', data)
-
-  if (data?.url) {
-    window.location.href = data.url
-  } else {
-    toast.error('No se pudo generar el link de pago.')
-  }
-} catch (error) {
-  console.error('Error al iniciar la donación:', error)
-  toast.error('Ocurrió un error al iniciar la donación.')
-}
+      if (data?.url) {
+        window.location.href = data.url
+      } else {
+        toast.error('No se pudo generar el link de pago.')
+      }
+    } catch (error) {
+      console.error('Error al iniciar la donación:', error)
+      toast.error('Ocurrió un error al iniciar la donación.')
+    }
   }
 
   return (
@@ -162,23 +164,31 @@ export default function DonacionPage() {
               key={caso.id}
               mascota={caso.mascota}
               onConocerHistoria={() => handleConocerHistoria(caso.mascota)}
-              onAdoptar={() => handleDonar(caso.mascota.id)}
+              onAdoptar={() => handleDonar(caso.mascota)}
               modo="donacion"
             />
           ))}
         </div>
       </div>
 
+      {/* Modal para ver historia */}
       {mascotaSeleccionada && (
         <MascotaModal
           mascota={mascotaSeleccionada}
           visible={mostrandoHistoria}
           cargando={false}
           onClose={() => setMostrandoHistoria(false)}
-          onAccion={() => handleDonar(mascotaSeleccionada.id)}
+          onAccion={() => handleDonar(mascotaSeleccionada)}
           modo="donacion"
         />
       )}
+
+      {/* Modal para elegir monto */}
+      <DonarModal
+        visible={donarModalVisible}
+        onClose={() => setDonarModalVisible(false)}
+        onConfirm={handleConfirmarDonacion}
+      />
     </div>
   )
 }

@@ -127,6 +127,19 @@ switch (rol.rol) {
       >
         {loading ? "Ingresando..." : "Entrar"}
       </button>
+
+        
+<div className="mt-6 text-center text-sm text-gray-600">
+  ¿No tenés una cuenta?{" "}
+  <button
+    type="button"
+    onClick={() => router.push("/register")}
+    className="text-pink-600 font-semibold hover:underline"
+  >
+    Registrate acá
+  </button>
+</div>
+      
     </form>
   );
 }

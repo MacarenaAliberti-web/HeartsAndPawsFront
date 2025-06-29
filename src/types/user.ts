@@ -34,3 +34,6 @@ export interface AuthContextType {
   logged: boolean;
   loading: boolean; // ← indica si está en proceso de cargar el usuario
 }
+
+
+ 

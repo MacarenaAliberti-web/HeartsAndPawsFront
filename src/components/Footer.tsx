@@ -17,19 +17,31 @@ import Link from 'next/link';
           </p>
         </div>
 
-        {/* Enlaces rápidos */}
-        <div>
-          <h4 className="mb-2 font-semibold">Enlaces</h4>
-          <ul className="space-y-1 text-sm">
-            <li><a href="#" className="hover:text-pink-600">Casos</a></li>
-            <li>
-          <Link href="/register" className="hover:text-pink-600">
-            Registro
-           </Link>
-            </li>
-            <li><a href="#" className="hover:text-pink-600">Iniciar sesión</a></li>
-          </ul>
-        </div>
+       {/* Enlaces rápidos */}
+<div>
+  <h4 className="mb-2 font-semibold">Enlaces</h4>
+  <ul className="space-y-1 text-sm">
+    <li>
+      <a href="/adoptar/adopcion" className="hover:text-pink-600">
+        Adopciones
+      </a>
+    </li>
+    <li>
+      <a href="/donacion" className="hover:text-pink-600">
+        Donaciones
+      </a>
+    </li>
+    <li>
+      <Link href="/register" className="hover:text-pink-600">
+        Registro
+      </Link>
+    </li>
+    <li>
+      <a href="/login" className="hover:text-pink-600">Iniciar sesión</a>
+    </li>
+  </ul>
+</div>
+
 
         {/* Redes sociales */}
         <div>

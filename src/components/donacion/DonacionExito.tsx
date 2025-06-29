@@ -3,19 +3,15 @@
 import { useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 
-
 export default function DonacionExitosaPage() {
   const searchParams = useSearchParams()
   
-  const usuarioId = searchParams?.get('usuarioId')
-  const casoId = searchParams?.get('casoId')
+  const sessionId = searchParams?.get('session_id')
 
   useEffect(() => {
-    // Podés registrar la donación si querés en tu base
-    console.log('Donación exitosa:', { usuarioId, casoId })
+    console.log('Donación exitosa con session_id:', sessionId)
 
-    // También podrías hacer un toast o animación
-  }, [usuarioId, casoId])
+  }, [sessionId])
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-green-50 p-6 text-center">
