@@ -72,7 +72,7 @@ const CaseForm = ({ register, errors, watch }: Props) => {
       {type === "DONACION" && (
         <div>
           <label className="block mb-2 font-semibold">
-            Meta de donación (en pesos)
+            Meta de donación 
           </label>
           <input
             type="number"

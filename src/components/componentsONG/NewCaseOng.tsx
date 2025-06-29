@@ -7,19 +7,12 @@ import toast from "react-hot-toast";
 import CaseForm from "./CaseForm";
 import NewPet from "./NewPet";
 import { createCase } from "@/services/createCases";
+import { FormInputs } from "@/types/formsOng";
 
-
-interface FormData {
-  title: string;
-  description: string;
-  type: "ADOPCION" | "DONACION";
-  petId: string;
-  donationGoal?: number;
-}
 
 const NewCaseOng = () => {
   const { ong } = useOngAuth();
-  const [mostrarNewPet, setMostrarNewPet] = useState(false);
+  const [mostrarNewPet] = useState(false);
 
   const {
     register,
@@ -27,12 +20,13 @@ const NewCaseOng = () => {
     formState: { errors },
     watch,
     reset,
-  } = useForm<FormData>();
+  } = useForm<FormInputs>();
 
   if (mostrarNewPet) return <NewPet />; // ⬅️ Redirige directo al componente
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: FormInputs) => {
     if (!ong) return toast.error("Falta el ID de la ONG");
+    const donationGoalNum = data.donationGoal ? Number(data.donationGoal) : undefined;
 
     const body =
       data.type === "DONACION"
@@ -43,7 +37,7 @@ const NewCaseOng = () => {
             mascotaId: data.petId,
             ongId: ong.id,
             donacion: {
-              metaDonacion: 100000,
+              metaDonacion: data.donationGoal ? Number(data.donationGoal) : undefined,
             },
           }
         : {
@@ -69,14 +63,14 @@ const NewCaseOng = () => {
       <h1 className="text-3xl font-bold mb-4 text-center text-pink-600">Crear nuevo caso</h1>
 
       {/* Botón para redirigir al form de mascota */}
-      <div className="flex justify-center mb-6">
+      {/* <div className="flex justify-center mb-6">
         <button
           className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-6 py-2 rounded-lg transition"
           onClick={() => setMostrarNewPet(true)}
         >
           Crear nueva mascota
         </button>
-      </div>
+      </div> */}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <CaseForm register={register} errors={errors} watch={watch} />
