@@ -2,10 +2,11 @@
 
 import { MascotaCardConModoProps } from '@/types/mascotas'
 import Image from 'next/image'
-import React from 'react'
-import { useUsuarioAuth } from '@/context/UsuarioAuthContext' // Ajustá si la ruta cambia
+import React, { useState } from 'react'
+import { useUsuarioAuth } from '@/context/UsuarioAuthContext'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
+import { FaHeart, FaRegHeart } from 'react-icons/fa' 
 
 export default function MascotaCard({
   mascota,
@@ -15,6 +16,8 @@ export default function MascotaCard({
 }: MascotaCardConModoProps) {
   const { usuario } = useUsuarioAuth()
   const router = useRouter()
+
+  const [esFavorito, setEsFavorito] = useState(false)
 
   const imagenUrl =
     mascota.imagenes?.[0]?.url ??
@@ -32,8 +35,28 @@ export default function MascotaCard({
     onAdoptar?.(mascota.id)
   }
 
+  const toggleFavorito = () => {
+    if (!usuario) {
+      toast.error('Iniciá sesión para guardar favoritos.')
+      return
+    }
+
+    setEsFavorito(prev => !prev)
+    // Opcional: llamar a una API para guardar/eliminar de favoritos
+  }
+
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden transform hover:scale-105 transition duration-300 flex flex-col">
+    <div className="bg-white rounded-xl shadow-md overflow-hidden transform hover:scale-105 transition duration-300 flex flex-col relative">
+      {/* Icono de favorito */}
+      <button
+        onClick={toggleFavorito}
+        className="absolute top-3 right-3 text-pink-500 text-3xl z-10"
+
+        aria-label="Marcar como favorito"
+      >
+        {esFavorito ? <FaHeart /> : <FaRegHeart />}
+      </button>
+
       <div className="w-full h-48 p-2 flex items-center justify-center bg-white">
         <Image
           src={imagenUrl}

@@ -3,11 +3,12 @@
 import Image from 'next/image';
 import { FaHome, FaExclamation, FaHandshake } from 'react-icons/fa';
 import { motion } from 'framer-motion';
-import Link from 'next/link';
+
 
 export default function Home() {
   return (
-    <main className="flex flex-col items-center justify-start text-gray-800 bg-white min-w-screen">
+   <main className="flex flex-col items-center justify-start text-gray-800 bg-pink-50 min-w-full overflow-x-hidden">
+
       
       <div className="w-full relative h-[60vh] overflow-hidden flex items-center justify-center">
   <Image
@@ -34,7 +35,7 @@ export default function Home() {
       transition={{ duration: 0.8, delay: 0.3 }}
       className="mt-4 text-white text-lg md:text-xl drop-shadow-md"
     >
-      Unimos fuerzas por los que no tienen voz
+      
     </motion.p>
   </div>
 
@@ -42,53 +43,43 @@ export default function Home() {
 </div>
 
 
-      {/* Sección principal */}
-      <section className="grid items-center w-full grid-cols-1 gap-8 px-4 py-16 max-w-7xl md:grid-cols-2">
-        {/* Textos y botones con animación */}
-        <motion.div
-          initial={{ opacity: 0, x: -40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="flex flex-col gap-4"
-        >
-          <h2 className="text-3xl font-bold leading-tight md:text-4xl">
-            Unimos fuerzas <br /> por los que no tienen voz
-          </h2>
+     {/* Sección destacada: mensaje + imagen en contenedor blanco */}
+<section className="w-full px-4 py-10 flex justify-center">
+  <div className="grid items-center bg-white rounded-xl shadow-md p-8 w-full max-w-5xl grid-cols-1 md:grid-cols-2 gap-8">
+    
+    {/* Texto */}
+    <motion.div
+      initial={{ opacity: 0, x: -40 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.8 }}
+      className="flex flex-col justify-center gap-4"
+    >
+      <h2 className="text-3xl font-bold leading-tight md:text-4xl text-pink-600">
+        Unimos fuerzas <br /> por los que no tienen voz
+      </h2>
+      <p className="text-gray-700">
+        Ayudá, adoptá o colaborá con causas que salvan vidas. Nuestra red conecta corazones con patas. 🐾
+      </p>
+    </motion.div>
 
-          <div className="flex flex-col gap-3 mt-6">
-            <button className="px-4 py-2 text-white transition bg-pink-400 rounded-full hover:bg-pink-500 w-fit">
-              Casos
-            </button>
-            <Link href="/register/ong">
-            <button className="px-4 py-2 text-pink-500 transition border-2 border-pink-400 rounded-full hover:bg-pink-100 w-fit">
-              Registrá tu ONG
-            </button>
-           </Link>
+    {/* Imagen */}
+    <motion.div
+      initial={{ opacity: 0, x: 40 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.8 }}
+      className="flex justify-center"
+    >
+      <Image
+        src="/gato-y-amor.jpg"
+        alt="Perro y gato"
+        width={300}
+        height={300}
+        className="rounded-xl"
+      />
+    </motion.div>
+  </div>
+</section>
 
-         <Link href="/register/user">
-            <button className="px-4 py-2 text-gray-700 transition bg-pink-200 rounded-full hover:bg-pink-300 w-fit">
-              Registrate como usuario
-            </button>
-            </Link>
-          </div>
-        </motion.div>
-
-        {/* Imagen mascotas con animación */}
-        <motion.div
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="flex justify-center"
-        >
-          <Image
-            src="/gato-y-amor.jpg" 
-            alt="Perro y gato"
-            width={300}
-            height={300}
-            className="rounded-xl"
-          />
-        </motion.div>
-      </section>
 
       {/* Cómo funciona la red */}
       <motion.section

@@ -1,4 +1,3 @@
-'use client';
 
 import FormularioAdopcionPage from '@/components/adopcion/formulario-adopcion/FormularioPage';
 
