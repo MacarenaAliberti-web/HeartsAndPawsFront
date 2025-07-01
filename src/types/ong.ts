@@ -30,4 +30,6 @@ export type ContextType = {
   ong: OngUser | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  loading: boolean;
+  logged: boolean; 
 };

@@ -1,17 +1,31 @@
-
 "use client";
-import { useOngAuth } from '@/context/OngAuthContext';
-import React, { useState } from 'react';
-import ProfileOng from './ProfileOng';
-import NewCaseOng from './NewCaseOng';
-import AdoptionsOng from './AdoptionsOng';
-import DonationsOng from './DonationsOng';
 
-type ViewType = "profil" | "donations" | "newCase" | "adoptions";
+import { useOngAuth } from "@/context/OngAuthContext";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import ProfileOng from "@/components/componentsONG/ProfileOng";
+import NewCaseOng from "@/components/componentsONG/NewCaseOng";
+import AdoptionsOng from "@/components/componentsONG/AdoptionsOng";
+import DonationsOng from "@/components/componentsONG/DonationsOng";
+import CasesOng from "@/components/componentsONG/CasesOng";
+
+type ViewType = "profil" | "donations" | "adoptions" | "cases";
+
 
 const MyAccount = () => {
-  useOngAuth();
+  const { ong, loading } = useOngAuth();
+  const router = useRouter();
   const [selectedView, setSelectedView] = useState<ViewType>("profil");
+
+  useEffect(() => {
+    if (!loading && !ong) {
+      router.push("/login"); // Cambia por la ruta de login de ONG
+    }
+  }, [loading, ong, router]);
+
+  if (loading) return null; // O algún loader mientras carga la cookie
+
+  if (!ong) return null; // Evita renderizar si no está logueada
 
   return (
     <div className="flex min-h-screen -mt-16">
@@ -21,8 +35,8 @@ const MyAccount = () => {
         {[
           { label: "Mi Perfil", view: "profil" },
           { label: "Historial de Donaciones", view: "donations" },
-          { label: "Publicar Nuevo Caso", view: "newCase" },
           { label: "Solicitudes de Adopción", view: "adoptions" },
+          { label: "Mis Casos", view: "cases" },
         ].map((item) => (
           <button
             key={item.view}
@@ -39,8 +53,9 @@ const MyAccount = () => {
       <main className="flex-1 p-10 bg-pink-50">
         {selectedView === "profil" && <ProfileOng />}
         {selectedView === "donations" && <DonationsOng />}
-        {selectedView === "newCase" && <NewCaseOng />}
         {selectedView === "adoptions" && <AdoptionsOng />}
+        {selectedView === "cases" && <CasesOng />}
+
       </main>
     </div>
   );

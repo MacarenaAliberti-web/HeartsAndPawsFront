@@ -12,10 +12,10 @@ export default function CasesOng() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [tipo, setTipo] = useState<"perro" | "gato" | "">("");
-  const [orden, setOrden] = useState<"mas_reciente" | "mas_antiguo">(
-    "mas_reciente"
-  );
+  // const [tipo, setTipo] = useState<"perro" | "gato" | "">("");
+  // const [orden, setOrden] = useState<"mas_reciente" | "mas_antiguo">(
+  //   "mas_reciente"
+  // );
 
   useEffect(() => {
     if (!ong) return;
@@ -50,41 +50,40 @@ export default function CasesOng() {
           Acá podés ver todos los casos que registraste como ONG.
         </p>
 
-        <div className="flex flex-col sm:flex-row sm:justify-center gap-4 max-w-md mx-auto mb-8">
-  {/* Filtro por tipo */}
-  <div className="relative w-full max-w-xs">
-    <select
-      value={tipo}
-      onChange={(e) => setTipo(e.target.value as 'perro' | 'gato' | '')}
-      className="appearance-none w-full px-4 py-3 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
-      aria-label="Filtrar por tipo de mascota"
-    >
-      <option value="">Todos</option>
-      <option value="perro">Perro</option>
-      <option value="gato">Gato</option>
-    </select>
-    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-      <svg className="w-5 h-5 text-pink-600" />
-    </div>
-  </div>
+        {/* <div className="flex flex-col sm:flex-row sm:justify-center gap-4 max-w-md mx-auto mb-8">
+          <div className="relative w-full max-w-xs">
+            <select
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value as "perro" | "gato" | "")}
+              className="appearance-none w-full px-4 py-3 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+              aria-label="Filtrar por tipo de mascota"
+            >
+              <option value="">Todos</option>
+              <option value="perro">Perro</option>
+              <option value="gato">Gato</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+              <svg className="w-5 h-5 text-pink-600" />
+            </div>
+          </div>
 
-  {/* Orden */}
-  <div className="relative w-full max-w-xs">
-    <select
-      value={orden}
-      onChange={(e) => setOrden(e.target.value as 'mas_reciente' | 'mas_antiguo')}
-      className="appearance-none w-full px-4 py-3 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
-      aria-label="Ordenar mascotas"
-    >
-      <option value="mas_reciente">Más reciente</option>
-      <option value="mas_antiguo">Más antiguo</option>
-    </select>
-    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-      <svg className="w-5 h-5 text-pink-600"  />
-    </div>
-  </div>
-</div>
-
+          <div className="relative w-full max-w-xs">
+            <select
+              value={orden}
+              onChange={(e) =>
+                setOrden(e.target.value as "mas_reciente" | "mas_antiguo")
+              }
+              className="appearance-none w-full px-4 py-3 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+              aria-label="Ordenar mascotas"
+            >
+              <option value="mas_reciente">Más reciente</option>
+              <option value="mas_antiguo">Más antiguo</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+              <svg className="w-5 h-5 text-pink-600" />
+            </div>
+          </div>
+        </div> */}
 
         {loading && (
           <p className="text-center text-gray-500">Cargando casos...</p>
@@ -105,8 +104,6 @@ export default function CasesOng() {
     </div>
   );
 }
-
-
 
 
 
