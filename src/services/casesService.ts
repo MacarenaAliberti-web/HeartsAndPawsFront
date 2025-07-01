@@ -1,4 +1,5 @@
 
+
 import { Caso } from "@/types/casos";
 
 export async function getCasesByOng(): Promise<Caso[]> {

@@ -1,5 +1,6 @@
-// src/services/casos.ts
-export const createCase = async (body: any) => {
+import { CasoBody } from "@/types/formsOng";
+
+export const createCase = async (body: CasoBody) => {
   const res = await fetch("https://backend-hearts-paws-dev.onrender.com/casos", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

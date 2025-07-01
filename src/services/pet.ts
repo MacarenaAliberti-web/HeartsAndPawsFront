@@ -1,7 +1,9 @@
-// src/services/mascotas.ts
+
+
+import { NuevaMascotaData } from "@/components/componentsONG/NewPet";
 
 // Crear mascota
-export const createPet = async (body: any) => {
+export const createPet = async (body: NuevaMascotaData) => {
   const res = await fetch("https://backend-hearts-paws-dev.onrender.com/mascotas", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

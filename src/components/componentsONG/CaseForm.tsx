@@ -1,11 +1,8 @@
 "use client";
 import React from "react";
-
+import SelectPet from "./SelectPet";
 import { UseFormRegister, FieldErrors, UseFormWatch } from "react-hook-form";
 import { FormInputs } from "@/types/formsOng";
-import SelectPet from "@/components/componentsONG/SelectPet";
-
-
 
 
 interface Props {
@@ -72,7 +69,7 @@ const CaseForm = ({ register, errors, watch }: Props) => {
       {type === "DONACION" && (
         <div>
           <label className="block mb-2 font-semibold">
-            Meta de donación 
+            Meta de donación
           </label>
           <input
             type="number"

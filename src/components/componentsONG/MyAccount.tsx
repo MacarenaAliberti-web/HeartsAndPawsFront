@@ -3,11 +3,11 @@
 import { useOngAuth } from "@/context/OngAuthContext";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import ProfileOng from "@/components/componentsONG/ProfileOng";
-import NewCaseOng from "@/components/componentsONG/NewCaseOng";
-import AdoptionsOng from "@/components/componentsONG/AdoptionsOng";
-import DonationsOng from "@/components/componentsONG/DonationsOng";
-import CasesOng from "@/components/componentsONG/CasesOng";
+import ProfileOng from "./ProfileOng";
+import NewCaseOng from "./NewCaseOng";
+import AdoptionsOng from "./AdoptionsOng";
+import DonationsOng from "./DonationsOng";
+import CasesOng from "./CasesOng";
 
 type ViewType = "profil" | "donations" | "adoptions" | "cases";
 

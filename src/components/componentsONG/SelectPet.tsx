@@ -5,6 +5,8 @@ import { fetchPetsByOngId } from "@/services/petsService";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { FormInputs } from "@/types/formsOng";
 
+//sin modificaciones
+
 interface Pet {
   id: string;
   nombre: string;

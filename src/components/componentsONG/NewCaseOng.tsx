@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import CaseForm from "./CaseForm";
 import NewPet from "./NewPet";
 import { createCase } from "@/services/createCases";
-import { FormInputs } from "@/types/formsOng";
+import { CasoBody, FormInputs } from "@/types/formsOng";
 
 
 const NewCaseOng = () => {
@@ -28,25 +28,28 @@ const NewCaseOng = () => {
     if (!ong) return toast.error("Falta el ID de la ONG");
     const donationGoalNum = data.donationGoal ? Number(data.donationGoal) : undefined;
 
-    const body =
-      data.type === "DONACION"
-        ? {
-            titulo: data.title,
-            descripcion: data.description,
-            tipo: "DONACION",
-            mascotaId: data.petId,
-            ongId: ong.id,
-            donacion: {
-              metaDonacion: data.donationGoal ? Number(data.donationGoal) : undefined,
-            },
-          }
-        : {
-            titulo: data.title,
-            descripcion: data.description,
-            tipo: "ADOPCION",
-            mascotaId: data.petId,
-            ongId: ong.id,
-          };
+if (!data.petId) return toast.error("Falta seleccionar una mascota");
+
+const body: CasoBody =
+  data.type === "DONACION"
+    ? {
+        titulo: data.title,
+        descripcion: data.description,
+        tipo: "DONACION",
+        mascotaId: data.petId, // ahora TypeScript lo trata como string
+        ongId: ong.id,
+        donacion: {
+          metaDonacion: donationGoalNum,
+        },
+      }
+    : {
+        titulo: data.title,
+        descripcion: data.description,
+        tipo: "ADOPCION",
+        mascotaId: data.petId,
+        ongId: ong.id,
+      };
+
 
     try {
       await createCase(body);
