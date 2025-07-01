@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 
 type Donacion = {
   id: string
@@ -9,6 +10,7 @@ type Donacion = {
   estadoPago: string
   mascota: {
     nombre: string
+    imagenes?: { url: string }[]
   }
   organizacion: {
     nombre: string
@@ -59,10 +61,21 @@ export default function DonacionCard({ donacion }: DonacionCardProps) {
         <span>{textoEstado}</span>
       </div>
 
-      {/* Imagen de reemplazo tipo "🐾" */}
-      <div className="w-full md:w-32 h-32 flex items-center justify-center bg-pink-100 rounded-md text-pink-500 text-5xl">
-        🐾
-      </div>
+      {/* Imagen de la mascota o ícono por defecto */}
+<div className="w-full md:w-32 h-32 flex items-center justify-center bg-pink-100 rounded-md overflow-hidden relative">
+  {donacion.mascota.imagenes?.[0]?.url ? (
+    <Image
+      src={donacion.mascota.imagenes[0].url}
+      alt={`Foto de ${donacion.mascota.nombre}`}
+      fill
+      className="object-cover"
+    />
+  ) : (
+    <span className="text-pink-500 text-5xl z-10">🐾</span>
+  )}
+</div>
+
+
 
       {/* Info principal */}
       <div className="flex-1">

@@ -17,7 +17,6 @@ import {
   FaSignOutAlt,
   FaHome,
   FaCommentDots,
-  FaHeart,
   FaHandsHelping,
   FaUser,
 } from "react-icons/fa";
@@ -137,7 +136,6 @@ const Navbar = () => {
           icon: <FaHandsHelping className="text-pink-500" />,
         },
         { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw /> },
-        { label: "Favoritos", href: "/usuario/favoritos", icon: <FaHeart /> },
         {
           label: "Cerrar sesión",
           href: "/login",
@@ -173,9 +171,9 @@ const Navbar = () => {
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-1 text-2xl font-semibold text-pink-600 whitespace-nowrap"
+            className="flex items-center gap-2 text-4xl font-semibold text-pink-600 whitespace-nowrap"
           >
-            <FaPaw className="text-3xl" />
+            <FaPaw className="text-5xl" />
             <span>Hearts&Paws</span>
           </Link>
 

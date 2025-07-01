@@ -1,18 +1,20 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from "react";
 import { useUsuarioAuth } from "@/context/UsuarioAuthContext";
 import { supabase } from "@/lib/supabaseClient";
 import { ActualizarPerfil } from "@/services/dashboarusernormal";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { User } from "@supabase/supabase-js";
 
 export default function DashboardSencillo() {
-  const { usuario } = useUsuarioAuth();
+  const { usuario, loading } = useUsuarioAuth();
+  const [user, ] = useState<User | null>(null);
   const router = useRouter();
 
   const [isEditando, setIsEditando] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [previewUrl] = useState<string | null>(null);
 
   const [userData, setUserData] = useState<{
     nombre: string;
@@ -33,7 +35,9 @@ export default function DashboardSencillo() {
 
   useEffect(() => {
     const getUserSupabase = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (usuario) {
         setUserData({
@@ -47,28 +51,43 @@ export default function DashboardSencillo() {
         });
       } else if (user) {
         setUserData({
-          nombre: user.user_metadata["full_name"] || user.user_metadata["name"] || "",
+          nombre:
+            user.user_metadata["full_name"] || user.user_metadata["name"] || "",
           email: user?.email || "",
           telefono: "",
           direccion: "",
           ciudad: "",
           pais: "",
-          imagenPerfil: user.user_metadata["avatar_url"] || user.user_metadata["picture"] || "",
+          imagenPerfil:
+            user.user_metadata["avatar_url"] ||
+            user.user_metadata["picture"] ||
+            "",
         });
       }
     };
+   
 
     getUserSupabase();
-  }, [usuario]);
+  }, [usuario, user, isEditando]);
+  useEffect(() => {
+    if (!loading && !usuario && user) {
+      router.push("/login");
+    }
+  }, [usuario, loading, router, user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUserData((prev) => ({ ...prev, [name]: value }));
   };
-
-  const handleGuardar = () => {
-    setIsEditando(false);
-    console.log("Datos actualizados:", userData);
+ 
+  const handleGuardar = async () => {
+    try {
+    
+      console.log("Datos guardados:", userData);
+      setIsEditando(false);
+    } catch (error) {
+      console.error("Error al guardar perfil:", error);
+    }
   };
 
   const handleActualizar = async (archivo: File) => {
@@ -76,6 +95,7 @@ export default function DashboardSencillo() {
     try {
       await ActualizarPerfil(archivo, usuario?.id);
       const nuevaUrl = URL.createObjectURL(archivo);
+      console.log('soy la url nueva: ' + JSON.stringify(nuevaUrl));
       setUserData((prev) => ({
         ...prev,
         imagenPerfil: nuevaUrl,
@@ -91,7 +111,9 @@ export default function DashboardSencillo() {
     <div className="flex min-h-screen bg-pink-50">
       {/* Panel lateral */}
       <nav className="flex flex-col px-4 py-6 text-white bg-pink-600 w-60">
-        <h2 className="mb-8 text-xl font-semibold text-center">Perfil del Usuario</h2>
+        <h2 className="mb-8 text-xl font-semibold text-center">
+          Perfil del Usuario
+        </h2>
 
         <button
           onClick={() => router.push("/dashboard/usuario")}
@@ -113,6 +135,13 @@ export default function DashboardSencillo() {
         >
           Mis Donaciones
         </button>
+
+        <button
+  onClick={() => router.push("/usuario/favoritos")}
+  className="text-left px-3 py-2 rounded hover:bg-pink-700"
+>
+  Mis Favoritos
+</button>
       </nav>
 
       {/* Contenido principal */}
@@ -126,11 +155,14 @@ export default function DashboardSencillo() {
                     Cargando...
                   </span>
                 ) : (
-                  <Image
-                    src={userData.imagenPerfil || "/gato-y-amor.jpg"}
-                    alt={`Foto de perfil de ${userData.nombre}`}
-                    fill
-                    className="object-cover"
+                  <img
+                    src={
+                      previewUrl ||
+                      userData.imagenPerfil ||
+                      "/default-avatar.png"
+                    }
+                   alt={`Foto de perfil de ${userData.nombre}`}
+                    className="w-32 h-32 rounded-full object-cover border-2 border-pink-400 shadow"
                   />
                 )}
               </div>
@@ -154,20 +186,32 @@ export default function DashboardSencillo() {
             </div>
 
             <div>
-              <p className="text-2xl font-bold text-pink-700">Hola, {userData.nombre}!</p>
-              <p className="text-sm text-gray-500">Bienvenido a tu perfil personal</p>
+              <p className="text-2xl font-bold text-pink-700">
+                Hola, {userData.nombre}!
+              </p>
+              <p className="text-sm text-gray-500">
+                Bienvenido a tu perfil personal
+              </p>
             </div>
           </div>
 
           <form
             onSubmit={(e) => {
               e.preventDefault();
+
               handleGuardar();
             }}
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             {(
-              ["nombre", "email", "telefono", "direccion", "ciudad", "pais"] as const
+              [
+                "nombre",
+                "email",
+                "telefono",
+                "direccion",
+                "ciudad",
+                "pais",
+              ] as const
             ).map((campo) => (
               <div key={campo}>
                 <label
@@ -183,7 +227,7 @@ export default function DashboardSencillo() {
                   disabled={!isEditando}
                   value={userData[campo]}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 rounded border text-sm ${
+                  className={`w-full px-3 py-2 rounded border text-sm transition ${
                     isEditando
                       ? "border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-300"
                       : "border-gray-300 bg-gray-100 cursor-not-allowed"
@@ -194,24 +238,28 @@ export default function DashboardSencillo() {
             ))}
 
             <div className="col-span-full flex justify-end gap-4 mt-4">
-              {!isEditando ? (
+              {!isEditando && (
                 <button
                   type="button"
                   onClick={() => setIsEditando(true)}
-                  className="px-6 py-2 text-white bg-pink-600 hover:bg-pink-700 rounded"
+                  className="px-6 py-2 text-white transition bg-pink-600 rounded hover:bg-pink-700"
                 >
                   Editar
                 </button>
-              ) : (
+              )}
+
+              {isEditando && (
                 <button
                   type="submit"
-                  className="px-6 py-2 text-white bg-pink-600 hover:bg-pink-700 rounded"
+                  className="px-6 py-2 text-white transition bg-pink-600 rounded hover:bg-pink-700"
                 >
                   Guardar
                 </button>
               )}
             </div>
           </form>
+
+
         </section>
       </main>
     </div>
