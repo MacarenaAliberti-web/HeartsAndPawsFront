@@ -4,7 +4,7 @@ export interface FormularioAdopcionData {
   tipoVivienda: string;
   integrantesFlia: number;
   hijos: number;
-  hayOtrasMascotas: string;
+  hayOtrasMascotas: number;
   descripcionOtrasMascotas?: string;
   cubrirGastos: string;
   darAlimentoCuidados: string;

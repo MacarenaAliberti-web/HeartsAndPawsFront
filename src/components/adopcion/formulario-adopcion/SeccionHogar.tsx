@@ -77,41 +77,31 @@ export default function SeccionHogar({ formData, onChange }: Props) {
         </div>
 
         {/* Hay otras mascotas */}
-        <div>
-          <label className="block font-medium text-sm mb-1">¿Hay otras mascotas en casa?</label>
-          <label className="inline-flex items-center mr-4">
-            <input
-              type="radio"
-              name="hayOtrasMascotas"
-              value="Sí"
-              checked={formData.hayOtrasMascotas === 'Sí'}
-              onChange={onChange}
-              required
-            />{' '}
-            Sí
-          </label>
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              name="hayOtrasMascotas"
-              value="No"
-              checked={formData.hayOtrasMascotas === 'No'}
-              onChange={onChange}
-              required
-            />{' '}
-            No
-          </label>
-          {formData.hayOtrasMascotas === 'Sí' && (
-            <textarea
-              name="descripcionOtrasMascotas"
-              placeholder="Especificar especie, raza, edad y si están esterilizados"
-              value={formData.descripcionOtrasMascotas || ''}
-              onChange={onChange}
-              className="mt-2 w-full p-2 border border-gray-300 rounded"
-              required
-            />
-          )}
-        </div>
+<div>
+  <label className="block font-medium text-sm mb-1">¿Cuántas otras mascotas tenés en casa?</label>
+  <input
+    type="number"
+    name="hayOtrasMascotas"
+    min={0}
+    value={formData.hayOtrasMascotas ?? 0}
+    onChange={onChange}
+    className="w-full p-2 border border-gray-300 rounded"
+    required
+  />
+  {formData.hayOtrasMascotas > 0 && (
+    <textarea
+      name="descripcionOtrasMascotas"
+      placeholder="Especificar especie, raza, edad y si están esterilizados"
+      value={formData.descripcionOtrasMascotas || ''}
+      onChange={onChange}
+      className="mt-2 w-full p-2 border border-gray-300 rounded"
+      required
+    />
+  )}
+</div>
+
+
+
       </fieldset>
     </div>
   );

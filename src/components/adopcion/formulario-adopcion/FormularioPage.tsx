@@ -18,14 +18,15 @@ function pasoValido(paso: number, formData: FormularioAdopcionData): boolean {
     case 1:
       return true
     case 2:
-      return (
-        formData.tipoVivienda.trim() !== '' &&
-        formData.integrantesFlia > 0 &&
-        formData.hijos >= 0 &&
-        ['Sí', 'No'].includes(formData.hayOtrasMascotas) &&
-        (formData.hayOtrasMascotas === 'No' ||
-          (formData.descripcionOtrasMascotas?.trim() || '') !== '')
-      )
+  return (
+    formData.tipoVivienda.trim() !== '' &&
+    formData.integrantesFlia > 0 &&
+    formData.hijos >= 0 &&
+    formData.hayOtrasMascotas >= 0 &&
+(formData.hayOtrasMascotas === 0 || (formData.descripcionOtrasMascotas?.trim() || '') !== '')
+
+  )
+
     case 3:
       return (
         formData.cubrirGastos === 'Sí' &&
@@ -54,7 +55,7 @@ export default function FormularioAdopcionPage() {
     tipoVivienda: '',
     integrantesFlia: 0,
     hijos: 0,
-    hayOtrasMascotas: '',
+    hayOtrasMascotas: 0,
     descripcionOtrasMascotas: '',
     cubrirGastos: '',
     darAlimentoCuidados: '',
@@ -76,23 +77,26 @@ export default function FormularioAdopcionPage() {
   }, [usuario, searchParams])
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target
-    if (name === 'integrantesFlia' || name === 'hijos') {
-      const min = name === 'integrantesFlia' ? 1 : 0
-      const num = Number(value)
-      setFormData((prev) => ({
-        ...prev,
-        [name]: isNaN(num) || num < min ? min : num,
-      }))
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }))
-    }
-  }
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+) => {
+  const { name, value } = e.target
+
+ if (name === 'hayOtrasMascotas' || name === 'integrantesFlia' || name === 'hijos') {
+  const min = name === 'integrantesFlia' ? 1 : 0;
+  const num = Number(value);
+  setFormData((prev) => ({
+    ...prev,
+    [name]: isNaN(num) || num < min ? min : num,
+  }));
+} else {
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+}
+
+}
+
 
   const avanzarPaso = () => {
     if (!pasoValido(paso, formData)) {
