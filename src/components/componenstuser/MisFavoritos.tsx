@@ -127,34 +127,32 @@ export default function MisFavoritos() {
     }
   }
 
-  // --- CAMBIO ACÁ ---
-  // Al confirmar monto en modal de donación, llamar backend e ir directo a Stripe
+  
   const handleConfirmarDonacion = async (monto: number) => {
-    if (!casoDonacionId || !usuario) {
-      toast.error('Error: falta información para realizar la donación.')
-      return
-    }
-
-    setDonarModalVisible(false)
-
-    try {
-      const data = await iniciarDonacion({
-        usuarioId: usuario.id,
-        casoId: casoDonacionId,
-        monto,
-      })
-
-      if (data?.url) {
-        window.location.href = data.url
-      } else {
-        toast.error('No se pudo generar el link de pago.')
-      }
-    } catch (error) {
-      console.error('Error al iniciar la donación:', error)
-      toast.error('Ocurrió un error al iniciar la donación.')
-    }
+  if (!casoDonacionId || !usuario) {
+    toast.error('Error: falta información para realizar la donación.')
+    return
   }
-  // --- FIN DEL CAMBIO ---
+
+  // ❌ NO cerramos el modal acá — lo manejamos desde el modal mismo
+  try {
+    const data = await iniciarDonacion({
+      usuarioId: usuario.id,
+      casoId: casoDonacionId,
+      monto,
+    })
+
+    if (data?.url) {
+      window.location.href = data.url
+    } else {
+      toast.error('No se pudo generar el link de pago.')
+    }
+  } catch (error) {
+    console.error('Error al iniciar la donación:', error)
+    toast.error('Ocurrió un error al iniciar la donación.')
+  }
+}
+
 
   return (
     <div className="flex min-h-screen bg-pink-50">

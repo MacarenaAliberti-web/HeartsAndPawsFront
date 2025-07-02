@@ -46,12 +46,11 @@ export default function DonarModal({
   try {
     await onConfirm(montoFinal)
     // 🔥 No llamamos onClose aquí: el redireccionamiento ocurre desde onConfirm
-  } catch {
-  toast.dismiss()
-  toast.error('Error al procesar la donación.')
-  setLoading(false)
-}
-
+  } catch  {
+    toast.dismiss()
+    toast.error('Error al procesar la donación.')
+    setLoading(false)
+  }
 }
 
 
