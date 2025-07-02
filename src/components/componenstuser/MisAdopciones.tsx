@@ -52,6 +52,14 @@ export default function MisAdopciones() {
         >
           Mis Donaciones
         </button>
+
+<button
+          onClick={() => router.push('/usuario/favoritos')}
+          className="text-left px-3 py-2 rounded hover:bg-pink-700"
+        >
+          Mis Favoritos
+        </button>
+
       </nav>
 
       {/* Main content */}

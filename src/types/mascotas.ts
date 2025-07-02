@@ -6,6 +6,7 @@ export interface Imagen {
 
 export interface Mascota {
   id: string
+  casoId: string // <-- agregado
   nombre: string
   tipo: string
   imagenes: Imagen[]
@@ -16,6 +17,7 @@ export interface MascotaCardProps {
   mascota: Mascota
   onConocerHistoria?: (mascota: Mascota) => void
   onAdoptar?: (id: string) => void
+  mostrarFavorito?: boolean; // Agregamos la prop opcional
 }
 
 // Esta es la que usa MascotaCard

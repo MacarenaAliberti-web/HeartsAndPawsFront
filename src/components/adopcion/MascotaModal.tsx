@@ -1,11 +1,10 @@
-//components/adopcion/MascotaModal.tsx
 'use client'
 
 import { MascotaModalProps } from '@/types/mascotas'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
-import { useUsuarioAuth } from '@/context/UsuarioAuthContext' // Ajustá si tu ruta es distinta
+import { useUsuarioAuth } from '@/context/UsuarioAuthContext'
 
 export default function MascotaModal({
   mascota,
@@ -34,7 +33,8 @@ export default function MascotaModal({
       return
     }
 
-    onAccion?.(mascota.id)
+    // Mandar el casoId si está, sino id de mascota (fallback)
+    onAccion?.(mascota.casoId ?? mascota.id)
   }
 
   return (

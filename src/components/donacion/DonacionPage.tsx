@@ -159,15 +159,25 @@ export default function DonacionPage() {
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-6">
-          {resultadosOrdenados.map((caso) => (
-            <MascotaCard
-              key={caso.id}
-              mascota={caso.mascota}
-              onConocerHistoria={() => handleConocerHistoria(caso.mascota)}
-              onAdoptar={() => handleDonar(caso.mascota)}
-              modo="donacion"
-            />
-          ))}
+          {resultadosOrdenados.map((caso) => {
+  const mascotaCompleta: Mascota = {
+    ...caso.mascota,
+    casoId: caso.id,
+    tipo: caso.tipo.toLowerCase(),
+    descripcion: caso.descripcion,
+  }
+
+  return (
+    <MascotaCard
+      key={caso.id}
+      mascota={mascotaCompleta}
+      onConocerHistoria={() => handleConocerHistoria(mascotaCompleta)}
+      onAdoptar={() => handleDonar(mascotaCompleta)}
+      modo="donacion"
+    />
+  )
+})}
+
         </div>
       </div>
 

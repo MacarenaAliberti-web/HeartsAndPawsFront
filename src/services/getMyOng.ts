@@ -6,7 +6,7 @@ export const getMyOng = async () => {
       credentials: "include", // incluye cookies
     });
 
-    if (!res.ok) throw new Error("No se pudo obtener la ONG autenticada");
+    //if (!res.ok) throw new Error("No se pudo obtener la ONG autenticada");
 
     const data = await res.json();
     return data;

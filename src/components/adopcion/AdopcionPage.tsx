@@ -31,7 +31,7 @@ export default function AdopcionPage() {
         Object.keys(filtros).length === 0
           ? await getMascotasEnAdopcion()
           : await getMascotasFiltradas(filtros)
-console.log('🐾 Resultados filtrados:', data) // <-- agregá esto
+
       setResultados(data)
     } catch {
       setError('Hubo un error al cargar las mascotas.')
@@ -65,7 +65,7 @@ console.log('🐾 Resultados filtrados:', data) // <-- agregá esto
    const caso = resultados.find(c => c.mascota.id === id)
 if (!caso) return
 
-console.log('➡️ Adoptar mascota ID:', caso.mascota.id, 'Nombre:', caso.mascota.nombre)
+
 
 toast.success(`¡Gracias por querer adoptar a ${caso.mascota.nombre}! 🐶🐱`)
 setMostrandoHistoria(false)
@@ -142,15 +142,25 @@ router.push(`/adoptar/formulario-adopcion?id=${caso.mascota.id}`)
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-6">
-          {resultadosOrdenados.map((caso) => (
-            <MascotaCard
-              key={caso.id}
-              mascota={caso.mascota}
-              onConocerHistoria={() => handleConocerHistoria(caso.mascota)}
-              onAdoptar={() => handleAdoptar(caso.mascota.id)}
-              modo="adopcion"
-            />
-          ))}
+         {resultadosOrdenados.map((caso) => {
+  const mascota = {
+    ...caso.mascota,
+    casoId: caso.id,
+    tipo: caso.tipo.toLowerCase(), 
+    descripcion: caso.descripcion, 
+  }
+
+  return (
+    <MascotaCard
+      key={caso.id}
+      mascota={mascota}
+      onConocerHistoria={() => handleConocerHistoria(mascota)}
+      onAdoptar={() => handleAdoptar(mascota.id)}
+      modo="adopcion"
+    />
+  )
+})}
+
         </div>
       </div>
 

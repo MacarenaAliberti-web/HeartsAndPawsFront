@@ -8,7 +8,7 @@ import { useUsuarioAuth } from '@/context/UsuarioAuthContext'
 type DonarModalProps = {
   visible: boolean
   onClose: () => void
-  onConfirm: (monto: number) => void
+  onConfirm: (monto: number) => Promise<void> | void
 }
 
 export default function DonarModal({
@@ -26,37 +26,61 @@ export default function DonarModal({
 
   const opciones = [3000, 5000, 10000]
 
-  const handleConfirmar = () => {
-    if (!usuario) {
-      toast.error('Necesitás iniciar sesión para donar.')
-      router.push('/login')
-      return
-    }
-
-    const montoFinal = typeof monto === 'number' ? monto : 0
-
-    if (montoFinal < 1000) {
-      toast.error('Ingresá un monto válido (mínimo $1000).')
-      return
-    }
-
-    setLoading(true)
-    onConfirm(montoFinal)
-    setLoading(false)
-    onClose()
+  const handleConfirmar = async () => {
+  if (!usuario) {
+    toast.error('Necesitás iniciar sesión para donar.')
+    router.push('/login')
+    return
   }
+
+  const montoFinal = typeof monto === 'number' ? monto : 0
+
+  if (montoFinal < 1000) {
+    toast.error('Ingresá un monto válido (mínimo $1000).')
+    return
+  }
+
+  setLoading(true)
+  toast.loading('Redirigiéndote a Stripe para procesar tu donación... 💳')
+
+  try {
+    await onConfirm(montoFinal)
+    // 🔥 No llamamos onClose aquí: el redireccionamiento ocurre desde onConfirm
+  } catch {
+  toast.dismiss()
+  toast.error('Error al procesar la donación.')
+  setLoading(false)
+}
+
+}
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-pink-100 bg-opacity-30">
       <div className="relative bg-pink-50 rounded-2xl shadow-lg max-w-md w-full p-6 border border-pink-200 overflow-hidden">
+
         {/* Fondo decorativo */}
         <div className="absolute inset-0 opacity-10 bg-[url('/huellas-bg.png')] bg-contain bg-repeat pointer-events-none"></div>
+
+        {/* Overlay de bloqueo */}
+        {loading && (
+          <div className="absolute inset-0 bg-white bg-opacity-90 z-50 flex flex-col items-center justify-center p-6 text-center">
+            <div className="animate-spin mb-4 border-4 border-pink-300 border-t-transparent rounded-full w-10 h-10"></div>
+            <p className="text-pink-600 font-semibold">
+              Estamos redirigiéndote a la página de pago de Stripe.
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              El monto será convertido a USD 💵. No cierres ni recargues esta ventana.
+            </p>
+          </div>
+        )}
 
         {/* Botón cerrar */}
         <button
           onClick={onClose}
           className="absolute top-1 right-2 text-pink-500 hover:text-pink-700 text-3xl font-bold z-10"
           aria-label="Cerrar"
+          disabled={loading}
         >
           &times;
         </button>
@@ -76,6 +100,7 @@ export default function DonarModal({
                   ? 'bg-pink-500 text-white'
                   : 'bg-white text-pink-600 border-pink-300 hover:bg-pink-100'
               } transition-all duration-200`}
+              disabled={loading}
             >
               ${opcion}
             </button>
@@ -92,6 +117,7 @@ export default function DonarModal({
             value={monto}
             onChange={(e) => setMonto(Number(e.target.value))}
             min={1}
+            disabled={loading}
           />
         </div>
 
