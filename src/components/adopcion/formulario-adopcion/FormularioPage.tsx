@@ -122,7 +122,6 @@ export default function FormularioAdopcionPage() {
 
     try {
       const casoAdopcionId = await obtenerCasoAdopcionId(casoId)
-      console.log('casoAdopcionId obtenido:', casoAdopcionId)
 
       await enviarSolicitudAdopcion(
         { ...formData, casoAdopcionId },
@@ -132,10 +131,23 @@ export default function FormularioAdopcionPage() {
 
       toast.success('¡Solicitud enviada con éxito!')
       router.push('/adoptar/usuario-adopcion-exitoso')
-    } catch (error) {
-      console.error(error)
-      toast.error('Error al enviar formulario. Por favor, intenta nuevamente.')
-    }
+    } catch (error: unknown) {
+  if (
+    error instanceof Error &&
+    error.message.includes('no puede enviar mas de 1 solicitud')
+  ) {
+    toast.error('Ya has enviado una solicitud para este caso.')
+
+    setTimeout(() => {
+      router.push('/adoptar/adopcion')
+    }, 2000)
+
+    return
+  }
+
+  toast.error('Error al enviar formulario. Por favor, intenta nuevamente.')
+}
+
   }
 
   const pasos = [
@@ -143,7 +155,6 @@ export default function FormularioAdopcionPage() {
     <Compromisos key="paso2" formData={formData} onChange={handleChange} />,
     <div key="paso3" className="space-y-6">
       <DatosPersonales />
-     
     </div>,
     <DeclaracionFinal key="paso4" formData={formData} onChange={handleChange} />,
   ]

@@ -88,8 +88,19 @@ export const enviarSolicitudAdopcion = async (
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Error ${response.status}: ${errorText}`);
+      // Intenta parsear JSON para obtener el mensaje del error
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = null;
+      }
+
+      if (errorData?.message) {
+        throw new Error(errorData.message);
+      } else {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
     }
 
     return response.json();

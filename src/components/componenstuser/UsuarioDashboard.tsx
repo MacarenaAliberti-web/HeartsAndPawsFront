@@ -70,10 +70,11 @@ export default function DashboardSencillo() {
     getUserSupabase();
   }, [usuario, user, isEditando]);
   useEffect(() => {
-    if (!loading && !usuario && user) {
-      router.push("/login");
-    }
-  }, [usuario, loading, router, user]);
+  if (!loading && !usuario && !user) {
+    router.push('/login');
+  }
+}, [loading, usuario, user, router]);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -106,6 +107,10 @@ export default function DashboardSencillo() {
       setUploading(false);
     }
   };
+
+if (loading || (user === null && !usuario)) {
+    return <div className="flex justify-center items-center min-h-screen">Cargando usuario...</div>;
+  }
 
   return (
     <div className="flex min-h-screen bg-pink-50">
