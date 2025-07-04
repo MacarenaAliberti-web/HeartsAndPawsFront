@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { getFavoritosPorUsuario, putAgregarAFavoritos } from '@/services/favoritos'
-import { iniciarDonacion } from '@/services/donacion' // <-- Importar la función para iniciar donación
+import { iniciarDonacion, getDetalleDonacionPorCaso } from '@/services/donacion' // Importar getDetalleDonacionPorCaso
 import MascotaCard from '@/components/adopcion/MascotaCard'
 import MascotaModal from '@/components/adopcion/MascotaModal'
 import DonarModal from '@/components/donacion/DonarModal'
@@ -51,6 +51,7 @@ export default function MisFavoritos() {
   // Estado para mostrar modal de donación y casoId para donación
   const [donarModalVisible, setDonarModalVisible] = useState(false)
   const [casoDonacionId, setCasoDonacionId] = useState<string | null>(null)
+  const [detalleDonacion, setDetalleDonacion] = useState<{ meta: number; recaudado: number } | null>(null)
 
   const fetchFavoritos = useCallback(async () => {
     if (!usuario) return
@@ -90,7 +91,7 @@ export default function MisFavoritos() {
   }
 
   // Al clickear en Adoptar o Donar en la card o modal
-  const handleAdoptarODonar = (casoId: string) => {
+  const handleAdoptarODonar = async (casoId: string) => {
     const favorito = favoritos.find((f) => f.caso.id === casoId)
     if (!favorito) {
       toast.error('No se pudo encontrar el caso.')
@@ -113,46 +114,56 @@ export default function MisFavoritos() {
       })),
     }
 
-  if (mascota.tipo === 'adopcion') {
-  toast.success(`¡Gracias por querer adoptar a ${mascota.nombre}! 🐶🐱`)
-  setModalVisible(false) // Cerramos el modal si estaba abierto
-  router.push(`/adoptar/formulario-adopcion?id=${mascota.casoId}`)
-}
-
-
-    else {
+    if (mascota.tipo === 'adopcion') {
+      toast.success(`¡Gracias por querer adoptar a ${mascota.nombre}! 🐶🐱`)
+      setModalVisible(false) // Cerramos el modal si estaba abierto
+      router.push(`/adoptar/formulario-adopcion?id=${mascota.casoId}`)
+    } else {
       // Abrir modal para elegir monto en donación
       setCasoDonacionId(mascota.casoId)
       setDonarModalVisible(true)
+
+      // Obtener detalle de donación
+      try {
+        const detalle = await getDetalleDonacionPorCaso(mascota.casoId)
+        if (detalle) {
+          setDetalleDonacion({
+            meta: detalle.metaDonacion,
+            recaudado: detalle.estadoDonacion,
+          })
+        } else {
+          toast.error('No se pudo obtener la información de la donación.')
+        }
+      } catch (error) {
+        console.error('Error al obtener detalle de donación:', error)
+        toast.error('Ocurrió un error al cargar los datos de donación.')
+      }
     }
   }
 
-  
   const handleConfirmarDonacion = async (monto: number) => {
-  if (!casoDonacionId || !usuario) {
-    toast.error('Error: falta información para realizar la donación.')
-    return
-  }
-
-  // ❌ NO cerramos el modal acá — lo manejamos desde el modal mismo
-  try {
-    const data = await iniciarDonacion({
-      usuarioId: usuario.id,
-      casoId: casoDonacionId,
-      monto,
-    })
-
-    if (data?.url) {
-      window.location.href = data.url
-    } else {
-      toast.error('No se pudo generar el link de pago.')
+    if (!casoDonacionId || !usuario) {
+      toast.error('Error: falta información para realizar la donación.')
+      return
     }
-  } catch (error) {
-    console.error('Error al iniciar la donación:', error)
-    toast.error('Ocurrió un error al iniciar la donación.')
-  }
-}
 
+    try {
+      const data = await iniciarDonacion({
+        usuarioId: usuario.id,
+        casoId: casoDonacionId,
+        monto,
+      })
+
+      if (data?.url) {
+        window.location.href = data.url
+      } else {
+        toast.error('No se pudo generar el link de pago.')
+      }
+    } catch (error) {
+      console.error('Error al iniciar la donación:', error)
+      toast.error('Ocurrió un error al iniciar la donación.')
+    }
+  }
 
   return (
     <div className="flex min-h-screen bg-pink-50">
@@ -185,7 +196,7 @@ export default function MisFavoritos() {
         )}
 
         {!loading && !error && favoritos.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6 items-stretch">
             {favoritos.map((favorito) => {
               const { caso } = favorito
               const mascotaApi = caso.mascota
@@ -204,13 +215,13 @@ export default function MisFavoritos() {
               }
 
               return (
-                <div key={favorito.id} className="relative mx-10">
+                <div key={favorito.id} className="relative mx-10 h-full">
                   <MascotaCard
                     mascota={mascota}
                     modo={mascota.tipo as 'adopcion' | 'donacion'}
                     onConocerHistoria={handleConocerHistoria}
                     onAdoptar={() => handleAdoptarODonar(mascota.casoId)}
-                    mostrarFavorito={false} // <-- Aquí le dices que no muestre el corazón
+                    mostrarFavorito={false} // No mostrar el corazón
                   />
                   <button
                     onClick={() => handleEliminarFavorito(favorito)}
@@ -240,8 +251,13 @@ export default function MisFavoritos() {
         {/* Modal donación para elegir monto */}
         <DonarModal
           visible={donarModalVisible}
-          onClose={() => setDonarModalVisible(false)}
+          onClose={() => {
+            setDonarModalVisible(false)
+            setDetalleDonacion(null)
+          }}
           onConfirm={handleConfirmarDonacion}
+          meta={detalleDonacion?.meta ?? 0}
+          recaudado={detalleDonacion?.recaudado ?? 0}
         />
       </main>
     </div>

@@ -1,5 +1,7 @@
 // services/donacion.ts
 
+import { DetalleDonacion } from "@/types/detalledonacion";
+
 interface DonacionParams {
   usuarioId: string;
   casoId: string;
@@ -22,13 +24,13 @@ export async function iniciarDonacion({ usuarioId, casoId, monto }: DonacionPara
 
 
 // Meta Donacion
-export async function getDetalleDonacionPorCaso(casoId: string) {
+export async function getDetalleDonacionPorCaso(casoId: string): Promise<DetalleDonacion | null> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/donacion/detalleDonacion/${casoId}`)
-
+  
   if (!res.ok) {
     throw new Error('Error al obtener detalle de donación')
   }
 
-  const data = await res.json()
-  return data[0]  // ⬅️ Retorna solo el objeto
+  const data: DetalleDonacion[] = await res.json()
+  return data[0] || null
 }

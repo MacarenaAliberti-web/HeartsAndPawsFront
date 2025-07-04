@@ -8,17 +8,20 @@ import {
   getMascotasEnDonacion,
   getMascotasDonacionFiltradas,
 } from '@/services/mascotas'
-import { iniciarDonacion } from '@/services/donacion'
+import {
+  iniciarDonacion,
+  getDetalleDonacionPorCaso,
+} from '@/services/donacion'
 import MascotaCard from '@/components/adopcion/MascotaCard'
 import MascotaModal from '@/components/adopcion/MascotaModal'
-
-import { useUsuarioAuth } from '@/context/UsuarioAuthContext'
 import DonarModal from './DonarModal'
+import { useUsuarioAuth } from '@/context/UsuarioAuthContext'
+import { DetalleDonacion } from '@/types/detalledonacion'
 
 export default function DonacionPage() {
   const { usuario } = useUsuarioAuth()
 
-  const [tipo, setTipo] = useState<'perro' | 'gato' | ''>('')
+  const [tipo, setTipo] = useState<'perro' | 'gato' | ''>('') // filtro tipo
   const [orden, setOrden] = useState<'mas_reciente' | 'mas_antiguo'>('mas_reciente')
   const [resultados, setResultados] = useState<Caso[]>([])
   const [cargando, setCargando] = useState(false)
@@ -29,6 +32,7 @@ export default function DonacionPage() {
   // Estados para el modal de donación
   const [donarModalVisible, setDonarModalVisible] = useState(false)
   const [mascotaParaDonar, setMascotaParaDonar] = useState<Mascota | null>(null)
+  const [detalleDonacion, setDetalleDonacion] = useState<DetalleDonacion | null>(null)
 
   const fetchMascotas = useCallback(async (filtros: { tipo?: string }) => {
     setCargando(true)
@@ -62,14 +66,26 @@ export default function DonacionPage() {
     setMostrandoHistoria(true)
   }
 
-  const handleDonar = (mascota: Mascota) => {
-    setMascotaParaDonar(mascota)
-    setDonarModalVisible(true)
+  const handleDonar = async (mascota: Mascota) => {
+    if (!mascota.casoId) {
+      toast.error('Falta el caso de la mascota.')
+      return
+    }
+
+    try {
+      const detalle = await getDetalleDonacionPorCaso(mascota.casoId)
+      if (!detalle) throw new Error('No se encontró detalle de donación.')
+      setDetalleDonacion(detalle)
+      setMascotaParaDonar(mascota)
+      setDonarModalVisible(true)
+    } catch (error) {
+      console.error(error)
+      toast.error('No se pudo cargar el detalle de la donación.')
+    }
   }
 
   const handleConfirmarDonacion = async (monto: number) => {
-    const caso = resultados.find((c) => c.mascota.id === mascotaParaDonar?.id)
-    if (!caso || !usuario?.id) {
+    if (!mascotaParaDonar?.casoId || !usuario?.id) {
       toast.error('No se pudo iniciar la donación.')
       return
     }
@@ -77,7 +93,7 @@ export default function DonacionPage() {
     try {
       const data = await iniciarDonacion({
         usuarioId: usuario.id,
-        casoId: caso.id,
+        casoId: mascotaParaDonar.casoId,
         monto,
       })
 
@@ -102,54 +118,25 @@ export default function DonacionPage() {
           Estos animales necesitan tu colaboración. Gracias por tu interés en ayudarlos.
         </p>
 
-        {/* Filtros tipo y orden */}
+        {/* Filtros */}
         <div className="flex flex-col sm:flex-row sm:justify-center gap-4 max-w-md mx-auto mb-8">
-          <div className="relative w-full max-w-xs">
-            <select
-              className="appearance-none w-full px-4 py-3 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
-              value={tipo}
-              onChange={(e) => setTipo(e.target.value as 'perro' | 'gato' | '')}
-              aria-label="Filtrar por tipo de mascota"
-            >
-              <option value="">Todos</option>
-              <option value="perro">Perro</option>
-              <option value="gato">Gato</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-              <svg
-                className="w-5 h-5 text-pink-600"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-
-          <div className="relative w-full max-w-xs">
-            <select
-              className="appearance-none w-full px-4 py-3 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
-              value={orden}
-              onChange={(e) => setOrden(e.target.value as 'mas_reciente' | 'mas_antiguo')}
-              aria-label="Ordenar mascotas"
-            >
-              <option value="mas_reciente">Más reciente</option>
-              <option value="mas_antiguo">Más antiguo</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-              <svg
-                className="w-5 h-5 text-pink-600"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
+          <select
+            className="appearance-none w-full px-4 py-3 pr-10 border border-gray-300 rounded-full"
+            value={tipo}
+            onChange={(e) => setTipo(e.target.value as 'perro' | 'gato' | '')}
+          >
+            <option value="">Todos</option>
+            <option value="perro">Perro</option>
+            <option value="gato">Gato</option>
+          </select>
+          <select
+            className="appearance-none w-full px-4 py-3 pr-10 border border-gray-300 rounded-full"
+            value={orden}
+            onChange={(e) => setOrden(e.target.value as 'mas_reciente' | 'mas_antiguo')}
+          >
+            <option value="mas_reciente">Más reciente</option>
+            <option value="mas_antiguo">Más antiguo</option>
+          </select>
         </div>
 
         {cargando && <p className="text-center text-gray-500">Cargando casos...</p>}
@@ -160,28 +147,27 @@ export default function DonacionPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-6">
           {resultadosOrdenados.map((caso) => {
-  const mascotaCompleta: Mascota = {
-    ...caso.mascota,
-    casoId: caso.id,
-    tipo: caso.tipo.toLowerCase(),
-    descripcion: caso.descripcion,
-  }
+            const mascotaCompleta: Mascota = {
+              ...caso.mascota,
+              casoId: caso.id,
+              tipo: caso.tipo.toLowerCase(),
+              descripcion: caso.descripcion,
+            }
 
-  return (
-    <MascotaCard
-      key={caso.id}
-      mascota={mascotaCompleta}
-      onConocerHistoria={() => handleConocerHistoria(mascotaCompleta)}
-      onAdoptar={() => handleDonar(mascotaCompleta)}
-      modo="donacion"
-    />
-  )
-})}
-
+            return (
+              <MascotaCard
+                key={caso.id}
+                mascota={mascotaCompleta}
+                onConocerHistoria={() => handleConocerHistoria(mascotaCompleta)}
+                onAdoptar={() => handleDonar(mascotaCompleta)}
+                modo="donacion"
+              />
+            )
+          })}
         </div>
       </div>
 
-      {/* Modal para ver historia */}
+      {/* Modal historia */}
       {mascotaSeleccionada && (
         <MascotaModal
           mascota={mascotaSeleccionada}
@@ -193,12 +179,16 @@ export default function DonacionPage() {
         />
       )}
 
-      {/* Modal para elegir monto */}
-      <DonarModal
-        visible={donarModalVisible}
-        onClose={() => setDonarModalVisible(false)}
-        onConfirm={handleConfirmarDonacion}
-      />
+      {/* Modal de donación */}
+      {donarModalVisible && detalleDonacion && mascotaParaDonar && (
+        <DonarModal
+          visible={donarModalVisible}
+          onClose={() => setDonarModalVisible(false)}
+          onConfirm={handleConfirmarDonacion}
+          meta={detalleDonacion.metaDonacion}
+          recaudado={detalleDonacion.estadoDonacion}
+        />
+      )}
     </div>
   )
 }

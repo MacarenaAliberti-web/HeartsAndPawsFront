@@ -16,18 +16,15 @@ import { useUsuarioAuth } from '@/context/UsuarioAuthContext'
 function pasoValido(paso: number, formData: FormularioAdopcionData): boolean {
   switch (paso) {
     case 1:
-      return true
+      return (
+        formData.tipoVivienda.trim() !== '' &&
+        formData.integrantesFlia > 0 &&
+        formData.hijos >= 0 &&
+        formData.hayOtrasMascotas >= 0 &&
+        (formData.hayOtrasMascotas === 0 ||
+          (formData.descripcionOtrasMascotas?.trim() || '') !== '')
+      )
     case 2:
-  return (
-    formData.tipoVivienda.trim() !== '' &&
-    formData.integrantesFlia > 0 &&
-    formData.hijos >= 0 &&
-    formData.hayOtrasMascotas >= 0 &&
-(formData.hayOtrasMascotas === 0 || (formData.descripcionOtrasMascotas?.trim() || '') !== '')
-
-  )
-
-    case 3:
       return (
         formData.cubrirGastos === 'Sí' &&
         formData.darAlimentoCuidados === 'Sí' &&
@@ -35,6 +32,8 @@ function pasoValido(paso: number, formData: FormularioAdopcionData): boolean {
         formData.devolucionDeMascota === 'Sí' &&
         (formData.siNoPodesCuidarla?.trim() || '') !== ''
       )
+    case 3:
+      return true
     case 4:
       return formData.declaracionFinal === 'Sí'
     default:
@@ -77,26 +76,28 @@ export default function FormularioAdopcionPage() {
   }, [usuario, searchParams])
 
   const handleChange = (
-  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-) => {
-  const { name, value } = e.target
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target
 
- if (name === 'hayOtrasMascotas' || name === 'integrantesFlia' || name === 'hijos') {
-  const min = name === 'integrantesFlia' ? 1 : 0;
-  const num = Number(value);
-  setFormData((prev) => ({
-    ...prev,
-    [name]: isNaN(num) || num < min ? min : num,
-  }));
-} else {
-  setFormData((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
-}
-
-}
-
+    if (
+      name === 'hayOtrasMascotas' ||
+      name === 'integrantesFlia' ||
+      name === 'hijos'
+    ) {
+      const min = name === 'integrantesFlia' ? 1 : 0
+      const num = Number(value)
+      setFormData((prev) => ({
+        ...prev,
+        [name]: isNaN(num) || num < min ? min : num,
+      }))
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }))
+    }
+  }
 
   const avanzarPaso = () => {
     if (!pasoValido(paso, formData)) {
@@ -107,41 +108,43 @@ export default function FormularioAdopcionPage() {
   }
 
   const enviarFormulario = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault()
 
-  if (!pasoValido(paso, formData)) {
-    toast.error('Debes completar correctamente este paso.');
-    return;
+    if (!pasoValido(paso, formData)) {
+      toast.error('Debes completar correctamente este paso.')
+      return
+    }
+
+    if (!formData.usuarioId || !casoId) {
+      toast.error('Faltan datos esenciales para enviar el formulario.')
+      return
+    }
+
+    try {
+      const casoAdopcionId = await obtenerCasoAdopcionId(casoId)
+      console.log('casoAdopcionId obtenido:', casoAdopcionId)
+
+      await enviarSolicitudAdopcion(
+        { ...formData, casoAdopcionId },
+        formData.usuarioId,
+        casoAdopcionId
+      )
+
+      toast.success('¡Solicitud enviada con éxito!')
+      router.push('/adoptar/usuario-adopcion-exitoso')
+    } catch (error) {
+      console.error(error)
+      toast.error('Error al enviar formulario. Por favor, intenta nuevamente.')
+    }
   }
-
-  if (!formData.usuarioId || !casoId) {
-    toast.error('Faltan datos esenciales para enviar el formulario.');
-    return;
-  }
-
-  try {
-    const casoAdopcionId = await obtenerCasoAdopcionId(casoId);
-    console.log('casoAdopcionId obtenido:', casoAdopcionId);
-
-    await enviarSolicitudAdopcion(
-      { ...formData, casoAdopcionId },
-      formData.usuarioId,
-      casoAdopcionId
-    );
-
-    toast.success('¡Solicitud enviada con éxito!');
-    router.push('/adoptar/usuario-adopcion-exitoso');
-  } catch (error) {
-    console.error(error);
-    toast.error('Error al enviar formulario. Por favor, intenta nuevamente.');
-  }
-};
-
 
   const pasos = [
-    <DatosPersonales key="paso1" />,
-    <SeccionHogar key="paso2" formData={formData} onChange={handleChange} />,
-    <Compromisos key="paso3" formData={formData} onChange={handleChange} />,
+    <SeccionHogar key="paso1" formData={formData} onChange={handleChange} />,
+    <Compromisos key="paso2" formData={formData} onChange={handleChange} />,
+    <div key="paso3" className="space-y-6">
+      <DatosPersonales />
+     
+    </div>,
     <DeclaracionFinal key="paso4" formData={formData} onChange={handleChange} />,
   ]
 
@@ -173,7 +176,7 @@ export default function FormularioAdopcionPage() {
 
         {pasos[paso - 1]}
 
-        <div className="flex justify-center mt-6 space-x-4">
+        <div className="flex justify-center mt-6 gap-4 flex-wrap">
           {paso > 1 && (
             <button
               type="button"
@@ -181,6 +184,16 @@ export default function FormularioAdopcionPage() {
               className="px-4 py-2 text-white bg-pink-400 rounded hover:bg-pink-500 transition"
             >
               Atrás
+            </button>
+          )}
+
+          {paso === 3 && (
+            <button
+              type="button"
+              onClick={() => router.push('/dashboard/usuario')}
+              className="px-4 py-2 bg-pink-100 text-pink-600 border border-pink-300 rounded hover:bg-pink-200 transition"
+            >
+              Editar mis datos personales
             </button>
           )}
 

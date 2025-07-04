@@ -33,7 +33,7 @@ export const UsuarioAuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const data = await getMyUser();
         if (data && (data.id || data.usuario)) {
-          const usuarioData = data.usuario || data; // compatible con ambas estructuras
+          const usuarioData = data.usuario || data; 
           setUsuario(usuarioData);
           setUserLogged(true);
         } else {

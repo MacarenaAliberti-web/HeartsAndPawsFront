@@ -51,6 +51,10 @@ export default function DonacionCard({ donacion }: DonacionCardProps) {
   const color = colorEstadoPago[estado] || 'bg-gray-100 text-gray-800'
   const icono = iconoEstado[estado] || '❔'
 
+const TASA_CAMBIO = 1000; // ARS por USD
+const montoEnPesos = donacion.monto * TASA_CAMBIO;
+
+
   return (
     <div className="relative bg-white border border-pink-300 rounded-lg shadow-md p-4 md:pr-24 flex flex-col md:flex-row gap-4">
       {/* Badge flotante: en el centro a la derecha en md+, arriba a la derecha en mobile */}
@@ -82,8 +86,9 @@ export default function DonacionCard({ donacion }: DonacionCardProps) {
         <h2 className="text-xl font-semibold text-pink-600 mb-1">{donacion.mascota.nombre}</h2>
         <p className="text-gray-700 font-medium">{donacion.organizacion.nombre}</p>
         <p className="text-gray-600 text-sm mt-1">
-          <span className="font-semibold">Monto:</span> ${donacion.monto.toLocaleString()}
-        </p>
+  <span className="font-semibold">Monto:</span> ${donacion.monto.toLocaleString()} USD (~${montoEnPesos.toLocaleString()} ARS)
+</p>
+
         <p className="text-gray-600 text-sm">
           <span className="font-semibold">Fecha:</span> {fechaFormateada}
         </p>

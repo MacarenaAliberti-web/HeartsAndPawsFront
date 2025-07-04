@@ -28,20 +28,27 @@ export default function MisDonaciones() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    async function fetchDonaciones() {
-      try {
-        const data = await getMisDonaciones();
-        setDonaciones(data);
-      } catch {
-        setError('No se pudieron cargar tus donaciones. Asegurate de estar logueado.');
-      } finally {
-        setLoading(false);
-      }
-    }
+useEffect(() => {
+  async function fetchDonaciones() {
+    try {
+      const data = await getMisDonaciones();
 
-    fetchDonaciones();
-  }, []);
+      // Ordenamos de más reciente a más antigua
+      const ordenadas = data.sort(
+        (a: Donacion, b: Donacion) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+      );
+
+      setDonaciones(ordenadas);
+    } catch {
+      setError('No se pudieron cargar tus donaciones');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  fetchDonaciones();
+}, []);
+
 
   return (
     <div className="flex min-h-screen bg-pink-50">

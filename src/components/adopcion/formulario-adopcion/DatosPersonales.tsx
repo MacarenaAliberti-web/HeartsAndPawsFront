@@ -18,7 +18,10 @@ export default function DatosPersonales() {
 
   return (
     <div className="max-w-xl mx-auto bg-white border border-pink-300 rounded-xl p-8 shadow-md">
-      <h2 className="text-2xl font-bold text-center text-pink-600 mb-6">Datos Personales</h2>
+      <h2 className="text-2xl font-bold text-center text-pink-600 mb-4">Datos Personales</h2>
+      <p className="text-sm text-gray-700 mb-6 text-center">
+        Estos datos serán enviados junto con tu solicitud. Si deseas modificarlos, por favor actualízalos desde tu perfil de usuario y vuelve a iniciar el formulario de adopción.
+      </p>
       <ul className="space-y-4">
         {datos.map((dato, index) => (
           <li key={index}>

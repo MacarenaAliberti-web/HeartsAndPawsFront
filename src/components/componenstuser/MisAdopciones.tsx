@@ -16,9 +16,10 @@ export default function MisAdopciones() {
     async function fetchAdopciones() {
       try {
         const data = await getMisSolicitudesDeAdopcion();
+          console.log('Solicitudes recibidas:', data); 
         setAdopciones(data);
       } catch {
-        setError('No se pudieron cargar tus solicitudes. Asegurate de estar logueado.');
+        setError('No se pudieron cargar tus solicitudes');
       } finally {
         setLoading(false);
       }

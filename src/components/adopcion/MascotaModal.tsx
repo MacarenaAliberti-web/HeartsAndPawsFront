@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import { useUsuarioAuth } from '@/context/UsuarioAuthContext'
 import { getDetalleDonacionPorCaso } from '@/services/donacion'
-import { useEffect, useState } from 'react' // ✅ import necesario
+import { useEffect, useState } from 'react' 
 
 export default function MascotaModal({
   mascota,
@@ -26,13 +26,18 @@ export default function MascotaModal({
     const cargarDonacion = async () => {
       if (modo !== 'donacion' || !mascota.casoId) return
       try {
-        const detalle = await getDetalleDonacionPorCaso(mascota.casoId)
-        setMeta(detalle.metaDonacion)
-        setRecaudado(detalle.estadoDonacion)
-        console.log('Donación modal:', detalle) // opcional
-      } catch (error) {
-        console.error('Error al obtener meta en el modal:', error)
-      }
+  const detalle = await getDetalleDonacionPorCaso(mascota.casoId)
+  if (detalle) {
+    setMeta(detalle.metaDonacion)
+    setRecaudado(detalle.estadoDonacion)
+  } else {
+    setMeta(null)
+    setRecaudado(null)
+  }
+} catch (error) {
+  console.error('Error al obtener meta en el modal:', error)
+}
+
     }
 
     cargarDonacion()
