@@ -147,6 +147,14 @@ if (loading || (user === null && !usuario)) {
 >
   Mis Favoritos
 </button>
+
+<button
+  onClick={() => router.push("/chat")}
+  className="text-left px-3 py-2 rounded hover:bg-pink-700"
+>
+  Mensajes
+</button>
+
       </nav>
 
       {/* Contenido principal */}

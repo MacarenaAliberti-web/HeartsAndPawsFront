@@ -48,6 +48,12 @@ const MyAccount = () => {
             {item.label}
           </button>
         ))}
+        <button
+          className="block w-full text-left py-2 px-3 rounded hover:bg-pink-700"
+          onClick={() => router.push("/chat")}
+        >
+          Mensajes
+        </button>
       </aside>
 
       <main className="flex-1 p-10 bg-pink-50">
