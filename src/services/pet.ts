@@ -4,8 +4,9 @@ import { NuevaMascotaData } from "@/components/componentsONG/NewPet";
 
 // Crear mascota
 export const createPet = async (body: NuevaMascotaData) => {
-  const res = await fetch("https://backend-hearts-paws-dev.onrender.com/mascotas", {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/mascotas`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
@@ -20,8 +21,9 @@ export const petImages = async (mascotaId: string, imagenes: FileList) => {
   const formData = new FormData();
   Array.from(imagenes).forEach((img) => formData.append("imagenes", img));
 
-  const res = await fetch(`https://backend-hearts-paws-dev.onrender.com/mascotas/${mascotaId}/imagenes`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/mascotas/${mascotaId}/imagenes`, {
     method: "POST",
+    credentials: "include",
     body: formData,
   });
 

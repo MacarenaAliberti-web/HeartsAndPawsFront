@@ -77,7 +77,7 @@ const Navbar = () => {
         icon: <FaExclamationTriangle />,
       },
 
-      { label: "Mensajes", href: "/chat", icon: <FaCommentDots /> },
+      
       {
         label: "Cerrar sesión",
         href: "#",

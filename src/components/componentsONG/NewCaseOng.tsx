@@ -37,7 +37,7 @@ const body: CasoBody =
         descripcion: data.description,
         tipo: "DONACION",
         mascotaId: data.petId, // ahora TypeScript lo trata como string
-        ongId: ong.id,
+       
         donacion: {
           metaDonacion: donationGoalNum,
         },
@@ -47,7 +47,7 @@ const body: CasoBody =
         descripcion: data.description,
         tipo: "ADOPCION",
         mascotaId: data.petId,
-        ongId: ong.id,
+        
       };
 
 

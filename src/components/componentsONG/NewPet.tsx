@@ -1,7 +1,3 @@
-
-
-
-
 "use client";
 import { toast } from "react-hot-toast";
 import React, { useEffect, useState } from "react";
@@ -30,14 +26,15 @@ export interface NuevaMascotaData {
   edad: number;
   descripcion: string;
   tipoId: string;
-  organizacionId: string;
+  
 }
 
 const NewPet = () => {
   const { ong } = useOngAuth();
   const router = useRouter();
   const [tipos, setTipos] = useState<TipoMascota[]>([]);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+ const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
 
   const [loading, setLoading] = useState(false);
 
@@ -61,16 +58,23 @@ const NewPet = () => {
     fetchTipos();
   }, []);
 
-  useEffect(() => {
-  const archivo = watch("imagenes")?.[0];
-  if (!archivo) {
-    setPreviewUrl(null);
+  const imagenesSeleccionadas = watch("imagenes");
+
+useEffect(() => {
+  if (!imagenesSeleccionadas || imagenesSeleccionadas.length === 0) {
+    setPreviewUrls([]);
     return;
   }
-  const objectUrl = URL.createObjectURL(archivo);
-  setPreviewUrl(objectUrl);
-  return () => URL.revokeObjectURL(objectUrl);
-}, [watch("imagenes")]);
+  const objectUrls = Array.from(imagenesSeleccionadas).map((archivo) =>
+    URL.createObjectURL(archivo)
+  );
+  setPreviewUrls(objectUrls);
+
+  return () => {
+    objectUrls.forEach((url) => URL.revokeObjectURL(url));
+  };
+}, [imagenesSeleccionadas]);
+
 
 
   const onSubmit = async (data: IMascotaFormData) => {
@@ -87,7 +91,7 @@ const NewPet = () => {
         edad: Number(data.edad),
         descripcion: data.descripcion,
         tipoId: data.tipoId,
-        organizacionId: ong.id,
+       
       });
 
       if (data.imagenes.length > 0) {
@@ -197,15 +201,20 @@ const NewPet = () => {
           )}
         </div>
 
-        {previewUrl && (
-          <div className="mt-2">
-            <img
-              src={previewUrl}
-              alt="Vista previa"
-              className="max-w-xs max-h-40 rounded-md object-contain border border-gray-300"
-            />
-          </div>
-        )}
+        {previewUrls.length > 0 && (
+  <div className="mt-2 flex gap-2 overflow-x-auto">
+    {previewUrls.map((url, index) => (
+      <img
+        key={index}
+        src={url}
+        alt={`Vista previa ${index + 1}`}
+        className="max-w-xs max-h-40 rounded-md object-contain border border-gray-300"
+      />
+    ))}
+  </div>
+)}
+
+
 
         <button
           type="submit"
@@ -219,7 +228,6 @@ const NewPet = () => {
 };
 
 export default NewPet;
-
 
 
 
