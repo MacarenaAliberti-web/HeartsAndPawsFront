@@ -39,7 +39,7 @@ export default function RootLayout({
           <UsuarioAuthProvider>
             <OngAuthProvider>
               <NavbarWrapper />              
-              <main className="pt-16">{children}</main>
+              <main className=" bg-pink-50 min-h-screen">{children}</main>
               <Toaster />
             </OngAuthProvider>
           </UsuarioAuthProvider>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
@@ -13,48 +12,61 @@ const supabase = createClient(
 interface AuthContextProps {
   session: Session | null;
   user: User | null;
+  token: string | null;
 }
 
 const AuthContext = createContext<AuthContextProps>({
   session: null,
   user: null,
+  token: null,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-   const supabasesession =  supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      console.log('data: ' + JSON.stringify(session));
-      const token = session?.access_token;
-      if (token) {
-        const res = fetchConToken(token);
-        console.log('soy la respuesta del token: '+res);
+    const syncToken = async (session: Session | null) => {
+      if (!session) return;
+
+      const token = session.access_token;
+      setToken(token); // ✅ Guardamos token en estado
+
+      console.log("Access token actualizado:", token);
+
+      try {
+        const res = await fetchConToken(token);
+        console.log("Token sincronizado con éxito:", res);
+      } catch (error) {
+        console.error("Error al sincronizar token:", error);
       }
+    };
 
-    });
-    console.log('soy la seession que tengo: ' +  supabasesession);
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("Evento auth:", _event, session);
+    // Obtener sesión inicial
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-        
-
+      setToken(session?.access_token ?? null); // ✅ Guardar token inicial
+      syncToken(session);
     });
-   
+
+    // Suscribirse a cambios de auth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Cambio de auth:", _event, session);
+      setSession(session);
+      setUser(session?.user ?? null);
+      setToken(session?.access_token ?? null); // ✅ Actualizar token
+      syncToken(session);
+    });
+
     return () => {
       subscription.unsubscribe();
     };
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, user }}>
+    <AuthContext.Provider value={{ session, user, token }}>
       {children}
     </AuthContext.Provider>
   );

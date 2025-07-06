@@ -34,8 +34,8 @@ export interface RespuestaAdopcion {
 
 export const enviarSolicitudAdopcion = async (
   formData: FormularioAdopcionData,
-  usuarioId: string,
-  casoAdopcionId: string
+  casoAdopcionId: string,
+  token: string | null
 ): Promise<RespuestaAdopcion> => {
   try {
     const {
@@ -53,7 +53,6 @@ export const enviarSolicitudAdopcion = async (
     } = formData;
 
     const body = {
-      usuarioId,
       casoAdopcionId,
       tipoVivienda,
       integrantesFlia,
@@ -78,17 +77,27 @@ export const enviarSolicitudAdopcion = async (
       }
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/solicitud-adoptar`, {
+    // Construcción dinámica de headers y configuración
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    const fetchOptions: RequestInit = {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
+      headers,
       body: JSON.stringify(body),
-    });
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      fetchOptions.credentials = 'omit'; // omitimos cookies
+    } else {
+      fetchOptions.credentials = 'include'; // usamos cookies
+    }
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/solicitud-adoptar`, fetchOptions);
 
     if (!response.ok) {
-      // Intenta parsear JSON para obtener el mensaje del error
       let errorData;
       try {
         errorData = await response.json();
@@ -103,7 +112,7 @@ export const enviarSolicitudAdopcion = async (
       }
     }
 
-    return response.json();
+    return await response.json();
   } catch (error: unknown) {
     if (error instanceof Error) {
       throw new Error('Error al enviar la solicitud: ' + error.message);

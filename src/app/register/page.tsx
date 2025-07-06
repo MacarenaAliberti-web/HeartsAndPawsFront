@@ -1,13 +1,24 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import React, { useEffect } from 'react';
 
 export default function RegisterTypeSelector() {
   const router = useRouter();
 
+  useEffect(() => {
+    // Bloquear scroll del body cuando el componente está montado
+    document.body.style.overflow = 'hidden';
+
+    // Limpiar al desmontar
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-pink-50 px-4">
-      <div className="max-w-xl w-full bg-white p-8 rounded-xl shadow-lg border border-pink-300">
+    <div className="fixed inset-0 bg-pink-50 overflow-hidden flex items-center justify-center px-4">
+      <div className="max-w-xl w-full bg-white p-8 rounded-xl shadow-lg border border-pink-300 box-border">
         <h1 className="text-3xl font-bold text-pink-600 text-center mb-8">
           ¿Cómo querés registrarte?
         </h1>

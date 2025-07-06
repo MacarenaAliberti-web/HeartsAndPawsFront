@@ -76,6 +76,24 @@ export default function DashboardSencillo() {
 }, [loading, usuario, user, router]);
 
 
+useEffect(() => {
+  const originalOverflow = document.body.style.overflow;
+  const originalPaddingRight = document.body.style.paddingRight;
+
+  const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+  if (scrollbarWidth > 0) {
+    document.body.style.paddingRight = `${scrollbarWidth}px`;
+  }
+
+  document.body.style.overflow = "hidden";
+
+  return () => {
+    document.body.style.overflow = originalOverflow;
+    document.body.style.paddingRight = originalPaddingRight;
+  };
+}, []);
+
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUserData((prev) => ({ ...prev, [name]: value }));
@@ -150,8 +168,8 @@ if (loading || (user === null && !usuario)) {
       </nav>
 
       {/* Contenido principal */}
-      <main className="flex-1 p-10">
-        <section className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6 border border-pink-100">
+    <main className="flex-1 flex items-start justify-center pt-20 p-10 min-h-screen">
+        <section className="w-full max-w-3xl bg-white rounded-lg shadow p-6 border border-pink-100">
           <div className="flex items-center space-x-6 mb-6">
             <div className="relative w-28 h-28">
               <div className="w-28 h-28 rounded-full border-2 border-pink-400 shadow overflow-hidden relative bg-white">

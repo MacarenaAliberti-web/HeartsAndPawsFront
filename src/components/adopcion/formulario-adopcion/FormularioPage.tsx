@@ -11,7 +11,7 @@ import DeclaracionFinal from './DeclaracionFinal'
 
 import { FormularioAdopcionData } from '@/types/formularioadopcion'
 import { enviarSolicitudAdopcion, obtenerCasoAdopcionId } from '@/services/adopcion'
-import { useUsuarioAuth } from '@/context/UsuarioAuthContext'
+import { useAuth } from '@/components/SupabaseProvider'
 
 function pasoValido(paso: number, formData: FormularioAdopcionData): boolean {
   switch (paso) {
@@ -43,13 +43,12 @@ function pasoValido(paso: number, formData: FormularioAdopcionData): boolean {
 
 export default function FormularioAdopcionPage() {
   const [paso, setPaso] = useState(1)
+  const [loading, setLoading] = useState(false) // <- nuevo estado
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { usuario } = useUsuarioAuth()
-
+const { token } = useAuth();
   const [casoId, setCasoId] = useState('')
   const [formData, setFormData] = useState<FormularioAdopcionData>({
-    usuarioId: '',
     casoAdopcionId: '',
     tipoVivienda: '',
     integrantesFlia: 0,
@@ -66,14 +65,8 @@ export default function FormularioAdopcionPage() {
 
   useEffect(() => {
     const casoParam = searchParams?.get('id') || ''
-    const usuarioId = usuario?.id || ''
     setCasoId(casoParam)
-
-    setFormData((prev) => ({
-      ...prev,
-      usuarioId,
-    }))
-  }, [usuario, searchParams])
+  }, [searchParams])
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -115,37 +108,38 @@ export default function FormularioAdopcionPage() {
       return
     }
 
-    if (!formData.usuarioId || !casoId) {
-      toast.error('Faltan datos esenciales para enviar el formulario.')
+    if (!casoId) {
+      toast.error('Falta el ID del caso de adopción.')
       return
     }
 
-    try {
-      const casoAdopcionId = await obtenerCasoAdopcionId(casoId)
+    setLoading(true) // <- activar loading
+try {
+  const casoAdopcionId = await obtenerCasoAdopcionId(casoId)
 
-      await enviarSolicitudAdopcion(
-        { ...formData, casoAdopcionId },
-        formData.usuarioId,
-        casoAdopcionId
-      )
+  await enviarSolicitudAdopcion(
+    { ...formData, casoAdopcionId },
+    casoAdopcionId, token
+  )
 
-      toast.success('¡Solicitud enviada con éxito!')
-      router.push('/adoptar/usuario-adopcion-exitoso')
-    } catch (error: unknown) {
+  toast.success('¡Solicitud enviada con éxito!')
+  router.push('/adoptar/usuario-adopcion-exitoso')
+  return // ⬅️ Esto evita que se ejecute el `finally`
+} catch (error: unknown) {
   if (
     error instanceof Error &&
     error.message.includes('no puede enviar mas de 1 solicitud')
   ) {
     toast.error('Ya has enviado una solicitud para este caso.')
-
     setTimeout(() => {
       router.push('/adoptar/adopcion')
     }, 2000)
-
-    return
+    return // ⬅️ También salir aquí
   }
 
   toast.error('Error al enviar formulario. Por favor, intenta nuevamente.')
+} finally {
+  setLoading(false)
 }
 
   }
@@ -160,7 +154,7 @@ export default function FormularioAdopcionPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-pink-50 py-10 px-4 flex justify-center">
+    <div className="min-h-screen bg-pink-50 py-10 px-4 flex justify-center relative">
       <form
         className="w-full max-w-3xl space-y-10 bg-white p-8 rounded-xl shadow-md"
         onSubmit={enviarFormulario}
@@ -236,6 +230,16 @@ export default function FormularioAdopcionPage() {
           )}
         </div>
       </form>
+
+      {/* Overlay loading */}
+      {loading && (
+        <div className="fixed inset-0 z-50 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center pointer-events-auto">
+          <div className="text-pink-600 font-semibold text-lg animate-pulse text-center mb-4">
+            Enviando solicitud, por favor aguardá...
+          </div>
+          <div className="w-8 h-8 border-4 border-pink-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
     </div>
   )
 }

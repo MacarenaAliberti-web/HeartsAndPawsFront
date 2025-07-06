@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useUsuarioAuth } from "@/context/UsuarioAuthContext";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { authMe } from "@/services/login";
-
 
 export default function LoginUsuario() {
   const router = useRouter();
@@ -17,65 +16,83 @@ export default function LoginUsuario() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Bloqueo scroll al montar y restaurar al desmontar
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    const originalPaddingRight = document.body.style.paddingRight;
+
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.paddingRight = originalPaddingRight;
+    };
+  }, []);
+
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!email.trim()) {
-      toast.error("Por favor ingresa tu email");
-      return;
-    }
-    if (!validateEmail(email)) {
-      toast.error("El formato del email no es válido");
-      return;
-    }
-    if (!password) {
-      toast.error("Por favor ingresa tu contraseña");
-      return;
-    }
-    if (password.length < 6) {
-      toast.error("La contraseña debe tener al menos 6 caracteres");
-      return;
-    }
+  if (!email.trim()) {
+    toast.error("Por favor ingresa tu email");
+    return;
+  }
+  if (!validateEmail(email)) {
+    toast.error("El formato del email no es válido");
+    return;
+  }
+  if (!password) {
+    toast.error("Por favor ingresa tu contraseña");
+    return;
+  }
+  if (password.length < 6) {
+    toast.error("La contraseña debe tener al menos 6 caracteres");
+    return;
+  }
 
-    setLoading(true);
-    try {
-      const success = await loginUsuario(email, password);
+  setLoading(true);
+  try {
+    const success = await loginUsuario(email, password);
 
-      if (success) {
-        
+    if (success) {
       const authme = await authMe();
       const rol = authme ? await authme.json() : {};
-      console.log('YO SOY EL ROL: ' + rol.rol);
 
-toast.success("Login exitoso, redirigiendo...");
-
-switch (rol.rol) {
-  case "ADMIN":
-    router.push("/dashboard/admin");
-    break;
-  case "USUARIO":
-    router.push("/dashboard/usuario");
-    break;
-  case "ONG":
-    router.push("/dashboard/ong");
-    break;
-  default:
-    toast.error("Credenciales inválidas");
-}
+      switch (rol.rol) {
+        case "ADMIN":
+          router.push("/dashboard/admin");
+          break;
+        case "USUARIO":
+          router.push("/dashboard/usuario");
+          break;
+        case "ONG":
+          router.push("/dashboard/ong");
+          break;
+        default:
+          toast.error("Credenciales inválidas");
+          setLoading(false); // solo si hubo error
       }
-    } catch (error) {
-      toast.error("Error de conexión, intenta nuevamente");
-      console.log(error);
-    } finally {
-      setLoading(false);
+    } else {
+      setLoading(false); // en caso de login fallido
     }
-  };
+  } catch (error) {
+    toast.error("Error de conexión, intenta nuevamente");
+    console.log(error);
+    setLoading(false);
+  }
+};
+
 
   return (
+  <>
     <form
       onSubmit={handleLogin}
       className="max-w-md p-6 mx-auto bg-white border border-pink-300 shadow-md rounded-xl"
@@ -128,18 +145,31 @@ switch (rol.rol) {
         {loading ? "Ingresando..." : "Entrar"}
       </button>
 
-        
-<div className="mt-6 text-center text-sm text-gray-600">
-  ¿No tenés una cuenta?{" "}
-  <button
-    type="button"
-    onClick={() => router.push("/register")}
-    className="text-pink-600 font-semibold hover:underline"
-  >
-    Registrate acá
-  </button>
-</div>
-      
+      <div className="mt-6 text-center text-sm text-gray-600">
+        ¿No tenés una cuenta?{" "}
+        <button
+          type="button"
+          onClick={() => router.push("/register")}
+          className="text-pink-600 font-semibold hover:underline"
+        >
+          Registrate acá
+        </button>
+      </div>
     </form>
-  );
+
+    {loading && (
+  <div className="fixed inset-0 z-50 bg-white/80 backdrop-blur-sm flex items-center justify-center pointer-events-auto">
+    <div className="flex flex-col items-center gap-4">
+      <div className="text-center text-pink-600 font-semibold text-lg animate-pulse">
+        Iniciando sesión...<br />
+        Redirigiendo a tu perfil, por favor aguardá.
+      </div>
+      <div className="w-6 h-6 border-4 border-pink-600 border-t-transparent rounded-full animate-spin" />
+    </div>
+  </div>
+)}
+
+
+  </>
+);
 }

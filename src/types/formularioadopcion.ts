@@ -1,5 +1,4 @@
 export interface FormularioAdopcionData {
-  usuarioId: string;
   casoAdopcionId: string;
   tipoVivienda: string;
   integrantesFlia: number;
