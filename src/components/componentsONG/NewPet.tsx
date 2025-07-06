@@ -26,7 +26,7 @@ export interface NuevaMascotaData {
   edad: number;
   descripcion: string;
   tipoId: string;
-  organizacionId: string;
+  
 }
 
 const NewPet = () => {
@@ -91,7 +91,7 @@ useEffect(() => {
         edad: Number(data.edad),
         descripcion: data.descripcion,
         tipoId: data.tipoId,
-        organizacionId: ong.id,
+       
       });
 
       if (data.imagenes.length > 0) {

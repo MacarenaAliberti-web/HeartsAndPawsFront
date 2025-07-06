@@ -12,7 +12,7 @@ export interface CasoAdopcionBody {
   descripcion: string;
   tipo: "ADOPCION";
   mascotaId: string;
-  ongId: string;
+  
 }
 
 export interface CasoDonacionBody {
@@ -20,7 +20,7 @@ export interface CasoDonacionBody {
   descripcion: string;
   tipo: "DONACION";
   mascotaId: string;
-  ongId: string;
+  
   donacion: {
     metaDonacion?: number;
   };

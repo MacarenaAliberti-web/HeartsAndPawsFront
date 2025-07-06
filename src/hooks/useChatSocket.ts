@@ -41,19 +41,17 @@ export function useChatSocket(chatId: string | null, autorId: string | null, aut
       return;
     }
 
-    const mensajeLocal: Mensaje = {
-  id: `local-${Date.now()}`,
-  autor: { id: autorId, nombre: autorNombre }, // ← CAMBIO ACÁ
-  contenido,
-  enviado_en: new Date().toISOString(),
-};
-
-
-
-   setMensajes(prev => [...prev, mensajeLocal]);
-
-
     socket.emit('sendMessage', { chatId, autorId, contenido });
+
+//     const mensajeLocal: Mensaje = {
+//   id: `local-${Date.now()}`,
+//   autor: { id: autorId, nombre: autorNombre }, // ← CAMBIO ACÁ
+//   contenido,
+//   enviado_en: new Date().toISOString(),
+// };
+//    setMensajes(prev => [...prev, mensajeLocal]);
+//     socket.emit('sendMessage', { chatId, autorId, contenido });
+
   };
 
   return { mensajes, enviarMensaje };

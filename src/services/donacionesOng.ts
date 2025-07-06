@@ -19,7 +19,9 @@ export interface Donacion {
 }
 
 export async function getDonacionesPorOng(ongId: string): Promise<Donacion[]> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/donacion/ong/${ongId}`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/donacion/ong`,{
+    method: 'GET',
+    credentials: 'include'});
   if (!res.ok) throw new Error("Error al obtener donaciones");
   return res.json();
 }
