@@ -51,7 +51,7 @@ export default function DonacionCard({ donacion }: DonacionCardProps) {
   const color = colorEstadoPago[estado] || 'bg-gray-100 text-gray-800'
   const icono = iconoEstado[estado] || '❔'
 
-const TASA_CAMBIO = 1000; // ARS por USD
+const TASA_CAMBIO = 1205; 
 const montoEnPesos = donacion.monto * TASA_CAMBIO;
 
 
@@ -78,8 +78,6 @@ const montoEnPesos = donacion.monto * TASA_CAMBIO;
     <span className="text-pink-500 text-5xl z-10">🐾</span>
   )}
 </div>
-
-
 
       {/* Info principal */}
       <div className="flex-1">

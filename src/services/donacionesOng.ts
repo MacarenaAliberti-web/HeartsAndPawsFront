@@ -18,7 +18,7 @@ export interface Donacion {
   mascota?: Mascota | null;
 }
 
-export async function getDonacionesPorOng(ongId: string): Promise<Donacion[]> {
+export async function getDonacionesPorOng(): Promise<Donacion[]> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/donacion/ong`,{
     method: 'GET',
     credentials: 'include'});

@@ -1,11 +1,10 @@
-import OngDashboardComponent from "@/components/componentsONG/OngDashboard";
-
+import MyAccount from "@/components/componentsONG/MyAccount";
 
 export default function OngDashboard() {
   return (
     <div>
      
-      <OngDashboardComponent />
+     <MyAccount/>
      
     </div>
   );

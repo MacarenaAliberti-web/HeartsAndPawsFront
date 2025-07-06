@@ -7,7 +7,7 @@ export interface OngFormDataType {
   direccion: string;
   ciudad: string;
   pais: string;
-   creado_en:number;
+   //creado_en:number;
 }
 
 // OngAuthContext.tsx
