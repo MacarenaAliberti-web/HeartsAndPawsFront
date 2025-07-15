@@ -22,7 +22,7 @@ const SelectPet = ({ register, errors }: Props) => {
   useEffect(() => {
     if (!ong) return;
 
-    fetchPetsByOngId(ong.id)
+    fetchPetsByOngId()
       .then(setPets)
       .catch((err) => console.error("Error fetching pets", err));
   }, [ong]);

@@ -1,7 +1,7 @@
 import { CasoBody } from "@/types/formsOng";
 
 export const createCase = async (body: CasoBody) => {
-  const res = await fetch("https://backend-hearts-paws-dev.onrender.com/casos", {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/casos`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },

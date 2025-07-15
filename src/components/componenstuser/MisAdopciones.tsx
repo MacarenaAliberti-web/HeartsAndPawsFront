@@ -5,17 +5,19 @@ import { getMisSolicitudesDeAdopcion } from '@/services/usuario';
 import AdopcionCard from './AdopcionCard';
 import { SolicitudDeAdopcion } from '@/types/adopcionesdeusuario';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../SupabaseProvider';
 
 export default function MisAdopciones() {
   const [adopciones, setAdopciones] = useState<SolicitudDeAdopcion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { token } = useAuth();
 
   useEffect(() => {
     async function fetchAdopciones() {
       try {
-        const data = await getMisSolicitudesDeAdopcion();
+        const data = await getMisSolicitudesDeAdopcion(token ?? undefined);
           console.log('Solicitudes recibidas:', data); 
         setAdopciones(data);
       } catch {
@@ -59,6 +61,12 @@ export default function MisAdopciones() {
           className="text-left px-3 py-2 rounded hover:bg-pink-700"
         >
           Mis Favoritos
+        </button>
+          <button
+          onClick={() => router.push("/chat")}
+          className="text-left px-3 py-2 rounded hover:bg-pink-700"
+        >
+          Mensajes
         </button>
 
       </nav>

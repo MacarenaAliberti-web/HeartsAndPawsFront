@@ -1,7 +1,7 @@
 // src/services/petsService.ts
 
-export const fetchPetsByOngId = async (ongId: string) => {
-  const response = await fetch(`https://backend-hearts-paws-dev.onrender.com/mascotas/ong`,{
+export const fetchPetsByOngId = async () => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/mascotas/ong`,{
     method: 'GET',
     credentials: 'include',
   });

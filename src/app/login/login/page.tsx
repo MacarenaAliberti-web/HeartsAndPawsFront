@@ -4,7 +4,6 @@ import LoginSupabaseForm from "../../../components/forms/LoginSupabase";
 
 
 export default function LoginPage() {
-console.log('LOGIN/LOGIN');
 
   return (
       

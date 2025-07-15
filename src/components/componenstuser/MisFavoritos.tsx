@@ -1,265 +1,254 @@
-'use client'
+'use client';
 
-import { useEffect, useState, useCallback } from 'react'
-import { getFavoritosPorUsuario, putAgregarAFavoritos } from '@/services/favoritos'
-import { iniciarDonacion, getDetalleDonacionPorCaso } from '@/services/donacion' // Importar getDetalleDonacionPorCaso
-import MascotaCard from '@/components/adopcion/MascotaCard'
-import MascotaModal from '@/components/adopcion/MascotaModal'
-import DonarModal from '@/components/donacion/DonarModal'
-import { useUsuarioAuth } from '@/context/UsuarioAuthContext'
-import { Mascota } from '@/types/mascotas'
-import { useRouter } from 'next/navigation'
-import toast from 'react-hot-toast'
+import { useEffect, useState, useCallback } from "react";
+import {
+  getFavoritosPorUsuario,
+  putAgregarAFavoritos,
+} from "@/services/favoritos";
+import {
+  iniciarDonacion,
+  getDetalleDonacionPorCaso,
+} from "@/services/donacion";
+import MascotaCard from "@/components/adopcion/MascotaCard";
+import MascotaModal from "@/components/adopcion/MascotaModal";
+import DonarModal from "@/components/donacion/DonarModal";
+import { useAuth } from "@/components/SupabaseProvider";
+import { Mascota } from "@/types/mascotas";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { useUsuarioAuth } from "@/context/UsuarioAuthContext";
 
-interface Imagen {
-  url: string
-}
-
-interface MascotaFavorito {
-  id?: string
-  nombre: string
-  imagenes?: Imagen[]
-}
-
+interface Imagen { url: string; }
+interface MascotaFavorito { id?: string; nombre: string; imagenes?: Imagen[]; }
 interface CasoFavorito {
-  id: string
-  titulo: string
-  descripcion: string
-  tipo: 'ADOPCION' | 'DONACION' | string
-  mascotaId: string
-  creado_en: string
-  mascota: MascotaFavorito
+  id: string; titulo: string; descripcion: string;
+  tipo: "ADOPCION" | "DONACION" | string;
+  mascotaId: string; creado_en: string;
+  mascota: MascotaFavorito;
 }
-
 interface Favorito {
-  id: string
-  usuarioId: string
-  casoId: string
-  caso: CasoFavorito
+  id: string;
+  casoId: string;
+  caso: CasoFavorito;
 }
 
 export default function MisFavoritos() {
-  const { usuario } = useUsuarioAuth()
-  const router = useRouter()
-  const [favoritos, setFavoritos] = useState<Favorito[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { user, token } = useAuth();
+  const router = useRouter();
 
-  const [mascotaSeleccionada, setMascotaSeleccionada] = useState<Mascota | null>(null)
-  const [modalVisible, setModalVisible] = useState(false)
-
-  // Estado para mostrar modal de donación y casoId para donación
-  const [donarModalVisible, setDonarModalVisible] = useState(false)
-  const [casoDonacionId, setCasoDonacionId] = useState<string | null>(null)
-  const [detalleDonacion, setDetalleDonacion] = useState<{ meta: number; recaudado: number } | null>(null)
+  const [favoritos, setFavoritos] = useState<Favorito[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [mascotaSeleccionada, setMascotaSeleccionada] = useState<Mascota | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [donarModalVisible, setDonarModalVisible] = useState(false);
+  const [casoDonacionId, setCasoDonacionId] = useState<string | null>(null);
+  const [detalleDonacion, setDetalleDonacion] = useState<{ meta: number; recaudado: number } | null>(null);
+    const { usuario } = useUsuarioAuth();
 
   const fetchFavoritos = useCallback(async () => {
-    if (!usuario) return
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const data = await getFavoritosPorUsuario(usuario.id)
-      setFavoritos(data)
+      console.log("Token para favoritos:", token);
+      const data = await getFavoritosPorUsuario(token ?? undefined);
+      console.log("Favoritos obtenidos:", data);
+      setFavoritos(data);
     } catch {
-      setError('Error al cargar tus favoritos. Asegurate de estar logueado.')
+      setError("Error al cargar tus favoritos. Asegurate de estar logueado.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [usuario])
+  }, [token]);
 
   useEffect(() => {
-    fetchFavoritos()
-  }, [fetchFavoritos])
+    if (token !== undefined) fetchFavoritos();
+  }, [fetchFavoritos, token]);
 
-  const handleEliminarFavorito = async (favorito: Favorito) => {
-    if (!usuario) {
-      toast.error('Debes estar logueado para quitar favoritos')
-      return
+  const handleEliminarFavorito = async (fav: Favorito) => {
+    if (!user && !usuario) {
+      toast.error("Debes estar logueado para quitar favoritos");
+      return;
     }
     try {
-      await putAgregarAFavoritos(usuario.id, favorito.casoId)
-      toast.success('Favorito eliminado')
-      fetchFavoritos()
+      await putAgregarAFavoritos(fav.casoId, token ?? undefined);
+      toast.success("Favorito eliminado");
+      fetchFavoritos();
     } catch {
-      toast.error('No se pudo eliminar el favorito')
+      toast.error("No se pudo eliminar el favorito");
     }
-  }
-
+  };
   const handleConocerHistoria = (mascota: Mascota) => {
-    setMascotaSeleccionada(mascota)
-    setModalVisible(true)
-  }
+    setMascotaSeleccionada(mascota);
+    setModalVisible(true);
+  };
 
-  // Al clickear en Adoptar o Donar en la card o modal
   const handleAdoptarODonar = async (casoId: string) => {
-    const favorito = favoritos.find((f) => f.caso.id === casoId)
-    if (!favorito) {
-      toast.error('No se pudo encontrar el caso.')
-      return
-    }
+    const fav = favoritos.find((f) => f.caso.id === casoId);
+    if (!fav) return toast.error("No se pudo encontrar el caso.");
+    const tipo = fav.caso.tipo.toLowerCase() === "adopcion" ? "adopcion" : "donacion";
 
-    const tipo = favorito.caso.tipo.toUpperCase()
-    const mascotaApi = favorito.caso.mascota
-    if (!mascotaApi) return
-
+    const mascotaApi = fav.caso.mascota;
+    if (!mascotaApi) return;
     const mascota: Mascota = {
-      id: mascotaApi.id ?? favorito.caso.mascotaId,
-      casoId: favorito.caso.id,
+      id: mascotaApi.id ?? fav.caso.mascotaId,
+      casoId: fav.caso.id,
       nombre: mascotaApi.nombre,
-      tipo: tipo === 'ADOPCION' ? 'adopcion' : 'donacion',
-      descripcion: favorito.caso.descripcion,
-      imagenes: (mascotaApi.imagenes ?? []).map((img, idx) => ({
-        id: img.url || String(idx),
-        url: img.url,
-      })),
-    }
+      tipo,
+      descripcion: fav.caso.descripcion,
+      imagenes: (mascotaApi.imagenes ?? []).map((img, idx) => ({ id: img.url || `${idx}`, url: img.url })),
+    };
 
-    if (mascota.tipo === 'adopcion') {
-      toast.success(`¡Gracias por querer adoptar a ${mascota.nombre}! 🐶🐱`)
-      setModalVisible(false) // Cerramos el modal si estaba abierto
-      router.push(`/adoptar/formulario-adopcion?id=${mascota.casoId}`)
+    if (mascota.tipo === "adopcion") {
+      toast.success(`¡Gracias por querer adoptar a ${mascota.nombre}!`);
+      setModalVisible(false);
+      router.push(`/adoptar/formulario-adopcion?id=${mascota.casoId}`);
     } else {
-      // Abrir modal para elegir monto en donación
-      setCasoDonacionId(mascota.casoId)
-      setDonarModalVisible(true)
-
-      // Obtener detalle de donación
+      setCasoDonacionId(mascota.casoId);
+      setDonarModalVisible(true);
       try {
-        const detalle = await getDetalleDonacionPorCaso(mascota.casoId)
-        if (detalle) {
-          setDetalleDonacion({
-            meta: detalle.metaDonacion,
-            recaudado: detalle.estadoDonacion,
-          })
-        } else {
-          toast.error('No se pudo obtener la información de la donación.')
-        }
-      } catch (error) {
-        console.error('Error al obtener detalle de donación:', error)
-        toast.error('Ocurrió un error al cargar los datos de donación.')
+        const det = await getDetalleDonacionPorCaso(mascota.casoId, token ?? undefined);
+        if (det) setDetalleDonacion({ meta: det.metaDonacion, recaudado: det.estadoDonacion });
+        else toast.error("No se pudo obtener la información de la donación.");
+      } catch {
+        toast.error("Ocurrió un error al cargar los datos de donación.");
       }
     }
+  };
+
+ const handleConfirmarDonacion = async (monto: number): Promise<void> => {
+  const usuarioId = user?.id || usuario?.id;
+
+  if (!casoDonacionId || !usuarioId) {
+    toast.error("Error: falta información para realizar la donación.");
+    return;
   }
 
-  const handleConfirmarDonacion = async (monto: number) => {
-    if (!casoDonacionId || !usuario) {
-      toast.error('Error: falta información para realizar la donación.')
-      return
+  try {
+    const res = await iniciarDonacion({ casoId: casoDonacionId, monto }, token ?? undefined);
+    if (res?.url) {
+      window.location.href = res.url;
+    } else {
+      toast.error("No se pudo generar el link de pago.");
     }
-
-    try {
-      const data = await iniciarDonacion({
-        usuarioId: usuario.id,
-        casoId: casoDonacionId,
-        monto,
-      })
-
-      if (data?.url) {
-        window.location.href = data.url
-      } else {
-        toast.error('No se pudo generar el link de pago.')
-      }
-    } catch (error) {
-      console.error('Error al iniciar la donación:', error)
-      toast.error('Ocurrió un error al iniciar la donación.')
-    }
+  } catch {
+    toast.error("Ocurrió un error al iniciar la donación.");
   }
+};
+
+
 
   return (
     <div className="flex min-h-screen bg-pink-50">
-      {/* Sidebar */}
-      <nav className="flex flex-col px-4 py-6 text-white bg-pink-600 w-60">
-        <h2 className="mb-8 text-xl font-semibold text-center">Perfil del Usuario</h2>
+       <nav className="flex flex-col px-4 py-6 text-white bg-pink-600 w-60">
+        <h2 className="mb-8 text-xl font-semibold text-center">
+          Perfil del Usuario
+        </h2>
 
-        <button onClick={() => router.push('/dashboard/usuario')} className="text-left px-3 py-2 rounded hover:bg-pink-700">
+        <button
+          onClick={() => router.push("/dashboard/usuario")}
+          className="text-left px-3 py-2 rounded hover:bg-pink-700"
+        >
           Principal
         </button>
-        <button onClick={() => router.push('/usuario/adopciones')} className="text-left px-3 py-2 rounded hover:bg-pink-700">
+        <button
+          onClick={() => router.push("/usuario/adopciones")}
+          className="text-left px-3 py-2 rounded hover:bg-pink-700"
+        >
           Mis Adopciones
         </button>
-        <button onClick={() => router.push('/usuario/donaciones')} className="text-left px-3 py-2 rounded hover:bg-pink-700">
+        <button
+          onClick={() => router.push("/usuario/donaciones")}
+          className="text-left px-3 py-2 rounded hover:bg-pink-700"
+        >
           Mis Donaciones
         </button>
-        <button onClick={() => router.push('/usuario/favoritos')} className="text-left px-3 py-2 rounded bg-pink-700 font-semibold">
+        <button
+          onClick={() => router.push("/usuario/favoritos")}
+          className="text-left px-3 py-2 rounded bg-pink-700 font-semibold"
+        >
           Mis Favoritos
+        </button>
+          <button
+          onClick={() => router.push("/chat")}
+          className="text-left px-3 py-2 rounded hover:bg-pink-700"
+        >
+          Mensajes
         </button>
       </nav>
 
-      {/* Main content */}
       <main className="flex-1 p-10">
         <h1 className="text-3xl font-bold mb-6 text-pink-700 text-center">Mis Favoritos</h1>
 
         {loading && <p className="text-center text-gray-500 mt-10">⏳ Cargando tus favoritos...</p>}
         {error && <p className="text-center text-red-600 mt-10">{error}</p>}
-        {!loading && !error && favoritos.length === 0 && (
-          <p className="text-center text-gray-500 mt-10">📭 No tenés favoritos aún.</p>
-        )}
-
+        {!loading && !error && favoritos.length === 0 && <p className="text-center text-gray-500 mt-10">📭 No tenés favoritos aún.</p>}
         {!loading && !error && favoritos.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6 items-stretch">
-            {favoritos.map((favorito) => {
-              const { caso } = favorito
-              const mascotaApi = caso.mascota
-              if (!mascotaApi) return null
-
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
+            {favoritos.map((fav) => {
+              const mascotaApi = fav.caso.mascota;
+              if (!mascotaApi) return null;
               const mascota: Mascota = {
-                id: mascotaApi.id ?? caso.mascotaId,
-                casoId: caso.id,
+                id: mascotaApi.id ?? fav.caso.mascotaId,
+                casoId: fav.caso.id,
                 nombre: mascotaApi.nombre,
-                tipo: caso.tipo.toLowerCase() === 'adopcion' ? 'adopcion' : 'donacion',
-                imagenes: (mascotaApi.imagenes ?? []).map((img, idx) => ({
-                  id: img.url || String(idx),
-                  url: img.url,
-                })),
-                descripcion: caso.descripcion,
-              }
-
+                tipo: fav.caso.tipo.toLowerCase() === "adopcion" ? "adopcion" : "donacion",
+                imagenes: (mascotaApi.imagenes ?? []).map((img, idx) => ({ id: img.url || `${idx}`, url: img.url })),
+                descripcion: fav.caso.descripcion,
+              };
               return (
-                <div key={favorito.id} className="relative mx-10 h-full">
+                <div key={fav.id} className="relative h-full">
                   <MascotaCard
                     mascota={mascota}
-                    modo={mascota.tipo as 'adopcion' | 'donacion'}
+                    modo={mascota.tipo as "adopcion" | "donacion"}
                     onConocerHistoria={handleConocerHistoria}
                     onAdoptar={() => handleAdoptarODonar(mascota.casoId)}
-                    mostrarFavorito={false} // No mostrar el corazón
+                    mostrarFavorito={false}
                   />
                   <button
-                    onClick={() => handleEliminarFavorito(favorito)}
-                    aria-label="Quitar de favoritos"
-                    className="absolute top-2 right-2 text-2xl hover:text-red-600 transition"
-                    type="button"
+                    onClick={() => handleEliminarFavorito(fav)}
+                    className="absolute top-2 right-2 text-black-600 hover:text-red-800"
+                    aria-label="Eliminar favorito"
                   >
-                    🗑️
+                   <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-6 h-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6 18L18 18M9 6V4.5a1.5 1.5 0 011.5-1.5h3A1.5 1.5 0 0115 4.5V6m4.5 0H4.5m1.5 0v12a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0017.25 18V6"
+                      />
+                    </svg>
                   </button>
                 </div>
-              )
+              );
             })}
           </div>
         )}
 
-        {/* Modal historia (MascotaModal) */}
         {mascotaSeleccionada && (
           <MascotaModal
             visible={modalVisible}
             mascota={mascotaSeleccionada}
             onClose={() => setModalVisible(false)}
             onAccion={handleAdoptarODonar}
-            modo={mascotaSeleccionada.tipo === 'adopcion' ? 'adopcion' : 'donacion'}
+            modo={mascotaSeleccionada.tipo as "adopcion" | "donacion"}
           />
         )}
 
-        {/* Modal donación para elegir monto */}
         <DonarModal
           visible={donarModalVisible}
-          onClose={() => {
-            setDonarModalVisible(false)
-            setDetalleDonacion(null)
-          }}
+          onClose={() => { setDonarModalVisible(false); setDetalleDonacion(null); }}
           onConfirm={handleConfirmarDonacion}
           meta={detalleDonacion?.meta ?? 0}
           recaudado={detalleDonacion?.recaudado ?? 0}
         />
       </main>
     </div>
-  )
+  );
 }

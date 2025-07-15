@@ -1,34 +1,40 @@
-// services/favoritos.ts
 
-export async function putAgregarAFavoritos(userId: string, casoId: string) {
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/usuarios/${userId}/favoritos/${casoId}`
 
-  const res = await fetch(url, {
-    method: 'PUT',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
 
+export async function putAgregarAFavoritos( casoId: string, token?: string) {
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/usuarios/${casoId}/favoritos`
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+ 
+
+  const res = await fetch(url, { method: 'PUT', credentials: 'include', headers })
   if (!res.ok) {
-    throw new Error('Error al agregar a favoritos')
+    const text = await res.text()
+    throw new Error(`Error ${res.status}: ${text}`)
   }
-
   return res.json()
 }
 
-export async function getFavoritosPorUsuario(userId: string) {
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/usuarios/favoritos/casos/${userId}`
+
+
+export async function getFavoritosPorUsuario(token?: string) {
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/usuarios/favoritos/casos`;
+
+  const headers: HeadersInit = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
 
   const res = await fetch(url, {
     method: 'GET',
-    credentials: 'include',
-  })
+    headers,
+    credentials: token ? 'omit' : 'include', 
+  });
 
   if (!res.ok) {
-    throw new Error('Error al obtener los favoritos del usuario')
+    throw new Error('Error al obtener los favoritos del usuario');
   }
 
-  return res.json()
+  return res.json();
 }
+

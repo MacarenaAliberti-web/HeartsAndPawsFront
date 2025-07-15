@@ -11,7 +11,7 @@ export const obtenerCasoAdopcionId = async (casoId: string): Promise<string> => 
 
     if (!res.ok) {
       const text = await res.text();
-      throw new Error(`Error ${res.status}: ${text}`);
+      throw new Error(`${res.status}: ${text}`);
     }
 
     const data = await res.json();
@@ -26,8 +26,6 @@ export const obtenerCasoAdopcionId = async (casoId: string): Promise<string> => 
 };
 
 
-
-// Define una interfaz para la respuesta que esperas del backend
 export interface RespuestaAdopcion {
   message: string;
 }
@@ -90,9 +88,9 @@ export const enviarSolicitudAdopcion = async (
 
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      fetchOptions.credentials = 'omit'; // omitimos cookies
+      fetchOptions.credentials = 'omit'; 
     } else {
-      fetchOptions.credentials = 'include'; // usamos cookies
+      fetchOptions.credentials = 'include';
     }
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/solicitud-adoptar`, fetchOptions);

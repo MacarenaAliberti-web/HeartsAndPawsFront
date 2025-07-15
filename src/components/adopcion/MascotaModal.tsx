@@ -7,6 +7,7 @@ import { toast } from 'react-hot-toast'
 import { useUsuarioAuth } from '@/context/UsuarioAuthContext'
 import { getDetalleDonacionPorCaso } from '@/services/donacion'
 import { useEffect, useState } from 'react' 
+import { useAuth } from '../SupabaseProvider'
 
 export default function MascotaModal({
   mascota,
@@ -21,6 +22,7 @@ export default function MascotaModal({
 
   const [meta, setMeta] = useState<number | null>(null)
   const [recaudado, setRecaudado] = useState<number | null>(null)
+    const { user } = useAuth();
 
   useEffect(() => {
     const cargarDonacion = async () => {
@@ -49,7 +51,7 @@ export default function MascotaModal({
   const textoBoton = modo === 'adopcion' ? '¡Quiero Adoptar!' : '¡Quiero Donar!'
 
   const handleAccion = () => {
-    if (!usuario) {
+    if (!usuario&& !user) {
       toast.error('Necesitás iniciar sesión para continuar.')
       router.push('/login')
       return

@@ -33,7 +33,7 @@ export const OngAuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setOng(null);
         }
-      } catch (error) {
+      } catch {
         setOng(null);
       } finally {
         setLoading(false);

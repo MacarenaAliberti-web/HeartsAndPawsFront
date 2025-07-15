@@ -40,7 +40,7 @@ export interface MascotaConSolicitudes {
   solicitudes: Solicitud[];
 }
 
-export async function getMascotasPorOng(ongId: string): Promise<Mascota[]> {
+export async function getMascotasPorOng(): Promise<Mascota[]> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/mascotas/mascotas-por-ong-adopcion/`,{
     method: 'GET',
     credentials: 'include',

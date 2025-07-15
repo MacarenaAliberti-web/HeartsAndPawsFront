@@ -31,8 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!session) return;
 
       const token = session.access_token;
-      setToken(token); // ✅ Guardamos token en estado
-
+      setToken(token); 
       console.log("Access token actualizado:", token);
 
       try {
@@ -43,20 +42,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // Obtener sesión inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      console.log('soy la session suapabase: ' + JSON.stringify(session));
       setUser(session?.user ?? null);
-      setToken(session?.access_token ?? null); // ✅ Guardar token inicial
+      setToken(session?.access_token ?? null); 
       syncToken(session);
     });
 
-    // Suscribirse a cambios de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log("Cambio de auth:", _event, session);
       setSession(session);
       setUser(session?.user ?? null);
-      setToken(session?.access_token ?? null); // ✅ Actualizar token
+      setToken(session?.access_token ?? null); 
       syncToken(session);
     });
 

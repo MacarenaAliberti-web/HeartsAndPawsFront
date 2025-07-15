@@ -10,6 +10,8 @@ import { FaHeart, FaRegHeart } from 'react-icons/fa'
 import { putAgregarAFavoritos, getFavoritosPorUsuario } from '@/services/favoritos'
 import { getDetalleDonacionPorCaso } from '@/services/donacion'
 import type { DetalleDonacion } from '@/types/detalledonacion'
+import { supabase } from '@/lib/supabaseClient'
+import { useAuth } from '../SupabaseProvider'
 
 interface FavoritoItem {
   caso: { id: string }
@@ -27,26 +29,27 @@ export default function MascotaCard({
   mostrarFavorito = true,
 }: Props) {
   const { usuario } = useUsuarioAuth()
+  const { token } = useAuth()
   const router = useRouter()
 
   const [esFavorito, setEsFavorito] = useState(false)
   const [detalleDonacion, setDetalleDonacion] = useState<DetalleDonacion | null>(null)
-
   const [imagenActual, setImagenActual] = useState(0)
   const totalImagenes = mascota.imagenes?.length ?? 0
 
-  const irAAnterior = () => {
-    setImagenActual((prev) => (prev === 0 ? totalImagenes - 1 : prev - 1))
-  }
-
-  const irASiguiente = () => {
-    setImagenActual((prev) => (prev === totalImagenes - 1 ? 0 : prev + 1))
-  }
+  const irAAnterior = () => setImagenActual((prev) => (prev === 0 ? totalImagenes - 1 : prev - 1))
+  const irASiguiente = () => setImagenActual((prev) => (prev === totalImagenes - 1 ? 0 : prev + 1))
 
   const textoBotonAccion = modo === 'adopcion' ? 'Adoptar' : 'Donar'
 
-  const handleAccion = () => {
-    if (!usuario) {
+  const getUserId = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    return usuario?.id || user?.id || null
+  }
+
+  const handleAccion = async () => {
+    const userId = await getUserId()
+    if (!userId) {
       toast.error('Necesitás iniciar sesión para continuar.')
       router.push('/login')
       return
@@ -55,16 +58,10 @@ export default function MascotaCard({
   }
 
   const toggleFavorito = async () => {
-    if (!usuario) {
-      toast.error('Iniciá sesión para guardar favoritos.')
-      router.push('/login')
-      return
-    }
-
     try {
-      await putAgregarAFavoritos(usuario.id, mascota.casoId)
+      await putAgregarAFavoritos( mascota.casoId, token ?? undefined)
       setEsFavorito((prev) => !prev)
-      toast.success(esFavorito ? 'Eliminado de favoritos' : 'Agregado a favoritos')
+      toast.success(!esFavorito ? 'Agregado a favoritos' : 'Eliminado de favoritos')
     } catch (error) {
       console.error(error)
       toast.error('No se pudo actualizar el favorito.')
@@ -73,10 +70,10 @@ export default function MascotaCard({
 
   useEffect(() => {
     const cargarFavoritos = async () => {
-      if (!usuario) return
+      
 
       try {
-        const favoritos: FavoritoItem[] = await getFavoritosPorUsuario(usuario.id)
+        const favoritos: FavoritoItem[] = await getFavoritosPorUsuario(token ?? undefined)
         const estaEnFavoritos = favoritos.some((f) => f.caso.id === mascota.casoId)
         setEsFavorito(estaEnFavoritos)
       } catch (error) {
@@ -85,14 +82,14 @@ export default function MascotaCard({
     }
 
     cargarFavoritos()
-  }, [usuario, mascota.casoId])
+  }, [ mascota.casoId, token])
 
   useEffect(() => {
     if (modo !== 'donacion') return
 
     const cargarDonacion = async () => {
       try {
-        const detalle = await getDetalleDonacionPorCaso(mascota.casoId)
+        const detalle = await getDetalleDonacionPorCaso(mascota.casoId,token?? undefined)
         setDetalleDonacion(detalle)
       } catch (error) {
         console.error('Error al cargar meta de donación', error)
@@ -100,7 +97,7 @@ export default function MascotaCard({
     }
 
     cargarDonacion()
-  }, [modo, mascota.casoId])
+  }, [modo, mascota.casoId,token])
 
   const recaudado = detalleDonacion?.estadoDonacion ?? 0
   const meta = detalleDonacion?.metaDonacion ?? 0
@@ -120,7 +117,6 @@ export default function MascotaCard({
         </button>
       )}
 
-      {/* 🖼 Carrusel de imágenes */}
       <div className="relative w-full h-48 bg-white flex items-center justify-center">
         {totalImagenes > 0 && (
           <Image
@@ -131,7 +127,6 @@ export default function MascotaCard({
             className="object-contain"
           />
         )}
-
         {totalImagenes > 1 && (
           <>
             <button
@@ -155,7 +150,6 @@ export default function MascotaCard({
       <div className="p-4 flex-1 flex flex-col justify-between">
         <h2 className="text-xl font-bold text-pink-600 mb-2">{mascota.nombre}</h2>
 
-        {/* ✅ Barra de progreso */}
         {modo === 'donacion' && detalleDonacion && (
           <div className="mb-3">
             <div className="flex justify-between text-xs text-gray-600 mb-1">
@@ -178,7 +172,6 @@ export default function MascotaCard({
           </div>
         )}
 
-        {/* ✅ Botones */}
         <div className="mt-auto space-y-2">
           <button
             onClick={() => onConocerHistoria?.(mascota)}
@@ -188,30 +181,29 @@ export default function MascotaCard({
             Conocer historia
           </button>
 
-         <button
-  onClick={handleAccion}
-  className={`w-full border py-2 px-4 rounded-full transition flex items-center justify-center ${
-    modo === 'donacion' && metaAlcanzada
-      ? 'border-gray-300 bg-gray-100 cursor-not-allowed'
-      : 'border-pink-600 text-pink-600 hover:bg-pink-50'
-  }`}
-  type="button"
-  disabled={modo === 'donacion' && metaAlcanzada}
-  title={
-    modo === 'donacion' && metaAlcanzada
-      ? 'La meta ya fue alcanzada. Gracias por tu interés 💖'
-      : ''
-  }
->
-  {modo === 'donacion' && metaAlcanzada ? (
-    <span className="text-lg text-pink-600 font-bold flex items-center gap-1">
-      ¡Meta alcanzada! <span className="text-lg">🐾</span>
-    </span>
-  ) : (
-    textoBotonAccion
-  )}
-</button>
-
+          <button
+            onClick={handleAccion}
+            className={`w-full border py-2 px-4 rounded-full transition flex items-center justify-center ${
+              modo === 'donacion' && metaAlcanzada
+                ? 'border-gray-300 bg-gray-100 cursor-not-allowed'
+                : 'border-pink-600 text-pink-600 hover:bg-pink-50'
+            }`}
+            type="button"
+            disabled={modo === 'donacion' && metaAlcanzada}
+            title={
+              modo === 'donacion' && metaAlcanzada
+                ? 'La meta ya fue alcanzada. Gracias por tu interés 💖'
+                : ''
+            }
+          >
+            {modo === 'donacion' && metaAlcanzada ? (
+              <span className="text-lg text-pink-600 font-bold flex items-center gap-1">
+                ¡Meta alcanzada! <span className="text-lg">🐾</span>
+              </span>
+            ) : (
+              textoBotonAccion
+            )}
+          </button>
         </div>
       </div>
     </div>

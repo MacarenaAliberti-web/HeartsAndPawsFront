@@ -102,7 +102,7 @@ const Navbar = () => {
           icon: <FaHandsHelping className="text-pink-500" />,
         },
         { label: 'Adoptar', href: '/adoptar/adopcion', icon: <FaPaw /> },
-
+       
       );
     }
 
@@ -138,12 +138,11 @@ const Navbar = () => {
     >
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-            {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 text-4xl font-semibold text-pink-600 whitespace-nowrap"
+            className="flex items-center gap-2 text-xl font-bold text-pink-600"
           >
-            <FaPaw className="text-5xl" />
+            <FaPaw className="text-2xl" />
             <span>Hearts&Paws</span>
           </Link>
 

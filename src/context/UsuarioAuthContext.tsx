@@ -33,14 +33,14 @@ export const UsuarioAuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const data = await getMyUser();
         if (data && (data.id || data.usuario)) {
-          const usuarioData = data.usuario || data; 
+          const usuarioData = data.usuario || data; // compatible con ambas estructuras
           setUsuario(usuarioData);
           setUserLogged(true);
         } else {
           setUsuario(null);
         }
       } catch (error) {
-        console.error('Error al cargar usuario', error);
+        console.log('Error al cargar usuario', error);
         setUsuario(null);
       } finally {
         setLoading(false);
@@ -64,7 +64,7 @@ export const UsuarioAuthProvider = ({ children }: { children: ReactNode }) => {
           return true;
         }
       } catch (error) {
-        console.error('Error al obtener usuario luego del login', error);
+        console.log('Error al obtener usuario luego del login', error);
       }
     }
     return false;

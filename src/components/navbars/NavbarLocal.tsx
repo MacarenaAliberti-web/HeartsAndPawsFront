@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaBuilding, FaChevronDown } from "react-icons/fa";
+import { FaBuilding, FaChartPie, FaChevronDown, FaInbox } from "react-icons/fa";
 import Link from "next/link";
 import {
   FaPaw,
@@ -16,9 +16,9 @@ import {
   FaUserShield,
   FaSignOutAlt,
   FaHome,
-  FaCommentDots,
   FaHandsHelping,
   FaUser,
+  FaCat,
 } from "react-icons/fa";
 
 import { useOngAuth } from "@/context/OngAuthContext";
@@ -47,13 +47,13 @@ const Navbar = () => {
 
   const handleLogoutOng = () => {
     logoutOng();
-    router.refresh(); 
+    router.refresh();
     router.push("/");
   };
 
   const handleLogoutUsuario = () => {
     logoutUsuario();
-    router.refresh(); 
+    router.refresh();
     router.push("/");
   };
 
@@ -76,8 +76,6 @@ const Navbar = () => {
         href: "/dashboard/ong/nueva-mascota",
         icon: <FaExclamationTriangle />,
       },
-
-      
       {
         label: "Cerrar sesión",
         href: "#",
@@ -89,9 +87,15 @@ const Navbar = () => {
     if (usuario.rol === "ADMIN") {
       menuLinks = [
         {
-          label: "Perfil Admin",
+          label: "Resumen",
+          href: "/dashboard/admin/resumen",
+          icon: <FaChartPie />,
+        },
+
+        {
+          label: "Solicitudes",
           href: "/dashboard/admin",
-          icon: <FaUserShield />,
+          icon: <FaInbox />,
         },
         {
           label: " Usuarios",
@@ -99,22 +103,20 @@ const Navbar = () => {
           icon: <FaUser />,
         },
         {
-         label: "Organizaciones",
-         href: "#",
-         icon: <FaBuilding />,
+          label: "Organizaciones",
+          href: "/dashboard/admin/organizaciones",
+          icon: <FaBuilding />,
         },
+
         {
-          label: "Otros",
+          label: "Mascotas",
           href: "#",
-          icon: <FaRegClipboard />,
+          icon: <FaCat />,
           onClick: () => setShowHistorialDropdown((prev) => !prev),
           subItems: [
-            { label: "Aprobadas", href: "/admin/historial/aprobadas" },
-            { label: "Rechazadas", href: "/admin/historial/rechazadas" },
-            { label: "Mascotas", href: "/admin/historial/rechazadas" },
-            { label: "Solicitudes", href: "/admin/historial/rechazadas" },
-            { label: "Adopciones", href: "/admin/historial/rechazadas" },
-            { label: "Donaciones", href: "/admin/historial/rechazadas" },
+            { label: "Mascotas", href: "/dashboard/admin/mascotas-registradas" },
+            { label: "Adopciones", href: "/dashboard/admin/adopciones-registradas" },
+            { label: "Donaciones", href: "/dashboard/admin/donaciones-recibidas" },
           ],
         },
         {
@@ -136,7 +138,10 @@ const Navbar = () => {
           href: "/donacion",
           icon: <FaHandsHelping className="text-pink-500" />,
         },
-        { label: "Adoptar", href: "/adoptar/adopcion", icon: <FaPaw /> },
+        { label: "Adoptar",
+           href: "/adoptar/adopcion", 
+           icon: <FaPaw /> 
+        },
         {
           label: "Cerrar sesión",
           href: "/login",
@@ -172,9 +177,9 @@ const Navbar = () => {
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 text-4xl font-semibold text-pink-600 whitespace-nowrap"
+            className="flex items-center gap-1 text-2xl font-semibold text-pink-600 whitespace-nowrap"
           >
-            <FaPaw className="text-5xl" />
+            <FaPaw className="text-3xl" />
             <span>Hearts&Paws</span>
           </Link>
 

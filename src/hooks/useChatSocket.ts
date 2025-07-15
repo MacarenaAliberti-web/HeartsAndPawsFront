@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { connectSocket, getSocket } from '@/lib/socket';
 import { Mensaje } from '@/types/chat';
-;
 
-
-export function useChatSocket(chatId: string | null, autorId: string | null, autorNombre: string)
- {
+export function useChatSocket(
+  chatId: string | null,
+  autorId: string | null,
+  autorNombre: string
+) {
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
 
   useEffect(() => {
@@ -14,7 +15,6 @@ export function useChatSocket(chatId: string | null, autorId: string | null, aut
     setMensajes([]);
 
     const socket = connectSocket();
-
     socket.emit('joinchat', { chatId });
 
     const onMessageReceived = (mensaje: Mensaje) => {
@@ -41,18 +41,17 @@ export function useChatSocket(chatId: string | null, autorId: string | null, aut
       return;
     }
 
+    const mensajeLocal: Mensaje = {
+      id: `local-${Date.now()}`,
+      autor: { id: autorId, nombre: autorNombre },
+      contenido,
+      enviado_en: new Date().toISOString(),
+    };
+
+    setMensajes(prev => [...prev, mensajeLocal]);
+
     socket.emit('sendMessage', { chatId, autorId, contenido });
-
-//     const mensajeLocal: Mensaje = {
-//   id: `local-${Date.now()}`,
-//   autor: { id: autorId, nombre: autorNombre }, // ← CAMBIO ACÁ
-//   contenido,
-//   enviado_en: new Date().toISOString(),
-// };
-//    setMensajes(prev => [...prev, mensajeLocal]);
-//     socket.emit('sendMessage', { chatId, autorId, contenido });
-
   };
-
+  console.log('UseChatSocket: ' + JSON.stringify(mensajes));
   return { mensajes, enviarMensaje };
 }

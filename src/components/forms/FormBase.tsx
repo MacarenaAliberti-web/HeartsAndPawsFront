@@ -7,8 +7,8 @@ interface Field<T> {
   name: keyof T;
   label: string;
   type?: string;
-  multiline?: boolean; 
-  rows?: number;       
+  multiline?: boolean;
+  rows?: number;
 }
 
 interface Props<T> {
@@ -22,9 +22,8 @@ interface Props<T> {
   showPasswordToggle?: boolean;
   showPassword?: boolean;
   setShowPassword?: (value: boolean) => void;
-  children?: React.ReactNode; 
+  children?: React.ReactNode;
 }
-
 
 export default function FormBase<T>({
   title,
@@ -61,8 +60,8 @@ export default function FormBase<T>({
               name={String(name)}
               value={String(formData[name] ?? '')}
               onChange={onChange}
-              rows={rows}
               disabled={isLoading}
+              rows={rows}
               className={`w-full border ${
                 errors[name] ? 'border-red-500' : 'border-gray-300'
               } rounded-md px-4 py-2 resize-none focus:ring-2 focus:ring-pink-500 focus:outline-none`}
@@ -98,6 +97,7 @@ export default function FormBase<T>({
             </div>
           )}
 
+          {/* ✅ Mensaje de error debajo del campo */}
           {errors[name] && (
             <p className="text-red-500 text-xs mt-1">{errors[name]}</p>
           )}

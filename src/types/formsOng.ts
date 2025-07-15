@@ -1,4 +1,3 @@
-// types/formsOng.ts
 export interface FormInputs {
   title: string;
   description: string;
@@ -12,7 +11,7 @@ export interface CasoAdopcionBody {
   descripcion: string;
   tipo: "ADOPCION";
   mascotaId: string;
-  
+
 }
 
 export interface CasoDonacionBody {
@@ -20,11 +19,10 @@ export interface CasoDonacionBody {
   descripcion: string;
   tipo: "DONACION";
   mascotaId: string;
-  
+
   donacion: {
     metaDonacion?: number;
   };
 }
 
 export type CasoBody = CasoAdopcionBody | CasoDonacionBody;
-

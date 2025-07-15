@@ -1,4 +1,4 @@
-import MyAccount from "@/components/componentsONG/MyAccount";
+import MyAccount from "@/components/componentsong/MyAccount";
 
 export default function OngDashboard() {
   return (

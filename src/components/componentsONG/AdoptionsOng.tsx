@@ -10,7 +10,7 @@ import {
   MascotaConSolicitudes,
 } from "@/services/adoptionsOng";
 
-const ONG_ID = "idDeTuOng"; 
+
 
 export default function AdoptionsOng() {
   const [data, setData] = useState<MascotaConSolicitudes[]>([]);
@@ -21,7 +21,7 @@ export default function AdoptionsOng() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const mascotas = await getMascotasPorOng(ONG_ID);
+        const mascotas = await getMascotasPorOng();
         const solicitudesData = await getSolicitudesPorCaso();
 
         type Solicitud = MascotaConSolicitudes['solicitudes'][number];

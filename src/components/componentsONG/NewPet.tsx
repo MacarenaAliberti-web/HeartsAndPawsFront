@@ -19,6 +19,13 @@ interface IMascotaFormData {
   tipoId: string;
   imagenes: FileList;
 }
+export interface NuevaMascotaData {
+  nombre: string;
+  edad: number;
+  descripcion: string;
+  tipoId: string;
+  
+}
 
 const NewPet = () => {
   const { ong } = useOngAuth();

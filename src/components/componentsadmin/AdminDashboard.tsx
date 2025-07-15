@@ -1,18 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User } from "@supabase/supabase-js";
+
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { MdVerified } from "react-icons/md";
 import toast from "react-hot-toast";
-import { getMyadmin, getVerificacion, Patchsolicitud } from "@/services/adminconexion";
+import {getTotalOrganizaciones, getVerificacion, Patchsolicitud } from "@/services/adminconexion";
 import { OngUser } from "@/types/ong";
-import { useOngAuth } from "@/context/OngAuthContext";
+
 
 
 export default function AdminDashboard() {
- const [user] = useState<User | null>(null);
-  const { ong } = useOngAuth();
+ 
   const [requests, setRequests] = useState<OngUser[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +20,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchSolicitudes = async () => {
       try {
-        const res = await getMyadmin();
+        const res = await getTotalOrganizaciones();
         if (!res || !res.ok) throw new Error("Error al obtener las ONGs");
 
         const data: OngUser[] = await res.json();
@@ -50,7 +49,6 @@ export default function AdminDashboard() {
       }
     };
 
-   // handleVerificacion('9d7a6b3a-9130-413c-a51d-748f4a79b013'); //Ejemplo. Ver donde se obtiene el ID
 
   const handleDecision = async (
     id: string,
@@ -77,21 +75,13 @@ export default function AdminDashboard() {
     }
   };
 
-  const displayName =
-    typeof user?.app_metadata === "string"
-      ? user.app_metadata
-      : ong?.nombre || "Administrador";
-
+  
   return (
     <main className="min-h-screen p-8 bg-gradient-to-br from-pink-100 to-pink-200">
       <div className="max-w-4xl mx-auto">
         <header className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <div>
-              <p className="text-lg font-semibold text-pink-700">
-                {displayName}
-              </p>
-            </div>
+    
           </div>
         </header>
 

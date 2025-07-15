@@ -4,7 +4,7 @@ export async function registerOng(
   formData: OngFormDataType,
   imagenPerfil: File | null,
   archivoVerificacion: File | null
-): Promise<void> {
+): Promise<{ ok: boolean; mensaje: string }> {
   const dataToSend = new FormData();
   dataToSend.append("nombre", formData.nombre);
   dataToSend.append("email", formData.email);
@@ -18,13 +18,22 @@ export async function registerOng(
   if (imagenPerfil) dataToSend.append("imagenPerfil", imagenPerfil);
   if (archivoVerificacion) dataToSend.append("archivoVerificacionUrl", archivoVerificacion);
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/registro-ong`, {
-    method: "POST",
-    body: dataToSend,
-  });
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/registro-ong`,{
+      method: "POST",
+      body: dataToSend,
+    });
 
-  if (!res.ok) {
-    const errorData = await res.json();
-    throw new Error(errorData.message || "Error al registrar ONG");
+    const response = await res.json();
+
+    if (res.ok && response.ok) {
+      return { ok: true, mensaje: response.mensaje };
+    } else if (res.status === 409) {
+      return { ok: false, mensaje: response.mensaje  ("El correo ya está registrado") };
+    } else {
+      return { ok: false, mensaje: response.mensaje ("Error al registrar ONG") };
+    }
+  } catch {
+    return { ok: false, mensaje: "Error de red o servidor" };
   }
 }

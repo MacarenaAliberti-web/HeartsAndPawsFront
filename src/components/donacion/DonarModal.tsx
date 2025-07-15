@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import { useUsuarioAuth } from '@/context/UsuarioAuthContext'
+import { supabase } from '@/lib/supabaseClient'
 
 type DonarModalProps = {
   visible: boolean
@@ -49,7 +50,11 @@ export default function DonarModal({
   }
 
   const handleConfirmar = async () => {
-    if (!usuario) {
+      const {
+            data: { user },
+          } = await supabase.auth.getUser();
+    
+    if (!usuario && !user) {
       toast.error('Necesitás iniciar sesión para donar.')
       router.push('/login')
       return

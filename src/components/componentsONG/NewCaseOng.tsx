@@ -115,7 +115,7 @@ const NewCaseOng = () => {
         <div className="fixed inset-0 z-50 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center pointer-events-auto">
           <LoaderCircle className="animate-spin w-10 h-10 text-pink-600 mb-4" />
           <p className="text-pink-600 font-semibold text-lg text-center px-4">
-            Redirigiendo al formulario de caso, por favor aguarde...
+            Confirmando Registro del caso, por favor aguarde...
           </p>
         </div>
       )}

@@ -1,20 +1,35 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/SupabaseProvider";
+import {
+  ActualizarPerfil,
+  ActualizarUsuario,
+} from "@/services/dashboarusernormal";
+import toast from "react-hot-toast";
 import { useUsuarioAuth } from "@/context/UsuarioAuthContext";
 import { supabase } from "@/lib/supabaseClient";
-import { ActualizarPerfil } from "@/services/dashboarusernormal";
-import { useRouter } from "next/navigation";
-import { User } from "@supabase/supabase-js";
+
+interface UsuarioUpdateData {
+  email?: string;
+  contrasena?: string;
+  telefono?: string;
+  direccion?: string;
+  ciudad?: string;
+  pais?: string;
+}
 
 export default function DashboardSencillo() {
-  const { usuario, loading } = useUsuarioAuth();
-  const [user, ] = useState<User | null>(null);
+  const { user } = useAuth();
   const router = useRouter();
+  const { usuario } = useUsuarioAuth();
+  const { token } = useAuth();
 
   const [isEditando, setIsEditando] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [previewUrl] = useState<string | null>(null);
+  
 
   const [userData, setUserData] = useState<{
     nombre: string;
@@ -34,63 +49,83 @@ export default function DashboardSencillo() {
   });
 
   useEffect(() => {
-    const getUserSupabase = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    if (!user && !usuario) return;
 
-      if (usuario) {
-        setUserData({
-          nombre: usuario.nombre || "",
-          email: usuario.email || "",
-          telefono: usuario.telefono || "",
-          direccion: usuario.direccion || "",
-          ciudad: usuario.ciudad || "",
-          pais: usuario.pais || "",
-          imagenPerfil: usuario.imagenPerfil || "",
-        });
-      } else if (user) {
-        setUserData({
-          nombre:
-            user.user_metadata["full_name"] || user.user_metadata["name"] || "",
-          email: user?.email || "",
-          telefono: "",
-          direccion: "",
-          ciudad: "",
-          pais: "",
-          imagenPerfil:
-            user.user_metadata["avatar_url"] ||
-            user.user_metadata["picture"] ||
-            "",
-        });
-      }
-    };
-   
+    if (usuario) {
+      setUserData({
+        nombre: usuario.nombre || "",
+        email: usuario.email || "",
+        telefono: usuario.telefono || "",
+        direccion: usuario.direccion || "",
+        ciudad: usuario.ciudad || "",
+        pais: usuario.pais || "",
+        imagenPerfil: usuario.imagenPerfil || "",
+      });
+    } else if (user) {
+      setUserData({
+        nombre:
+          user.user_metadata["full_name"] || user.user_metadata["name"] || "",
+        email: user?.email || "",
+        telefono: "",
+        direccion: "",
+        ciudad: "",
+        pais: "",
+        imagenPerfil:
+          user.user_metadata["avatar_url"] ||
+          user.user_metadata["picture"] ||
+          "",
+      });
+    }
+  }, [user, usuario]);
 
-    getUserSupabase();
-  }, [usuario, user, isEditando]);
   useEffect(() => {
-  if (!loading && !usuario && !user) {
-    router.push('/login');
-  }
-}, [loading, usuario, user, router]);
+    if (!user && !usuario) {
+      // router.push("/login");
+    }
+  }, [user, router, usuario]);
 
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    const originalPaddingRight = document.body.style.paddingRight;
 
-useEffect(() => {
-  const originalOverflow = document.body.style.overflow;
-  const originalPaddingRight = document.body.style.paddingRight;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
 
-  const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-  if (scrollbarWidth > 0) {
-    document.body.style.paddingRight = `${scrollbarWidth}px`;
-  }
+    document.body.style.overflow = "hidden";
 
-  document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.paddingRight = originalPaddingRight;
+    };
+  }, []);
+  useEffect(() => {
+  const cargarDatosDesdeSupabase = async () => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) {
+      console.error("Error al obtener usuario:", error);
+      return;
+    }
 
-  return () => {
-    document.body.style.overflow = originalOverflow;
-    document.body.style.paddingRight = originalPaddingRight;
+    const user = data?.user;
+    if (user) {
+      const meta = user.user_metadata || {};
+
+      setUserData((prev) => ({
+        ...prev,
+        nombre: meta.nombre || prev.nombre, 
+        telefono: meta.telefono || '',
+        direccion: meta.direccion || '',
+        ciudad: meta.ciudad || '',
+        pais: meta.pais || '',
+        imagenPerfil: meta.imagenPerfil || prev.imagenPerfil, 
+      }));
+    }
   };
+
+  cargarDatosDesdeSupabase();
 }, []);
 
 
@@ -98,23 +133,52 @@ useEffect(() => {
     const { name, value } = e.target;
     setUserData((prev) => ({ ...prev, [name]: value }));
   };
- 
-  const handleGuardar = async () => {
-    try {
-    
-      console.log("Datos guardados:", userData);
-      setIsEditando(false);
-    } catch (error) {
-      console.error("Error al guardar perfil:", error);
+
+ const handleGuardar = async () => {
+  try {
+    const idUsuario = user?.id || usuario?.id;
+    if (!idUsuario) throw new Error("Usuario no autenticado");
+
+    const { email, telefono, direccion, ciudad, pais } = userData;
+
+    const datos: UsuarioUpdateData = { email, telefono, direccion, ciudad, pais };
+
+    // 1. Actualiza en tu backend
+    await ActualizarUsuario(datos, token ?? undefined);
+
+    // 2. Actualiza metadata de Supabase
+    await supabase.auth.updateUser({
+      data: { telefono, direccion, ciudad, pais },
+    });
+
+    // 3. Recupera el usuario actualizado
+    const { data: userActualizado } = await supabase.auth.getUser();
+    if (userActualizado?.user) {
+      const meta = userActualizado.user.user_metadata || {};
+      setUserData((prev) => ({
+        ...prev,
+        telefono: meta.telefono || '',
+        direccion: meta.direccion || '',
+        ciudad: meta.ciudad || '',
+        pais: meta.pais || '',
+      }));
     }
-  };
+
+    toast.success("Perfil actualizado correctamente 🎉");
+    setIsEditando(false);
+  } catch (error) {
+    console.error("Error al guardar perfil:", error);
+    toast.error("Error inesperado al guardar.");
+  }
+};
+
+
 
   const handleActualizar = async (archivo: File) => {
     setUploading(true);
     try {
-      await ActualizarPerfil(archivo, usuario?.id);
+      await ActualizarPerfil(archivo, token!);
       const nuevaUrl = URL.createObjectURL(archivo);
-      console.log('soy la url nueva: ' + JSON.stringify(nuevaUrl));
       setUserData((prev) => ({
         ...prev,
         imagenPerfil: nuevaUrl,
@@ -126,58 +190,57 @@ useEffect(() => {
     }
   };
 
-if (loading || (user === null && !usuario)) {
-    return <div className="flex justify-center items-center min-h-screen">Cargando usuario...</div>;
+  if (!user && !usuario) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        Cargando usuario...
+      </div>
+    );
   }
 
   return (
     <div className="flex min-h-screen bg-pink-50">
-      {/* Panel lateral */}
+      {/* Navegación lateral */}
       <nav className="flex flex-col px-4 py-6 text-white bg-pink-600 w-60">
         <h2 className="mb-8 text-xl font-semibold text-center">
           Perfil del Usuario
         </h2>
-
         <button
           onClick={() => router.push("/dashboard/usuario")}
           className="text-left px-3 py-2 rounded hover:bg-pink-700"
         >
           Principal
         </button>
-
         <button
           onClick={() => router.push("/usuario/adopciones")}
           className="text-left px-3 py-2 rounded hover:bg-pink-700"
         >
           Mis Adopciones
         </button>
-
         <button
           onClick={() => router.push("/usuario/donaciones")}
           className="text-left px-3 py-2 rounded hover:bg-pink-700"
         >
           Mis Donaciones
         </button>
-
         <button
-  onClick={() => router.push("/usuario/favoritos")}
-  className="text-left px-3 py-2 rounded hover:bg-pink-700"
->
-  Mis Favoritos
-</button>
-
-<button
-  onClick={() => router.push("/chat")}
-  className="text-left px-3 py-2 rounded hover:bg-pink-700"
->
-  Mensajes
-</button>
-
+          onClick={() => router.push("/usuario/favoritos")}
+          className="text-left px-3 py-2 rounded hover:bg-pink-700"
+        >
+          Mis Favoritos
+        </button>
+        <button
+          onClick={() => router.push("/chat")}
+          className="text-left px-3 py-2 rounded hover:bg-pink-700"
+        >
+          Mensajes
+        </button>
       </nav>
 
       {/* Contenido principal */}
-    <main className="flex-1 flex items-start justify-center pt-20 p-10 min-h-screen">
+      <main className="flex-1 flex items-start justify-center pt-20 p-10 min-h-screen">
         <section className="w-full max-w-3xl bg-white rounded-lg shadow p-6 border border-pink-100">
+          {/* Avatar */}
           <div className="flex items-center space-x-6 mb-6">
             <div className="relative w-28 h-28">
               <div className="w-28 h-28 rounded-full border-2 border-pink-400 shadow overflow-hidden relative bg-white">
@@ -192,7 +255,7 @@ if (loading || (user === null && !usuario)) {
                       userData.imagenPerfil ||
                       "/default-avatar.png"
                     }
-                   alt={`Foto de perfil de ${userData.nombre}`}
+                    alt={`Foto de perfil de ${userData.nombre}`}
                     className="w-32 h-32 rounded-full object-cover border-2 border-pink-400 shadow"
                   />
                 )}
@@ -226,10 +289,10 @@ if (loading || (user === null && !usuario)) {
             </div>
           </div>
 
+          {/* Formulario */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
-
               handleGuardar();
             }}
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -251,20 +314,37 @@ if (loading || (user === null && !usuario)) {
                 >
                   {campo}
                 </label>
-                <input
-                  id={campo}
-                  name={campo}
-                  type={campo === "email" ? "email" : "text"}
-                  disabled={!isEditando}
-                  value={userData[campo]}
-                  onChange={handleChange}
-                  className={`w-full px-3 py-2 rounded border text-sm transition ${
-                    isEditando
-                      ? "border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-300"
-                      : "border-gray-300 bg-gray-100 cursor-not-allowed"
-                  }`}
-                  required={campo === "nombre" || campo === "email"}
-                />
+
+                {campo === "email" ? (
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    disabled
+                    value={userData.email}
+                    onClick={() =>
+                      toast(
+                        "El email es un campo definido que no permite edición"
+                      )
+                    }
+                    className="w-full px-3 py-2 rounded border text-sm border-gray-300 bg-gray-100 cursor-not-allowed"
+                  />
+                ) : (
+                  <input
+                    id={campo}
+                    name={campo}
+                    type="text"
+                    disabled={!isEditando}
+                    value={userData[campo]}
+                    onChange={handleChange}
+                    className={`w-full px-3 py-2 rounded border text-sm transition ${
+                      isEditando
+                        ? "border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-300"
+                        : "border-gray-300 bg-gray-100 cursor-not-allowed"
+                    }`}
+                    required={campo === "nombre"}
+                  />
+                )}
               </div>
             ))}
 
@@ -289,8 +369,6 @@ if (loading || (user === null && !usuario)) {
               )}
             </div>
           </form>
-
-
         </section>
       </main>
     </div>

@@ -6,7 +6,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import FormBase from '@/components/forms/FormBase';
 import { useUsuarioAuth } from '@/context/UsuarioAuthContext';
 import { RegisterData } from '@/types/user';
-
+import { verificarEmailUsuario } from '@/services/register';
 
 export default function RegisterUserForm() {
   const { registerUser } = useUsuarioAuth();
@@ -36,7 +36,7 @@ export default function RegisterUserForm() {
     { name: 'pais', label: 'País' },
   ];
 
-  const validarCampo = (name: keyof RegisterData, value: string) => {
+  const validarCampo = (name: keyof RegisterData, value: string): string => {
     let error = '';
 
     switch (name) {
@@ -55,21 +55,57 @@ export default function RegisterUserForm() {
     }
 
     setErrors((prev) => ({ ...prev, [name]: error }));
+    return error;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement| HTMLTextAreaElement>) => {
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    validarCampo(name as keyof RegisterData, value);
+
+    const error = validarCampo(name as keyof RegisterData, value);
+    console.log(error);
+    // Validación adicional para el email
+    if (name === 'email') {
+      const esFormatoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      if (!value || !esFormatoValido) return;
+
+      try {
+        const { existe } = await verificarEmailUsuario(value);
+        if (existe) {
+          setErrors((prev) => ({
+            ...prev,
+            email: 'Este correo ya está registrado',
+          }));
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            email: '',
+          }));
+        }
+      } catch (err) {
+        // Si falla el servicio, podrías mostrar un error genérico (opcional)
+        console.error('Error al verificar email', err);
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     let hayErrores = false;
+    const nuevosErrores: Partial<Record<keyof RegisterData, string>> = {};
+
     for (const [key, value] of Object.entries(formData)) {
-      validarCampo(key as keyof RegisterData, value);
-      if (errors[key as keyof RegisterData]) hayErrores = true;
+      const error = validarCampo(key as keyof RegisterData, value);
+      if (error) {
+        nuevosErrores[key as keyof RegisterData] = error;
+        hayErrores = true;
+      }
+    }
+
+    // Verificar que no haya errores, incluyendo el del email ya registrado
+    if (Object.values(errors).some((err) => err)) {
+      hayErrores = true;
     }
 
     if (hayErrores) {

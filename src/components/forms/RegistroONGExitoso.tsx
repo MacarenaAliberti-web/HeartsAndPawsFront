@@ -1,11 +1,22 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import Link from 'next/link'
 
 export default function RegistroConfirmadoPage() {
+  useEffect(() => {
+    // Desactivar scroll
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    // Restaurar scroll al desmontar
+    return () => {
+      document.body.style.overflow = originalOverflow
+    }
+  }, [])
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-pink-50 px-4">
+   <div className="min-h-screen flex items-start justify-center bg-pink-50 px-4 pt-30">
       <div className="bg-white rounded-xl shadow-lg p-8 max-w-xl w-full text-center">
         <h1 className="text-2xl sm:text-3xl font-bold text-pink-600 mb-4">
           ¡Gracias por registrar tu organización!

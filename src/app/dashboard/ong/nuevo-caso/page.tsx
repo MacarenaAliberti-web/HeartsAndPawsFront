@@ -1,4 +1,4 @@
-import NewCaseOng from "@/components/componentsONG/NewCaseOng"
+import NewCaseOng from "@/components/componentsong/NewCaseOng"
 
 const NuevoCaso = () => {
   return (

@@ -11,7 +11,8 @@ import DeclaracionFinal from './DeclaracionFinal'
 
 import { FormularioAdopcionData } from '@/types/formularioadopcion'
 import { enviarSolicitudAdopcion, obtenerCasoAdopcionId } from '@/services/adopcion'
-import { useAuth } from '@/components/SupabaseProvider'
+import { useAuth } from '../../SupabaseProvider';
+
 
 function pasoValido(paso: number, formData: FormularioAdopcionData): boolean {
   switch (paso) {
@@ -43,10 +44,12 @@ function pasoValido(paso: number, formData: FormularioAdopcionData): boolean {
 
 export default function FormularioAdopcionPage() {
   const [paso, setPaso] = useState(1)
-  const [loading, setLoading] = useState(false) // <- nuevo estado
   const router = useRouter()
   const searchParams = useSearchParams()
-const { token } = useAuth();
+  const { token } = useAuth();
+
+
+
   const [casoId, setCasoId] = useState('')
   const [formData, setFormData] = useState<FormularioAdopcionData>({
     casoAdopcionId: '',
@@ -63,10 +66,13 @@ const { token } = useAuth();
     declaracionFinal: '',
   })
 
-  useEffect(() => {
-    const casoParam = searchParams?.get('id') || ''
-    setCasoId(casoParam)
-  }, [searchParams])
+  
+
+useEffect(() => {
+  const casoParam = searchParams?.get('id') || '';
+  setCasoId(casoParam);
+
+}, [searchParams]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -102,46 +108,40 @@ const { token } = useAuth();
 
   const enviarFormulario = async (e: React.FormEvent) => {
     e.preventDefault()
+    
 
     if (!pasoValido(paso, formData)) {
       toast.error('Debes completar correctamente este paso.')
       return
     }
 
-    if (!casoId) {
-      toast.error('Falta el ID del caso de adopción.')
-      return
+    
+
+
+    try {
+      const casoAdopcionId = await obtenerCasoAdopcionId(casoId)
+
+     await enviarSolicitudAdopcion({ ...formData, casoAdopcionId }, casoAdopcionId, token);
+
+
+      toast.success('¡Solicitud enviada con éxito!')
+      router.push('/adoptar/usuario-adopcion-exitoso')
+    } catch (error: unknown) {
+      if (
+        error instanceof Error &&
+        error.message.includes('no puede enviar mas de 1 solicitud')
+      ) {
+       // toast.error('Ya has enviado una solicitud para este caso.')
+
+        setTimeout(() => {
+          router.push('/adoptar/adopcion')
+        }, 2000)
+
+        return
+      }
+
+      toast.error('Ya has enviado una solicitud para este caso.')
     }
-
-    setLoading(true) // <- activar loading
-try {
-  const casoAdopcionId = await obtenerCasoAdopcionId(casoId)
-
-  await enviarSolicitudAdopcion(
-    { ...formData, casoAdopcionId },
-    casoAdopcionId, token
-  )
-
-  toast.success('¡Solicitud enviada con éxito!')
-  router.push('/adoptar/usuario-adopcion-exitoso')
-  return // ⬅️ Esto evita que se ejecute el `finally`
-} catch (error: unknown) {
-  if (
-    error instanceof Error &&
-    error.message.includes('no puede enviar mas de 1 solicitud')
-  ) {
-    toast.error('Ya has enviado una solicitud para este caso.')
-    setTimeout(() => {
-      router.push('/adoptar/adopcion')
-    }, 2000)
-    return // ⬅️ También salir aquí
-  }
-
-  toast.error('Error al enviar formulario. Por favor, intenta nuevamente.')
-} finally {
-  setLoading(false)
-}
-
   }
 
   const pasos = [
@@ -154,7 +154,7 @@ try {
   ]
 
   return (
-    <div className="min-h-screen bg-pink-50 py-10 px-4 flex justify-center relative">
+    <div className="min-h-screen bg-pink-50 py-10 px-4 flex justify-center">
       <form
         className="w-full max-w-3xl space-y-10 bg-white p-8 rounded-xl shadow-md"
         onSubmit={enviarFormulario}
@@ -230,16 +230,6 @@ try {
           )}
         </div>
       </form>
-
-      {/* Overlay loading */}
-      {loading && (
-        <div className="fixed inset-0 z-50 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center pointer-events-auto">
-          <div className="text-pink-600 font-semibold text-lg animate-pulse text-center mb-4">
-            Enviando solicitud, por favor aguardá...
-          </div>
-          <div className="w-8 h-8 border-4 border-pink-600 border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
     </div>
   )
 }

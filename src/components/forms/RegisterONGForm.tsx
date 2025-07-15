@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import FormBase from '@/components/forms/FormBase';
 import { OngFormDataType } from "@/types/ong";
+
+
 import { registerOng } from "@/services/ongRegister";
+import { verificarEmailOng } from "@/services/register";
 
 type ErrorsType = Partial<Record<keyof OngFormDataType | "imagenPerfil" | "archivoVerificacion", string>>;
 
@@ -72,31 +75,38 @@ export function RegisterONGForm() {
     return errores;
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const { name, value } = e.target;
+  setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Validar campo individual
-    let error = "";
-    if (!value.trim()) error = `El campo ${name} es obligatorio`;
-    else {
-      if (name === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
-        error = "Email no válido";
-      if (name === "contrasena" && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/.test(value))
-        error = "Mínimo 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y símbolo.";
-      if (name === "telefono" && !/^\d{7,15}$/.test(value))
-        error = "Debe ser numérico (7-15 dígitos)";
+  // Validar campo individual
+  let error = "";
+  if (!value.trim()) error = `El campo ${name} es obligatorio`;
+  else {
+    if (name === "email") {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = "Email no válido";
+      else {
+        try {
+          const { existe } = await verificarEmailOng(value);
+          if (existe) error = "Este correo ya está registrado";
+        } catch {
+          // opcional: manejar error de red
+        }
+      }
     }
+    if (name === "contrasena" && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/.test(value))
+      error = "Mínimo 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y símbolo.";
+    if (name === "telefono" && !/^\d{7,15}$/.test(value))
+      error = "Debe ser numérico (7-15 dígitos)";
+  }
 
-    setErrors((prev) => {
-      const copia = { ...prev };
-      if (error) copia[name as keyof ErrorsType] = error;
-      else delete copia[name as keyof ErrorsType];
-      return copia;
-    });
-  };
+  setErrors((prev) => {
+    const copia = { ...prev };
+    if (error) copia[name as keyof ErrorsType] = error;
+    else delete copia[name as keyof ErrorsType];
+    return copia;
+  });
+};
 
   const validarFormulario = (): boolean => {
     const errores = obtenerErrores(formData);
@@ -105,16 +115,18 @@ export function RegisterONGForm() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!validarFormulario()) {
-      toast.error("Por favor completa todos los campos correctamente.");
-      return;
-    }
+  if (!validarFormulario()) {
+    toast.error("Por favor completa todos los campos correctamente.");
+    return;
+  }
 
-    try {
-      await registerOng(formData, imagenPerfil, archivoVerificacion);
-      toast.success("ONG registrada con éxito");
+  try {
+    const result = await registerOng(formData, imagenPerfil, archivoVerificacion);
+
+    if (result.ok) {
+      toast.success(result.mensaje);
 
       setFormData({
         nombre: "",
@@ -125,17 +137,19 @@ export function RegisterONGForm() {
         direccion: "",
         ciudad: "",
         pais: "",
-       
       });
       setImagenPerfil(null);
       setArchivoVerificacion(null);
       setErrors({});
       router.push("/register/ong-registro-exitoso");
-    } catch (error) {
-      console.error("Error al registrar ONG:", error);
-      toast.error("Error al registrar ONG. Intenta nuevamente.");
+    } else {
+      toast.error(result.mensaje);
     }
-  };
+  } catch (error) {
+    console.error("Error al registrar ONG:", error);
+    toast.error("Error de red o servidor");
+  }
+};
 
   const campos = [
     { name: "nombre" as const, label: "Nombre" },

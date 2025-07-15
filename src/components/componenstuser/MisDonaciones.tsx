@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getMisDonaciones } from '@/services/usuario';
 import DonacionCard from './DonacionCard';
+import { useAuth } from '../SupabaseProvider';
 
 interface Donacion {
   id: string;
@@ -27,11 +28,12 @@ export default function MisDonaciones() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+   const { token } = useAuth();
 
 useEffect(() => {
   async function fetchDonaciones() {
     try {
-      const data = await getMisDonaciones();
+      const data = await getMisDonaciones(token ?? undefined);
 
       // Ordenamos de más reciente a más antigua
       const ordenadas = data.sort(
@@ -83,6 +85,12 @@ useEffect(() => {
         >
           Mis Favoritos
         </button>
+          <button
+          onClick={() => router.push("/chat")}
+          className="text-left px-3 py-2 rounded hover:bg-pink-700"
+        >
+          Mensajes
+        </button>
 
       </nav>
 
@@ -97,7 +105,7 @@ useEffect(() => {
         )}
           {error && <p className="text-red-600">{error}</p>}
           {!loading && !error && donaciones.length === 0 && (
-            <p>No tenés donaciones aún.</p>
+            <p>📭 No tenés solicitudes aún.</p>
           )}
           {!loading && !error && donaciones.length > 0 && (
             <div className="space-y-6">

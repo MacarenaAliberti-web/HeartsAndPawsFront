@@ -1,6 +1,6 @@
 
 
-import { NuevaMascotaData } from "@/components/componentsONG/NewPet";
+import { NuevaMascotaData } from "@/components/componentsong/NewPet";
 
 // Crear mascota
 export const createPet = async (body: NuevaMascotaData) => {
