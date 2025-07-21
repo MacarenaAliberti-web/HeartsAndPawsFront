@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hearts & Paws (Proyecto Final Grupal)
 
-## Getting Started
+Plataforma web diseñada para apoyar a organizaciones que rescatan y cuidan animales en situación de calle.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 🧩 Funcionalidades principales
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Registro y gestión de animales según su estado: en rehabilitación o en adopción.  
+- Creación y administración de campañas de donación con trazabilidad y emisión de comprobantes.  
+- Comunicación directa entre organizaciones, adoptantes y donantes.  
+- Visualización de perfiles para promover transparencia y generar confianza.  
+- Sistema de calificación para garantizar calidad y credibilidad.  
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 💡 Valor diferencial
 
-## Learn More
+Plataforma integral que digitaliza procesos clave en la protección animal, elevando los estándares tecnológicos y facilitando la interacción con la comunidad.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 🛠️ Tecnologías
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Next.js · React · Tailwind CSS · Node.js · Express · PostgreSQL · MongoDB
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 🤝 Trabajo en equipo
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Compartimos responsabilidades en frontend, backend, diseño y gestión para lograr una solución profesional y colaborativa.
+
+---
+
+### Aptitudes desarrolladas
+
+- Trabajo en equipo  
+- Comunicación efectiva  
+- Resolución de problemas  
+- Desarrollo Full Stack  
+- React.js
+
